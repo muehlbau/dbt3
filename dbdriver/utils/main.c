@@ -1,54 +1,95 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <common.h>
 
-#include "common.h"
 #include "get_statement.h"
-#include "sql_exec.h"
 
 struct sql_statement_t sql_statement;
-int main(int argc, char *argv[])
+
+main(int argc, char *argv[])
 {
 	FILE *query_input;
-	char query_file_name[60];
+	FILE *query_output;
+	char query_input_file_name[60];
+	char query_output_file_name[60];
 	int rc;
-	char dbname[40];
-	char hostname[40];
+	int perf_run_number;
+	int stream_number;
+	int run_type;
+
+	/* flag indicating if the current is the first statement in this block*/
+	int first_stmt;
 	
-	if (argc != 4)
+	first_stmt=TRUE;
+	if (argc < 4)
 	{
-		printf("usage ./argv[0] query_file, hostname, dbname\n");
+		printf("usage: \n%s <query_input_file> <query_output_file> <S>\n", argv[0]);
+		printf("%s <query_input_file> <query_output_file> <P> <perf_run_number> \n", argv[0]);
+		printf("%s <query_input_file> <query_output_file> <T> <perf_run_number> <throughput_query_stream_number>\n", argv[0]);
 		exit(1);
 	}
 	
-	init_common();
-
-	strcpy(query_file_name, argv[1]);
-	strcpy(hostname, argv[2]);
-	strcpy(dbname, argv[3]);
-
-	rc=db_connect(dbname,hostname);
-	if (rc!=0) 
+	strcpy(query_input_file_name, argv[1]);
+	strcpy(query_output_file_name, argv[2]);
+	if (strcmp(argv[3], "P")==0 || strcmp(argv[3],"p")==0)
 	{
-		LOG_ERROR_MESSAGE("db_connect failed: %d\n", rc);
-		printf("db_connect error\n");
+		run_type = POWER;
+		perf_run_number = atoi(argv[4]);
+	}
+	else if (strcmp(argv[3], "S")==0 || strcmp(argv[3], "s") == 0)
+		run_type = SINGLE;
+	else if (strcmp(argv[3], "T")==0 || strcmp(argv[3], "t") == 0)
+	{
+		run_type = THROUGHPUT;
+		perf_run_number = atoi(argv[4]);
+		stream_number = atoi(argv[5]);
+	}
+	else
+	{
+		printf("run type: P -- power test  T -- throughput test  S -- single query\n");
+		exit(1);
+	}
+	
+
+	if ( (query_input=fopen(query_input_file_name, "r")) == NULL)
+	{
+		printf("can not open file %s\n", query_input_file_name);
 		exit(-1);
 	}
-	else printf("db_connect passed\n");
 
-	if ( (query_input=fopen(query_file_name, "r")) == NULL)
+	if ( (query_output=fopen(query_output_file_name, "w")) == NULL)
 	{
-		LOG_ERROR_MESSAGE("can not open file %s\n", query_file_name);
-		printf("can not open file %s\n", query_file_name);
+		printf("can not open file %s\n", query_output_file_name);
 		exit(-1);
 	}
 
-	while ( (rc=get_statement(query_input)) == TRUE)
-	{
-#ifdef DEBUG
-		LOG_DEBUG_MESSAGE("comment: %s\n", sql_statement.comment);
-		LOG_DEBUG_MESSAGE("statement: %s\n", sql_statement.statement);
-		LOG_DEBUG_MESSAGE("fetch row: %d\n", sql_statement.rowcount);
-#endif
-	}
+	fprintf(query_output, "sql_execute set format ISO\n\n");
+	//fprintf(query_output, "sql_execute delete * from time_statistic\n\n");
 
-	printf("end of file\n");
+	while ( (rc=get_statement(query_input)) != END_OF_FILE)
+	{
+		/* if this is the first statement in this block */
+		if (rc == END_OF_STMT && first_stmt == TRUE)
+		{
+			if (run_type == POWER)
+				fprintf(query_output, "%s insert into time_statistic (task_name, s_time) values ('PERF%d.POWER.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, sql_statement.query_id);
+			else if (run_type == THROUGHPUT)
+				fprintf(query_output, "%s insert into time_statistic (task_name, s_time) values ('PERF%d.THUPUT.QS%d.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+			first_stmt = FALSE;
+		}
+		if (rc == END_OF_STMT)
+			fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
+		if (rc == END_OF_BLOCK)
+		{
+			first_stmt = TRUE;
+			if (run_type == POWER)
+				fprintf(query_output, "%s update time_statistic set e_time=timestamp where task_name='PERF%d.POWER.Q%d'\n\n", SQL_EXEC, perf_run_number, sql_statement.query_id);
+			else if (run_type == THROUGHPUT)
+				fprintf(query_output, "%s update time_statistic set e_time=timestamp where task_name='PERF%d.THUPUT.QS%d.Q%d'\n\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+		}
+	}
+	
+
+	fclose(query_input);
+	fclose(query_output);
 }
