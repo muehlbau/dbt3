@@ -2,15 +2,24 @@
 # 20 february 2002
 
 include @TOPDIR@/make.common
+DATABASE=@DATABASE_TO_USE@
+
+UTIL_PRGS = main.c get_statement.c
+UTIL_OBJS = $(UTIL_PRGS:.c=.so)
+
+OBJS = $(UTIL_OBJS)
+PRGS = $(UTIL_PRGS)
 
 all: parse_query gtime
 
-parse_query: 
-	cd sapdb; $(MAKE)
+parse_query: Makefile $(OBJS) $(INCLUDE_DIR)/common.h $(INCLUDE_DIR)/db.h
+	$(CC) -I$(INCLUDE_DIR) -D$(DATABASE) $(CFLAGS) -o $@ $(OBJS)
+
+%.so:%.c
+	$(CC) -c -shared -fpic $(CFLAGS) -D$(DATABASE) -o $@ $<
 
 gtime:	get_time.c
 	$(CC) $(CFLAGS) -o gtime get_time.c
 
 clean:
-	cd sapdb; $(MAKE) clean
-	rm -f gtime *.o
+	rm -f parse_query gtime *.so
