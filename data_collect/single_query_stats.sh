@@ -16,7 +16,7 @@ fi
 
 query_num=$1
 scale_factor=$2
-CPUS=`grep -c processor /proc/cpuinfo`
+CPUS=`grep -c  '^processor' /proc/cpuinfo`
 
 #these number are taken from power run, if we restart the database
 #the number shoule be higher
