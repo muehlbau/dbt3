@@ -21,6 +21,39 @@ SRCDIR=@TOPDIR@
 
 USE_OPROFILE=0
 
+clearprof () {
+        sudo /usr/sbin/readprofile -m /boot/System.map -r
+}
+
+getprof () {
+        mkdir -p $OUTPUT_DIR/prof
+        sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/prof/${profname}.prof
+}
+
+clearoprof () {
+        sudo opcontrol --vmlinux=/boot/vmlinux
+        sleep 2
+        sudo opcontrol --start-daemon
+        sleep 2
+        sudo opcontrol --start
+        sleep 2
+        # If opcontrol ever gets stuck here, sometimes it helps to remove
+        # everything in this dir:
+        # /var/lib/oprofile
+        sudo opcontrol --reset
+}
+
+getoprof () {
+        mkdir -p $OUTPUT_DIR/oprofile/${profname}/annotate
+        sudo opcontrol --dump
+        sudo opreport -l -o $OUTPUT_DIR/oprofile/${profname}/oprofile.txt
+        sudo opcontrol --stop
+        cp -pR /var/lib/oprofile/samples/current $OUTPUT_DIR/oprofile/${profname}/
+        sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/${profname}/assembly.txt 2>&1
+        sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/${profname}/annotate
+        sudo opstack > $OUTPUT_DIR/oprofile/${profname}/call-graph.txt
+}
+
 while getopts "e:f:n:o:p:t:y:" opt; do
 	case $opt in
 	e) explain_analyze=$OPTARG
@@ -78,7 +111,9 @@ bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_
 
 # Stop collecting system statistics.
 bash $SRCDIR/scripts/stop_sysstats.sh
-killall $DBSTATS
+
+# no effect
+#killall $DBSTATS
 
 bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT"
 e_time=`$GTIME`
@@ -90,11 +125,11 @@ echo "elapsed time for throughput test $diff_time"
 bash -x $DBSCRIPTDIR/stop_db.sh
 
 if [ -f /proc/profile ]; then
-	profname="Throughput Test $TAG"
+	profname="Throughput_Test_$TAG"
 	getprof
 fi
 
 if [ $USE_OPROFILE -eq 1 ]; then
-	profname="Throughput Test $TAG"
+	profname="Throughput_Test_$TAG"
 	getoprof
 fi

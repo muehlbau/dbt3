@@ -418,7 +418,7 @@ print $fh li(a( { -href=>"$relative_indir/param.out"}, "database parameters")), 
 print $fh li(a( { -href=>"$relative_indir/primary_keys.out"}, "database primary keys")), "\n";
 print $fh li(a( { -href=>"$relative_indir/all_ind_columns.out"}, "database indexes")), "\n";
 print $fh li(a( { -href=>"$relative_indir/db_stat.tar.gz"}, "database monitor files")), "\n";
-my $knldiag=`find /opt/sapdb -name knldiag | head -1`;
+my $knldiag=`find /opt/sapdb -name knldiag | head -n 1`;
 chop($knldiag);
 if ( -f "$knldiag" )
 {

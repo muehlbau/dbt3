@@ -12,25 +12,16 @@
 
 db_param=$1
 
-@TOPDIR@/scripts/pgsql/set_db_env.sh "$db_param"
-@TOPDIR@/scripts/pgsql/drop_db.sh
+bash @TOPDIR@/scripts/pgsql/set_db_env.sh "$db_param"
+bash @TOPDIR@/scripts/pgsql/drop_db.sh
 
 # create database
 echo "create database $SID..."
-_o=`createdb $SID 2>&1`
+_o=`@CREATEDB@ $SID 2>&1`
 _test=`echo $_o | grep CREATE`
 if [ "$_test" = "" ]; then
 	echo "create $SID failed: $_o $_test"
 	exit 1
 fi
-
-# create database user 'dbt'
-#echo "create database user..."
-#_o=`psql -c "create user $PGUER" $SID 2>&1`
-#_test=`echo $_o | grep CREATE`
-#if [ "$_test" = "" ]; then
-#	echo "create db user failed: $_o"
-#	exit 1
-#fi
 
 exit 0

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-psql -d $SID -f @TOPDIR@/scripts/pgsql/grant.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/grant.sql

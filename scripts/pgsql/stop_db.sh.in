@@ -1,0 +1,3 @@
+#!/bin/bash
+
+@PG_CTL@ stop -D $PGDATA

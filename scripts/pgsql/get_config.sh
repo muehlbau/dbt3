@@ -31,8 +31,8 @@ rm .sar.tmp
 
 NODE=`hostname`
 CPUS=`grep -c '^processor' /proc/cpuinfo`
-MHz=`grep 'cpu MHz' /proc/cpuinfo|head -1|awk -F: '{print $2}'`
-model=`grep 'model name' /proc/cpuinfo|head -1|awk -F: '{print $2}'`
+MHz=`grep 'cpu MHz' /proc/cpuinfo|head -n 1|awk -F: '{print $2}'`
+model=`grep 'model name' /proc/cpuinfo|head -n 1|awk -F: '{print $2}'`
 
 if [ -f /etc/redhat-release ]; then
 	DISTRO=`cat /etc/redhat-release`
@@ -40,10 +40,13 @@ fi
 if [ -f /etc/SuSE-release-release ]; then
 	DISTRO=`cat /etc/SuSE-release-release`
 fi
+if [ -f /etc/miraclelinux-release ]; then
+	DISTRO=`cat /etc/miraclelinux-release`
+fi
 
 memory=`grep 'MemTotal' /proc/meminfo | awk -F: '{print $2 $3}'`
 
-shmmax_value=`/sbin/sysctl -e -a |grep shmmax|awk '{print $3}'`
+shmmax_value=`/sbin/sysctl -e -a 2> /dev/null | grep shmmax | awk '{print $3}'`
 
 echo "node: $NODE" > $output_dir/config.txt
 echo "kernel: $kernel" >> $output_dir/config.txt

@@ -9,7 +9,7 @@
 # June-6-2003 Create by Jenny Zhang
 
 export DSS_QUERY=@TOPDIR@/datagen/@DATABASE_TO_USE@-queries
-export DSS_PATH=/dbt3_data
+export DSS_PATH=/mnt/data
 export DSS_CONFIG=@TOPDIR@/datagen/dbgen
 export SID=DBT3
 export DBT3_PERL_MODULE=@TOPDIR@/perlmodules

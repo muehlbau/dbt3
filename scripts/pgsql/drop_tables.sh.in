@@ -1,3 +1,3 @@
 #!/bin/sh
 
-psql -d $SID -f @TOPDIR@/scripts/pgsql/drop_tables.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/drop_tables.sql

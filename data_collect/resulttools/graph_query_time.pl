@@ -182,8 +182,8 @@ unless( $outfile->open( "> $dirname/q_time.input" ) ) {
 	die "cannot open $dirname/q_time.input $!";
 }
 
-print $outfile "set linestyle 1 lt 1 lw 50\n";
-print $outfile "set linestyle 2 lt 2 lw 50\n";
+print $outfile "set style line 1 lt 1 lw 50\n";
+print $outfile "set style line 2 lt 2 lw 50\n";
 print $outfile "plot \"q_time_p.data\" using 1:2 title \"Power\" with imp ls 1, \"q_time_t.data\" using 1:2 title \"Throughput\" with imp ls 2\n";
 print $outfile "set term png small color\n";
 print $outfile "set output \"q_time.png\"\n";

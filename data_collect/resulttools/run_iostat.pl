@@ -43,7 +43,7 @@ Runs vmstat taking <count> samples at <interval> times.
 =cut
 
 sub get_iostat_v {
-    my $str = `iostat -V 2>&1 | head -1 `;
+    my $str = `iostat -V 2>&1 | head -n 1 `;
     chomp $str;
     my @outline = split / /, $str;
     return $outline[ 2 ];

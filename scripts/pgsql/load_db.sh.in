@@ -10,41 +10,41 @@
 
 date
 echo -n "loading table supplier..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/supplier.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/supplier.sql
 echo "done."
 
 date
 echo -n "loading table part..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/part.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/part.sql
 echo "done."
 
 date
 echo -n "loading table partsupp..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/partsupp.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/partsupp.sql
 echo "done."
 
 date
 echo -n "loading table customer..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/customer.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/customer.sql
 echo "done."
 
 date
 echo -n "loading table orders..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/orders.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/orders.sql
 echo "done."
 
 date
 echo -n "loading table lineitem..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/lineitem.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/lineitem.sql
 echo "done."
 
 date
 echo -n "loading table nation..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/nation.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/nation.sql
 echo "done."
 
 date
 echo -n "loading table region..."
-psql -d $SID -f @TOPDIR@/scripts/pgsql/region.sql
+@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/region.sql
 echo "done."
 

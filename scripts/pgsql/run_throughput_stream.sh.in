@@ -48,7 +48,7 @@ let "seed = $seed + $stream_num"
 # generate the queries for thoughput test
 rm -f $query_file
 rm -f $tmp_query_file
-echo "generate queries in $qgen_dir"
+echo "generate queries in $SRCDIR/datagen/dbgen"
 if [ $explain_analyze -eq 0 ]
 then
 	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file> $query_file
@@ -75,7 +75,7 @@ s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
-psql $SID -f $tmp_query_file -a >> $RUNDIR/thruput_qs${stream_num}.result 2>&1
+@PSQL@ $SID -f $tmp_query_file -a >> $RUNDIR/thruput_qs${stream_num}.result 2>&1
 bash $DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
 e_time=`$GTIME`
 echo "`date`: end queries "

@@ -4,8 +4,8 @@ if [ ! -d @TOPDIR@/run ]; then
 	chown -R pgsql:pgsql @TOPDIR@/run
 fi
 if [ "$db_param" ]; then
-	pg_ctl start -l @TOPDIR@/run/db_logfile.txt -o "$db_param"
+	@PG_CTL@ start -l @TOPDIR@/run/db_logfile.txt -o "$db_param"
 else
-	pg_ctl start -l @TOPDIR@/run/db_logfile.txt
+	@PG_CTL@ start -l @TOPDIR@/run/db_logfile.txt
 fi
 sleep 10

@@ -24,7 +24,8 @@ clearprof () {
 }
 
 getprof () {
-	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/${profname}.prof
+        mkdir -p $OUTPUT_DIR/prof
+	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/prof/${profname}.prof
 }
 
 clearoprof () {
@@ -56,11 +57,15 @@ SF=0
 redirect_tmp=0
 redirect_xlog=0
 USE_OPROFILE=0
+GENERATE=0
 
-while getopts "f:o:p:r:x:y:" opt; do
+while getopts "f:g:o:p:r:x:y:" opt; do
 	case $opt in
 	f)
 		SF=$OPTARG
+		;;
+	g)
+		GENERATE=$OPTARG
 		;;
 	o)
 		OUTPUT_DIR=$OPTARG
@@ -83,7 +88,7 @@ while getopts "f:o:p:r:x:y:" opt; do
 	esac
 done
 
-if [ $SF -ne 0 ]; then
+if [ $GENERATE -ne 0 ]; then
 	echo "Generating data... scale factor $SF"
 	cd $SRCDIR/datagen/dbgen
 	date
@@ -115,6 +120,7 @@ echo "Create tables"
 bash -x $SRCDIR/scripts/pgsql/create_tables.sh
 echo
 
+echo "`date +'%Y-%m-%d %H:%M:%S'` start load test"
 s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "LOAD"
 
@@ -157,8 +163,9 @@ echo "Update optimizer statistics"
 bash -x $SRCDIR/scripts/pgsql/update_statistics.sh
 date
 
-$DBSCRIPTDIR/record_end.sh -n "LOAD"
+bash $DBSCRIPTDIR/record_end.sh -n "LOAD"
 e_time=`$GTIME`
+echo "`date +'%Y-%m-%d %H:%M:%S'` load test end"
 let "diff_time=$e_time-$s_time"
 echo "elapsed time for load test ${i} $diff_time"
 
@@ -167,11 +174,11 @@ bash $SRCDIR/scripts/stop_sysstats.sh
 
 # Collect profile data.
 if [ -f /proc/profile ]; then
-	profname='Load Test'
+	profname='Load_Test'
 	getprof
 fi
 
 if [ $USE_OPROFILE -eq 1 ]; then
-	profname='Load Test'
+	profname='Load_Test'
 	getoprof
 fi

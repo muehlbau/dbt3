@@ -13,3 +13,4 @@ clean:
 install:
 	chmod +x data_collect/@DATABASE_TO_USE@/*.sh
 	chmod +x scripts/@DATABASE_TO_USE@/*.sh
+	chmod +x scripts/*.sh

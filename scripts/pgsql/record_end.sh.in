@@ -20,4 +20,4 @@ done
 GTIME="$SRCDIR/dbdriver/utils/gtime"
 
 SQL="UPDATE time_statistics SET e_time = current_timestamp WHERE task_name = '$NAME';"
-psql -d $SID -c "$SQL"
+@PSQL@ -d $SID -c "$SQL"

@@ -21,4 +21,4 @@ GTIME="$SRCDIR/dbdriver/utils/gtime"
 
 s_time=`$GTIME`
 SQL="INSERT INTO time_statistics (task_name, s_time, int_time) VALUES ('$NAME', current_timestamp, $s_time);"
-psql -d $SID -c "$SQL"
+@PSQL@ -d $SID -c "$SQL"

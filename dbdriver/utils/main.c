@@ -11,8 +11,8 @@ int main(int argc, char *argv[])
 {
 	FILE *query_input;
 	FILE *query_output;
-	char query_input_file_name[60];
-	char query_output_file_name[60];
+	char query_input_file_name[1024];
+	char query_output_file_name[1024];
 	int rc;
 	int perf_run_number;
 	int stream_number;

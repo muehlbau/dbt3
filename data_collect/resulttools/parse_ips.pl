@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings
-# $Author: fimath $ $Date: 2005-03-03 18:17:13 -0800 (Thu, 03 Mar 2005) $ $Id: parse_ips.pl 1201 2005-03-04 02:17:13Z fimath $
+# $Author: fimath $ $Date: 2005-03-04 09:10:26 -0800 (Fri, 04 Mar 2005) $ $Id: parse_ips.pl 1213 2005-03-04 17:10:26Z fimath $
 
 use strict;
 use English;

@@ -12,6 +12,8 @@ SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
+. $DATABASE/set_run_env.sh
+
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
 EXPLAIN_ANALYZE=0
@@ -22,7 +24,8 @@ SCALE_FACTOR=1
 STREAMS=1
 USE_OPROFILE=0
 MAX=1
-while getopts "e:f:n:o:p:r:s:x:" opt; do
+GENERATE=0
+while getopts "e:f:gn:o:p:r:s:x:" opt; do
 	case $opt in
 		e)
 			# PostgreSQL only.
@@ -30,6 +33,9 @@ while getopts "e:f:n:o:p:r:s:x:" opt; do
 			;;
 		f)
 			SCALE_FACTOR=$OPTARG
+			;;
+		g)
+			GENERATE=1
 			;;
 		n)
 			STREAMS=$OPTARG
@@ -80,7 +86,7 @@ fi
 echo "seed: `cat $SEED_FILE`"
 
 # Load Test
-bash -x $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR
+bash -x $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE
 
 i=1
 while [ $i -le $MAX ]
@@ -117,3 +123,10 @@ bash $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out
 
 # Calculate composite score.      
 perl $SRCDIR/scripts/get_composite.pl -p 1 -s $SCALE_FACTOR -n $STREAMS -o $OUTPUT_DIR/calc_composite.out
+cp -p dbt3.out $OUTPUT_DIR
+perl $SRCDIR/data_collect/resulttools/wb_dbt3_report_pgsql.pl --indir $OUTPUT_DIR --outfile $OUTPUT_DIR/index.html
+bash $SRCDIR/data_collect/resulttools/dbt3_gen_graphs.sh $OUTPUT_DIR/plot $OUTPUT_DIR/plot
+perl $SRCDIR/data_collect/resulttools/graph_query_time.pl --if $OUTPUT_DIR/q_time.out
+
+RUN_NUMBER=`expr $RUN_NUMBER + 1`
+echo $RUN_NUMBER > run_number

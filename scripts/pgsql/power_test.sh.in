@@ -19,7 +19,8 @@ clearprof () {
 }
 
 getprof () {
-	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/${profname}.prof
+        mkdir -p $OUTPUT_DIR/prof
+	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/prof/${profname}.prof
 }
 
 clearoprof () {
@@ -78,13 +79,13 @@ RUNDIR=$OUTPUT_DIR/run
 seed_file=$RUNDIR/seed
 param_file="$RUNDIR/power_plan.para"
 query_file="$RUNDIR/power_plan.sql"
-tmp_query_file="$RUNDIR/tmp_$query_name.sql"
+tmp_query_file="$RUNDIR/tmp_power_plan.sql"
 
 GTIME="$SRCDIR/dbdriver/utils/gtime"
 DBSTATS="$DBSCRIPTDIR/db_stats.sh"
 
 # Generate queries for the Power test.
-$SRCDIR/datagen/qgen -c -r `cat $seed_file` -p 0 -s $SCALE_FACTOR -l $param_file -x > $query_file
+$SRCDIR/datagen/dbgen/qgen -c -r `cat $seed_file` -p 0 -s $SCALE_FACTOR -l $param_file -x > $query_file
 
 # Get the EXPLAIN plans for only the SELECT statements.
 mkdir -p $RUNDIR/plan
@@ -152,16 +153,18 @@ echo "elapsed time for power test $diff_time"
 
 # Stop collecting system statistics.
 bash $SCRIPTDIR/stop_sysstats.sh
-killall $DBSTATS
+
+#no effect
+#killall $DBSTATS
 
 bash -x $DBSCRIPTDIR/stop_db.sh
 
 if [ -f /proc/profile ]; then
-	profname="Power Test $TAG"
+	profname="Power_Test_$TAG"
 	getprof
 fi
 
 if [ $USE_OPROFILE -eq 1 ]; then
-	profname="Power Test $TAG"
+	profname="Power_Test_$TAG"
 	getoprof
 fi

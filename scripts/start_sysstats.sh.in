@@ -13,13 +13,13 @@ SAMPLE_LENGTH=60
 while getopts "o:p:s:" opt; do
 	case $opt in
 		o)
-			OUTPUT_DIR=$optarg
+			OUTPUT_DIR=$OPTARG
 			;;
 		p)
-			PREFIX=$optarg
+			PREFIX=$OPTARG
 			;;
 		s)
-			SAMPLE_LENGTH=$optarg
+			SAMPLE_LENGTH=$OPTARG
 			;;
 	esac
 done
@@ -37,4 +37,4 @@ mkdir -p $VMSTATDIR
 @IOSTAT@ -d $SAMPLE_LENGTH  >> $IOSTATDIR/$PREFIX.iostat.out &
 @IOSTAT@ -d -x $SAMPLE_LENGTH  >> $IOSTATDIR/$PREFIX.iostatx.out &
 
-@VMSTAT@ -n $SAMPLE_LENGTH >> $OUTPUT_DIR/$PREFIX.vmstat.out &
+@VMSTAT@ -n $SAMPLE_LENGTH >> $VMSTATDIR/$PREFIX.vmstat.out &

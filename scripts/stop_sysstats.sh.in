@@ -7,4 +7,5 @@
 #
 # 17 october 2002
 
-killall @SAR@ @IOSTAT@ @VMSTAT@ 
+killall @SAR@ @IOSTAT@ @VMSTAT@ /usr/lib/sa/sadc
+ps -ef | grep -v grep | grep db_stats | awk '{ print $2}' | xargs kill

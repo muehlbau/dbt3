@@ -21,10 +21,9 @@ if [ "$id" = "0" ]; then
 fi
 
 	echo "shutting down postgresql server..."
-	pg_ctl stop > /dev/null 2>&1
+	@PG_CTL@ stop > /dev/null 2>&1
 	# wait for the processes to stop
 	sleep 10
-
 
 # since we are on STP, we can delete the database dir
 if [ -d $PGDATA ]; then
@@ -40,9 +39,9 @@ else
 
 	# initialize database cluster
 	echo "initializing database cluster..."
-	initdb -D $PGDATA > /dev/null 2>&1
+	@INITDB@ -D $PGDATA > /dev/null 2>&1
 fi
 	# start remote communication server
 	echo "start postgresql server..."
-	@TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
+	bash @TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
 
