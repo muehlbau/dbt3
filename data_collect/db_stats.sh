@@ -16,6 +16,18 @@ COUNTER=0
 echo "the database statistics is taken at $SAMPLE_LENGTH interval and $ITERATIONS count" >> $OUTPUT_DIR/readme.txt
 echo >> $OUTPUT_DIR/readme.txt
 
+while [ 1 ]
+do
+	_o=`/opt/sapdb/depend/bin/dbmcli -d $1 -u dbm,dbm db_state 2>&1`
+	_test=`echo $_o | grep -i warm`
+	if [ "$_test" = "" ]; then
+		echo "wait for database $1 to be on-line"
+		sleep 5
+	else
+		break;
+	fi
+done
+
 # save the database parameters
 /opt/sapdb/depend/bin/dbmcli -d $1 -u dbm,dbm -uSQL dbt,dbt -c param_extgetall | sort > $OUTPUT_DIR/param.out
 #read RN < .run_number
@@ -44,7 +56,7 @@ echo "resetting monitor tables"
 
 # Is the monitor init taking too much time?
 date
-echo "starting database statistics collection"
+echo "starting database statistics collection iteration $ITERATIONS"
 while [ $COUNTER -lt $ITERATIONS ]; do
 	# collent ipcs stats
         ipcs >> $OUTPUT_DIR/ipcs${COUNTER}.out
@@ -64,7 +76,7 @@ while [ $COUNTER -lt $ITERATIONS ]; do
 	/opt/sapdb/depend/bin/dbmcli -s -d $1 -u dba,dba -uSQL dbt,dbt "sql_execute select * from monitor_row" > $OUTPUT_DIR/m_row${COUNTER}.out
 	/opt/sapdb/depend/bin/dbmcli -s -d $1 -u dba,dba -uSQL dbt,dbt "sql_execute select * from monitor_trans" > $OUTPUT_DIR/m_trans${COUNTER}.out
 
-	let COUNTER=COUNTER+1
+	let "COUNTER=$COUNTER+1"
 	sleep $SAMPLE_LENGTH
 done
 
