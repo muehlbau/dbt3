@@ -6,7 +6,7 @@
 
 struct sql_statement_t sql_statement;
 
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	FILE *query_input;
 	FILE *query_output;
