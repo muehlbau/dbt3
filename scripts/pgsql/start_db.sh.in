@@ -6,10 +6,11 @@ DIR=`dirname $0`
 DB_PARAM=$1
 
 CMD="@PG_CTL@ -D ${PGDATA} start -l @TOPDIR@/run/db_logfile.txt"
-if [ "$db_param" ]; then
-	CMD="${CMD} -o ${DB_PARAM}"
+if [ $# -eq 1 ]; then
+	${CMD} -o "${DB_PARAM}" || exit 1
+else
+	${CMD} || exit 1
 fi
 
-${CMD} || exit 1
 
 sleep 10
