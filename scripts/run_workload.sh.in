@@ -12,7 +12,7 @@ SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
-. $DATABASE/set_run_env.sh
+. dbt3_profile
 
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
