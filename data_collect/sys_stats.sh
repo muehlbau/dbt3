@@ -8,15 +8,14 @@
 # March 2003
 
 #!/bin/sh
-if [ $# -ne 4 ]; then
-	echo "Usage: ./collect_data.sh <interval> <duration> <cpus> <result_dir>"
+if [ $# -ne 3 ]; then
+	echo "Usage: ./collect_data.sh <interval> <duration> <result_dir>"
 	exit
 fi
 
 INTERVAL=$1
 RUN_DURATION=$2
-CPUS=$3
-RESULTS_PATH=$4
+RESULTS_PATH=$3
 
 #calculate count
 let "COUNT=$RUN_DURATION/$INTERVAL"
@@ -45,7 +44,10 @@ then
 #sar
 /usr/local/bin/sar -u -P ALL -d -B -r -q -W -b -o $RESULTS_PATH/run.sar.data $INTERVAL $COUNT &
 #iostat
-/usr/local/bin/iostat -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
+echo "ziostat";
+/usr/src/ziostat/ziostat -a -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
+/usr/src/ziostat/ziostat -a -x $INTERVAL $COUNT >> $RESULTS_PATH/iostat-x.txt &
+#/usr/local/bin/iostat -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
 else
 #use sysstat 4.0.3
 #sar
