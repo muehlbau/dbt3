@@ -35,6 +35,8 @@ data_dev=`dbmcli -d $SID -u dbm,dbm param_extgetall | grep '^DATADEV_00' | wc -l
 sys_dev=`dbmcli -d $SID -u dbm,dbm param_extgetall | grep '^SYSDEV_00' | wc -l`
 log_dev=`dbmcli -d $SID -u dbm,dbm param_extgetall | grep '^ARCHIVE_LOG_00' | wc -l`
 
+shmmax_value=`/sbin/sysctl -e -a |grep shmmax|awk '{print $3}'`
+
 echo "kernel: $kernel" > $output_dir/config.txt
 echo "sapdb: $sapdb">> $output_dir/config.txt
 echo "procps: $procps">> $output_dir/config.txt
@@ -45,6 +47,7 @@ echo "model: $model">> $output_dir/config.txt
 echo "memory: $memory">> $output_dir/config.txt
 echo "scale_factor: $scale_factor">> $output_dir/config.txt
 echo "num_stream: $num_stream">> $output_dir/config.txt
+echo "shmmax: $shmmax_value" >> $output_dir/config.txt
 echo "data_dev_space: $data_dev data devspaces on $data_dev raw devices " >> $output_dir/config.txt
 echo "sys_dev_space: $sys_dev system devspaces on file system" >> $output_dir/config.txt
 echo "log_dev_space: $log_dev log devspaces on $log_dev raw devices" >> $output_dir/config.txt
