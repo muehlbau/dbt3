@@ -1,0 +1,16 @@
+#include <stdio.h>
+
+int db_connect(char *dbname, char *hostname)
+{
+	exec sql begin declare section;
+	char db_name[40];
+	char host_name[40];
+	exec sql end declare section;
+
+	strcpy(db_name, dbname);
+	strcpy(host_name, hostname);
+
+	EXEC SQL set serverdb :db_name on :host_name; 
+	EXEC SQL connect dbt identified by dbt;
+	return sqlca.sqlcode;
+}
