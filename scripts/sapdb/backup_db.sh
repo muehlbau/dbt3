@@ -1,5 +1,7 @@
 #!/bin/sh
 
+#note: if DATA_CACHE is too big, it should be reduced before backup
+#otherwise we get I/O error
 echo "changing data_cache to 10000"
 _o=`cat <<EOF |  /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
 param_startsession
@@ -16,6 +18,8 @@ fi
 
 echo "stard backup ..."
 _o=`cat <<EOF | /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
+db_stop
+db_start
 medium_put data /dbt3/datasave FILE DATA 0 8 YES
 medium_put incr /dbt3/incremental FILE PAGES 0 8 YES
 medium_put auto /dbt3/autosave FILE AUTO
@@ -34,3 +38,6 @@ echo "backup done"
 
 echo "set database parameters"
 ./set_param.sh
+_o=`cat <<EOF | /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
+db_stop
+db_warm
