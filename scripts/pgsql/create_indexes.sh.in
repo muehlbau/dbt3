@@ -1,20 +1,29 @@
 #!/bin/bash
 
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+TABLESPACES=${1}
+
+if [ ${TABLESPACES} -eq 1 ];then
+        INDEX_TABLESPACE="TABLESPACE ts_index"
+fi
+
 echo "Creating indexes..."
-@PSQL@ -d $SID -c "CREATE INDEX i_l_shipdate ON lineitem (l_shipdate);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_suppkey_partkey ON lineitem (l_partkey, l_suppkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_partkey ON lineitem (l_partkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_suppkey ON lineitem (l_suppkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_receiptdate ON lineitem (l_receiptdate);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_orderkey ON lineitem (l_orderkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_orderkey_quantity ON lineitem (l_orderkey, l_quantity);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_c_nationkey ON customer (c_nationkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_o_orderdate ON orders (o_orderdate);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_o_custkey ON orders (o_custkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_s_nationkey ON supplier (s_nationkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_ps_partkey ON partsupp (ps_partkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_ps_suppkey ON partsupp (ps_suppkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_n_regionkey ON nation (n_regionkey);" || exit 1
-@PSQL@ -d $SID -c "CREATE INDEX i_l_commitdate ON lineitem (l_commitdate);" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_shipdate ON lineitem (l_shipdate) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_suppkey_partkey ON lineitem (l_partkey, l_suppkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_partkey ON lineitem (l_partkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_suppkey ON lineitem (l_suppkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_receiptdate ON lineitem (l_receiptdate) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_orderkey ON lineitem (l_orderkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_orderkey_quantity ON lineitem (l_orderkey, l_quantity) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_c_nationkey ON customer (c_nationkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_o_orderdate ON orders (o_orderdate) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_o_custkey ON orders (o_custkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_s_nationkey ON supplier (s_nationkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_ps_partkey ON partsupp (ps_partkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_ps_suppkey ON partsupp (ps_suppkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_n_regionkey ON nation (n_regionkey) $INDEX_TABLESPACE;" || exit 1
+@PSQL@ -d $SID -c "CREATE INDEX i_l_commitdate ON lineitem (l_commitdate) $INDEX_TABLESPACE;" || exit 1
 
 exit 0
