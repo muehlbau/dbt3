@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
@@ -10,13 +10,10 @@
 # Set the relative execution prefix
 
 SAMPLE_LENGTH=60
-while getopts "o:p:s:" opt; do
+while getopts "o:s:" opt; do
 	case $opt in
 		o)
 			OUTPUT_DIR=$OPTARG
-			;;
-		p)
-			PREFIX=$OPTARG
 			;;
 		s)
 			SAMPLE_LENGTH=$OPTARG
@@ -24,17 +21,9 @@ while getopts "o:p:s:" opt; do
 	esac
 done
 
-SARDIR=$OUTPUT_DIR/sar
-IOSTATDIR=$OUTPUT_DIR/iostat
-VMSTATDIR=$OUTPUT_DIR/vmstat
+@SAR@ -o $OUTPUT_DIR/sar.out $SAMPLE_LENGTH 0 &
 
-mkdir -p $SARDIR
-mkdir -p $IOSTATDIR
-mkdir -p $VMSTATDIR
+@IOSTAT@ -d $SAMPLE_LENGTH  >> $OUTPUT_DIR/iostat.out &
+@IOSTAT@ -d -x $SAMPLE_LENGTH  >> $OUTPUT_DIR/iostatx.out &
 
-@SAR@ -o $SARDIR/$PREFIX.sar.out $SAMPLE_LENGTH 0 &
-
-@IOSTAT@ -d $SAMPLE_LENGTH  >> $IOSTATDIR/$PREFIX.iostat.out &
-@IOSTAT@ -d -x $SAMPLE_LENGTH  >> $IOSTATDIR/$PREFIX.iostatx.out &
-
-@VMSTAT@ -n $SAMPLE_LENGTH >> $VMSTATDIR/$PREFIX.vmstat.out &
+@VMSTAT@ -n $SAMPLE_LENGTH >> $OUTPUT_DIR/vmstat.out &
