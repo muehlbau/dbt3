@@ -67,7 +67,7 @@ gen_results()
 
 	echo "<h2>System Statistics</h2>" >> ${SUBDIR}/index.html
 	echo "<a href=\"sar.txt\">sar</a><br />" >> ${SUBDIR}/index.html
-	echo "<a href=\"vmstat.out\">vmstat</a> [<a href=\"vmcharts.html\">vmstat charts</a>]<br />" >> ${SUBDIR}/index.html
+	echo "<a href=\"vmstat.out\">vmstat</a> [<a href=\"vmcharts.html\">charts</a>]<br />" >> ${SUBDIR}/index.html
 	echo "<a href=\"iostatx.out\">iostat</a><br />" >> ${SUBDIR}/index.html
 	echo "<a href=\"ipcs.out\">ipcs</a><br />" >> ${SUBDIR}/index.html
 
