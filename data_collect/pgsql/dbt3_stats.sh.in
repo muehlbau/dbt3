@@ -131,6 +131,10 @@ if [ -f /proc/profile ]; then
         getprof
 fi
 
+#create symbolic links for pgsql_tmp
+#echo "create symbolic links for pgsql_tmp"
+#$datacollect_pgsql_path/ln_pgsql_tmp.sh
+
 #get execution plan
 $dbdriver_pgsql_path/explain_power_query.sh $scale_factor $output_dir
 
