@@ -1,7 +1,0 @@
-
-CC = gcc
-
-CFLAGS = -g -I$(INCLUDE_DIR) -DDEBUG
-
-COMMON_PRGS = $(COMMON_DIR)/common.c
-COMMON_OBJS = $(COMMON_PRGS:.c=.so)
