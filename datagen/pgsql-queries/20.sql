@@ -13,18 +13,13 @@ from
 where
 	s_suppkey in (
 		select
-			ps_suppkey
+			distinct (ps_suppkey)
 		from
-			partsupp
+			partsupp,
+			part
 		where
-			ps_partkey in (
-				select
-					p_partkey
-				from
-					part
-				where
-					p_name like ':1%'
-			)
+			ps_partkey=p_partkey
+			and p_name like ':1%'
 			and ps_availqty > (
 				select
 					0.5 * sum(l_quantity)
@@ -34,7 +29,7 @@ where
 					l_partkey = ps_partkey
 					and l_suppkey = ps_suppkey
 					and l_shipdate >= ':2'
-					and l_shipdate < date':2' + interval '365 days'
+					and l_shipdate < date ':2' + interval '1 year'
 			)
 	)
 	and s_nationkey = n_nationkey
