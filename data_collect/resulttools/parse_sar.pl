@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_sar.pl 900 2003-04-05 00:28:14Z jztpcw $ $Author: jztpcw $ $Date
+# $Id: parse_sar.pl 903 2003-04-09 22:18:05Z jztpcw $ $Author: jztpcw $ $Date
 
 use strict;
 use English;
@@ -63,7 +63,7 @@ open sar binary with option and generate gnuplot data files
 my ( $option, $infile, $outfile, $comment, $num_cpus, $configfile, 
 	$writeme, $hlp );
 
-my ( %options, $cline, $num_columns, $start_column, $sar_path, $os_version
+my ( %options, $cline, $num_columns, $start_column, $sar_path, $os_version,
 	$sar_version );
 
 my $fcf = new FileHandle;
@@ -111,7 +111,7 @@ else
 	die "No option $!";
 }
 
-if ( $option eq '-P' || $option eq '-A' )
+if ( $option eq '-P' || $option eq '-U' )
 {
 	if ( $num_cpus ) { $options{ 'num_cpus' } = $num_cpus; }
 	elsif ( $options{ 'num_cpus' } ) {
@@ -175,7 +175,7 @@ if ( -f $keyfile )
 	my @heads = eval{ get_header( $keyfile, "$option", "hr" ) };
         if ($@)
         {
-                die "error get_diskheads: $@";
+                die "error get_header: $@";
         }
 	$start_column = shift @heads;
 	$num_columns = $#heads + 1;
@@ -192,18 +192,18 @@ else
 
 # if key file exsits, header is read from the key files as human readable format
 # else header_type is 'ap' and header is read from the $infile
-if ( $option eq '-P' || $option eq '-A' )
+if ( $option eq '-P' || $option eq '-U' )
 {
 	#sysstat > 4.1.2 use -P instead of -A	
 	if ( $sar_version =~ /4\.1\.2/ ) { $option = '-P';}
 	for (my $i=0; $i<$num_cpus; $i++)
 	{
-		eval {sar_parse( "sar $option $i -f $infile |", "$outfile.cpu$i", $comment, $option, $num_columns, $start_column)};
+		eval {sar_parse( "$sar_path/sar $option $i -f $infile |", "$outfile.cpu$i", $comment, $option, $num_columns, $start_column)};
 	}
 }
 else
 {
-	eval {sar_parse( "sar $option -f $infile |", $outfile, $comment, $option, $num_columns, $start_column)};
+	eval {sar_parse( "$sar_path/sar $option -f $infile |", $outfile, $comment, $option, $num_columns, $start_column)};
 	if ( $@ )
 	{
 		die "error executing iostat_parse: $@\n";
