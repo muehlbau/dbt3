@@ -42,9 +42,9 @@ $parsequery_dir/parse_query $query_file $tmp_query_file P $perf_run_number
 #run the queries
 echo "`date`: start power queries "
 s_time=`$GTIME`
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.POWER.QS', current_timestamp, $s_time);"
-psql $SID -f $tmp_query_file -o /home/pgsql/dbt3/run/power_query.out
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_number}.POWER.QS' and int_time=$s_time;"
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.POWER.QS', current_timestamp, $s_time);"
+psql $SID -f $tmp_query_file -o $run_dir/power_query.result
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_number}.POWER.QS' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"
