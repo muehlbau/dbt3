@@ -11,7 +11,7 @@
 # 24-Jan-2003: Created by Jenny Zhang
 
 if [ $# -lt 2 ]; then
-        echo "usage: power_test_stats.sh <scale_factor> <output_dir> [-d duration -i interval]"
+        echo "usage: power_test_stats.sh <scale_factor> <output_dir> [-s seed -d duration -i interval]"
         exit
 fi
 
@@ -23,15 +23,18 @@ power_test_time=3600
 
 duration=0
 interval=0
+seed=0
 shift 2
 # process the command line parameters
 while getopts ":d:i:" opt; do
 	case $opt in
+		s) seed=$OPTARG
+				;;
 		d) duration=$OPTARG
 				;;
 		i) interval=$OPTARG
 				;;
-		?) echo "Usage: $0 <scale_factor> [-d duration -i interval]"
+		?) echo "Usage: $0 <scale_factor> [-s seed -d duration -i interval]"
 			exit ;;
 		esac
 done
@@ -59,6 +62,7 @@ dbdriver_sapdb_path=@TOPDIR@/dbdriver/scripts/sapdb
 datacollect_path=@TOPDIR@/data_collect
 datacollect_sapdb_path=@TOPDIR@/data_collect/sapdb
 run_path=@TOPDIR@/run
+seed_file=$run_path/seed
 
 # set run environment
 . $sapdb_script_path/set_run_env.sh
@@ -83,6 +87,17 @@ if [ "$_test" = "" ]; then
                  echo "set parameters failed: $_o"
                 exit 1
         fi
+fi
+
+if [ $seed -eq 0 ]; then
+	echo "running $SID with default seed"
+	echo "`date`: generate seed0"
+	echo "seed file is $seed_file";
+	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+else
+        echo "running power test with seed $seed"
+        echo "seed file is $seed_file";
+        echo "$seed" > $seed_file
 fi
 
 #make output directory
