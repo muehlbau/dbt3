@@ -21,7 +21,7 @@ then
 	echo "Generating data... scale factor $SF"
 	cd $DBT3_INSTALL_PATH/datagen/dbgen
 	date
-	./dbgen -s $SF
+	$DBT3_INSTALL_PATH/datagen/dbgen/dbgen -s $SF
 	echo "data files are generated"
 	date
 	cd $DBT3_INSTALL_PATH/scripts/sapdb
