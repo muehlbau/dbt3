@@ -33,8 +33,8 @@ where
 				where
 					l_partkey = ps_partkey
 					and l_suppkey = ps_suppkey
-					and l_shipdate >= ':2'
-					and l_shipdate < adddate(':2', 365)
+					and l_shipdate >= date ':2'
+					and l_shipdate < date ':2' + interval '1' year
 			)
 	)
 	and s_nationkey = n_nationkey

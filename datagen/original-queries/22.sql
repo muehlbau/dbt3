@@ -11,12 +11,12 @@ select
 from
 	(
 		select
-			substr(c_phone, 1, 2) as cntrycode,
+			substring(c_phone from 1 for 2) as cntrycode,
 			c_acctbal
 		from
 			customer
 		where
-			substr(c_phone, 1, 2) in
+			substring(c_phone from 1 for 2) in
 				(':1', ':2', ':3', ':4', ':5', ':6', ':7')
 			and c_acctbal > (
 				select
@@ -25,7 +25,7 @@ from
 					customer
 				where
 					c_acctbal > 0.00
-					and substr(c_phone, 1, 2) in
+					and substring(c_phone from 1 for 2) in
 						(':1', ':2', ':3', ':4', ':5', ':6', ':7')
 			)
 			and not exists (
@@ -36,7 +36,7 @@ from
 				where
 					o_custkey = c_custkey
 			)
-	)
+	) as custsale
 group by
 	cntrycode
 order by

@@ -6,7 +6,7 @@
 :o
 select
 	ps_partkey,
-	sum(ps_supplycost * ps_availqty) as value1
+	sum(ps_supplycost * ps_availqty) as value
 from
 	partsupp,
 	supplier,
@@ -30,5 +30,5 @@ group by
 				and n_name = ':1'
 		)
 order by
-	value1 desc;
+	value desc;
 :n -1

@@ -22,8 +22,8 @@ where
 	and s_nationkey = n_nationkey
 	and n_regionkey = r_regionkey
 	and r_name = ':1'
-	and o_orderdate >= ':2'
-	and o_orderdate < adddate(':2', 365)
+	and o_orderdate >= date ':2'
+	and o_orderdate < date ':2' + interval '1' year
 group by
 	n_name
 order by
