@@ -336,17 +336,17 @@ diff -Naru tpch-dbgen/print.c dbgen/print.c
  #endif /* EOL_HANDLING */
 diff -Naru tpch-dbgen/tpcd.h dbgen/tpcd.h
 --- tpch-dbgen/tpcd.h	Thu May 11 12:19:23 2000
-+++ dbgen/tpcd.h	Thu Jun 26 11:29:54 2003
++++ dbgen/tpcd.h	Mon Jul 14 15:51:21 2003
 @@ -33,6 +33,24 @@
  /*
   * database portability defines
   */
 +#ifdef sapdb
-+#define GEN_QUERY_PLAN  "SQL_EXECUTE EXPLAIN"
++#define GEN_QUERY_PLAN  "explain"
 +#define START_TRAN      "START"
-+#define END_TRAN        "SQL_EXECUTE COMMIT"
++#define END_TRAN        "COMMIT;"
 +#define SET_OUTPUT      ""
-+#define SET_ROWCOUNT    "--#set rowcount %d\ngo\n\n"
++#define SET_ROWCOUNT    ""
 +#define SET_DBASE       "CONNECT TO %s ;\n"
 +#endif
 +
