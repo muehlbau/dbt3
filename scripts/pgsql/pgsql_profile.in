@@ -11,4 +11,4 @@
 export PATH=/usr/local/pgsql/bin:$PATH
 
 export SID=dbt3
-export PGDATA=/home/markw/pgdata
+export PGDATA=/mnt/pgdata
