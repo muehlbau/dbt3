@@ -6,7 +6,7 @@
 # Copyright (C) 2003 Mark Wong & Open Source Development Lab, Inc.
 #
 # 4 September 2003
-# 4 November 2004 with help from Ken Brush
+# 5 November 2004 with help from Ken Brush
 
 use strict;
 use Getopt::Long;
@@ -14,11 +14,11 @@ use Getopt::Long;
 my $stats_dir;
 
 GetOptions(
-	"if=s" => \$stats_dir
+	"dir=s" => \$stats_dir
 );
 
 unless ( $stats_dir ) {
-	print "usage: analyze_stats.pl --if <directory>\n";
+	print "usage: analyze_stats.pl --dir <directory>\n";
 	exit 1;
 }
 
@@ -30,13 +30,13 @@ my @index_names = ( "supplier_pkey", "part_pkey", "partsupp_pkey",
 	"i_o_custkey", "i_s_nationkey", "i_ps_partkey", "i_ps_suppkey",
 	"i_n_regionkey", "i_l_commitdate" );
 
-my @table_names = ( "nation", "region", "time_statistics", "orders",
-	"lineitem", "partsupp", "customer", "supplier", "part" );
+my @table_names = ( "nation", "region", "orders", "lineitem", "partsupp",
+	"customer", "supplier", "part" );
 
 my @input_file;
 
 sub process {
-	my ( $filename, $column, @names ) = @_;
+	my ( $filename, $column, $ylabel, @names ) = @_;
 
 	# Read it all the data files and process the data.
 	my @index_data;
@@ -87,8 +87,8 @@ sub process {
 	}
 	print FILE "\"$filename\" using 1:" . ($i + 1) .
 		" title \"$names[ $i ]\" with lines\n";
-	print FILE "set xlabel \"Elapsed Time (s)\"\n";
-	print FILE "set ylabel \"Index Scans\"\n";
+	print FILE "set xlabel \"Elapsed Time (Minutes)\"\n";
+	print FILE "set ylabel \"$ylabel\"\n";
 	print FILE "set term png small\n";
 	print FILE "set output \"$png_filename\"\n";
 	print FILE "set yrange [0:]\n";
@@ -96,14 +96,14 @@ sub process {
 	close( FILE );
 }
 
-foreach my $filename ( <$stats_dir/*.indexes_scan.out> ) {
-	process( $filename, 10, @index_names );
+foreach my $filename ( <$stats_dir/*indexes_scan.out> ) {
+	process( $filename, 10, "Index Scans", @index_names );
 }
-foreach my $filename ( <$stats_dir/*.index_info.out> ) {
-	process( $filename, 8, @index_names );
+foreach my $filename ( <$stats_dir/*index_info.out> ) {
+	process( $filename, 8, "Blocks Read", @index_names );
 }
-foreach my $filename ( <$stats_dir/*.table_info.out> ) {
-	process( $filename, 4, @table_names );
+foreach my $filename ( <$stats_dir/*table_info.out> ) {
+	process( $filename, 4, "Blocks Read", @table_names );
 }
 
 # Plot each gnuplot input file.

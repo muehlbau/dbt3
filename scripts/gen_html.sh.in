@@ -40,7 +40,6 @@ gen_results()
 
 	echo "<img src=\"plots/cpu.png\" />" >> ${SUBDIR}/index.html
 	echo "<p>" >> ${SUBDIR}/index.html
-	echo "<a href=\"vmcharts.html\">vmstat charts</a>" >> ${SUBDIR}/index.html
 	echo "</p>" >> ${SUBDIR}/index.html
 
 	# Create HTML page for chargs.
@@ -68,7 +67,7 @@ gen_results()
 
 	echo "<h2>System Statistics</h2>" >> ${SUBDIR}/index.html
 	echo "<a href=\"sar.txt\">sar</a><br />" >> ${SUBDIR}/index.html
-	echo "<a href=\"vmstat.out\">vmstat</a><br />" >> ${SUBDIR}/index.html
+	echo "<a href=\"vmstat.out\">vmstat</a> [<a href=\"vmcharts.html\">vmstat charts</a>]<br />" >> ${SUBDIR}/index.html
 	echo "<a href=\"iostatx.out\">iostat</a><br />" >> ${SUBDIR}/index.html
 	echo "<a href=\"ipcs.out\">ipcs</a><br />" >> ${SUBDIR}/index.html
 
@@ -85,8 +84,8 @@ gen_results()
 
 	echo "<h2>Database Information</h2>" >> ${SUBDIR}/index.html
 	echo "<a href=\"param.out\">database parameters</a><br />" >> ${SUBDIR}/index.html
+	echo "<a href=\"db/\">database raw statistics</a> [<a href=\"db.html\">charts</a>]<br />" >> ${SUBDIR}/index.html
 	if [ "$1" != "Load Test" ]; then
-		echo "<a href=\"db/\">database raw statistics</a><br />" >> ${SUBDIR}/index.html
 		echo "<a href=\"db/indexes.out\">table indexes</a><br />" >> ${SUBDIR}/index.html
 		echo "<a href=\"db/plans\">query plans</a><br />" >> ${SUBDIR}/index.html
 		echo "<a href=\"results\">query results</a><br />" >> ${SUBDIR}/index.html
@@ -95,7 +94,29 @@ gen_results()
 	echo "</body>" >> ${SUBDIR}/index.html
 	echo "</html>" >> ${SUBDIR}/index.html
 
+	# Database Charts
+	echo "<html>" > ${SUBDIR}/db.html
+	echo "<head>" >> ${SUBDIR}/db.html
+	echo "<title>Database Test 3 $1 Database Charts</title>" >> ${SUBDIR}/db.html
+	echo "</head>" >> ${SUBDIR}/db.html
+	echo "<body>" >> ${SUBDIR}/db.html
+	echo "Index Scans<br/>" >> ${SUBDIR}/db.html
+	echo "<img src=\"db/indexes_scan.png\" />" >> ${SUBDIR}/db.html
+
+	echo "<hr/>" >> ${SUBDIR}/db.html
+
+	echo "Index Blocks Read<br/>" >> ${SUBDIR}/db.html
+	echo "<img src=\"db/index_info.png\" />" >> ${SUBDIR}/db.html
+
+	echo "<hr/>" >> ${SUBDIR}/db.html
+
+	echo "Table Blocks Read<br/>" >> ${SUBDIR}/db.html
+	echo "<img src=\"db/table_info.png\" />" >> ${SUBDIR}/db.html
+	echo "</body>" >> ${SUBDIR}/db.html
+	echo "</html>" >> ${SUBDIR}/db.html
+
 	${SHELL} $SRCDIR/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots -x "Minutes" > /dev/null 2>&1
+	perl $SRCDIR/scripts/${DBDIR}/analyze_stats.pl --dir ${SUBDIR}/db > /dev/null 2>&1
 }
 
 echo "<html>"
