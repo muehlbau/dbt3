@@ -16,8 +16,36 @@ AC_TYPE_SIZE_T
 AC_HEADER_TIME
 AC_STRUCT_TM
 
+dnl> Configuration options for different databases, PostgreSQL is default.
+DATABASE_TO_USE="pgsql"
+SEPARATOR_FOR_DB="|"
+AC_ARG_WITH(postgres,
+	[  --with-postgresql default],
+	[ DATABASE_TO_USE="pgsql" SEPARATOR_FOR_DB="|"])
+AC_ARG_WITH(sapdb,
+	[  --with-sapdb],
+	[DATABASE_TO_USE="sapdb" SEPARATOR_FOR_DB=","])
+
 TOPDIR=`pwd`
 AC_SUBST(TOPDIR)
+AC_SUBST(DATABASE_TO_USE)
+AC_SUBST(SEPARATOR_FOR_DB)
 
-AC_OUTPUT(make.common Makefile dbdriver/utils/Makefile dbdriver/utils/sapdb/Makefile datagen/dbgen/Makefile)
-
+AC_OUTPUT([
+make.common 
+Makefile 
+dbdriver/utils/Makefile 
+datagen/dbgen/Makefile 
+dbdriver/scripts/get_composite.sh
+dbdriver/scripts/pgsql/run_single_query.sh
+scripts/set_run_env.sh
+scripts/pgsql/backup_db.sh
+scripts/pgsql/create_db.sh
+scripts/pgsql/create_tables.sh
+scripts/pgsql/load_db.sh
+scripts/pgsql/build_db.sh
+scripts/pgsql/create_indexes.sh
+scripts/pgsql/drop_tables.sh
+scripts/pgsql/restore_db.sh
+scripts/pgsql/grant.sh
+])
