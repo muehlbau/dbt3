@@ -41,7 +41,7 @@ echo "set parameters for $SID..."
 ./set_param.sh
 # devsapce definition
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
-param_adddevspace 1 SYS  $SYS_DIR/$SID/DBT3_SYS_001   F
+param_adddevspace 1 SYS  $SYS_DIR/$SID/SYS_001   F
 param_adddevspace 1 DATA $SYS_DIR/$SID/DBT3_DATA_001 F 524228
 param_adddevspace 1 LOG  $SYS_DIR/$SID/DBT3_LOG_001  F 8192
 quit
