@@ -12,3 +12,7 @@ export PATH=/usr/local/pgsql/bin:$PATH
 
 export SID=dbt3
 export PGDATA=/mnt/pgdata/${SID}
+
+export LOAD_PARAMETERS="-c stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
+export POWER_PARAMETERS="-c stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
+export THROUGHPUT_PARAMETERS="stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
