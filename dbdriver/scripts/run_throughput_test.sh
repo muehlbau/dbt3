@@ -17,8 +17,8 @@ GTIME="${DBT3_INSTALL_PATH}/dbdriver/utils/gtime"
 
 echo "`date`:=======throughput test $perf_run_number========"
 s_time=`$GTIME`
-echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THUPUT', timestamp, $s_time)"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THUPUT', timestamp, $s_time)"
+echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THRUPUT', timestamp, $s_time)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THRUPUT', timestamp, $s_time)"
 
 #generate the queries for throughput test
 #and start the streams
@@ -40,8 +40,8 @@ do
 done
 
 wait
-echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_number}.THUPUT' and int_time=$s_time"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_number}.THUPUT' and int_time=$s_time"
+echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_number}.THRUPUT' and int_time=$s_time"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_number}.THRUPUT' and int_time=$s_time"
 e_time=`$GTIME`
 echo "`date`: end throughput test run "
 let "diff_time=$e_time-$s_time"
