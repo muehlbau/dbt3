@@ -115,9 +115,9 @@ if ( $writeme ) {
 
 $db_script_patch = "@TOPDIR@/scripts/@DATABASE_TO_USE@";
 
-system("$db_script_patch/get_power.pl -p $perf_run_number -s $scale_factor > composite.out ") && die "execute $db_script_patch/get_power.pl failed"; 
+system("perl $db_script_patch/get_power.pl -p $perf_run_number -s $scale_factor > composite.out ") && die "execute $db_script_patch/get_power.pl failed"; 
 
-system("$db_script_patch/get_throughput.pl -p $perf_run_number -s $scale_factor -n $num_of_streams >> composite.out ") && die "execute $db_script_patch/get_throughput.pl failed"; 
+system("perl $db_script_patch/get_throughput.pl -p $perf_run_number -s $scale_factor -n $num_of_streams >> composite.out ") && die "execute $db_script_patch/get_throughput.pl failed"; 
 
 my $fcomp = new FileHandle;
 unless ( $fcomp->open( "< composite.out" ) ) { die "can't open file $!"; }
