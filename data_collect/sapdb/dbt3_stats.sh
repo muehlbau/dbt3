@@ -22,8 +22,22 @@ scale_factor=$1
 num_stream=$2
 output_dir=$3
 
-#estimated dbt3 run time, make it really long, it will be killed at the end
-dbt3_test_time=21607
+clearprof () {
+	sudo /usr/sbin/readprofile -m /boot/System.map -r
+        }
+
+getprof () {
+	sudo /usr/sbin/readprofile -m /boot/System.map -v | sort -grk3,4 > $output_dir/${profname}.prof
+}
+
+#estimated dbt3 run time
+#dbt3_test_time=21607
+if [ $num_stream -eq 8 ]
+then
+	dbt3_test_time=10800
+else
+	dbt3_test_time=10800
+fi
 
 duration=0
 interval=0
@@ -105,6 +119,9 @@ echo "run dbt3 test for scale factor $scale_factor $num_stream streams"
 s_time_dbt3=`$GTIME`
 
 #***load test
+if [ -f /proc/profile ]; then
+        clearprof
+fi
 echo "`date +'%Y-%m-%d %H:%M:%S'` start load test" 
 #get the start time
 s_time=`$GTIME`
@@ -113,6 +130,10 @@ e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` load test end" 
 let "diff_time_load=$e_time-$s_time"
 echo "elapsed time for load test $diff_time_load" 
+if [ -f /proc/profile ]; then
+        profname='load'
+        getprof
+fi
 
 #get run config
 $datacollect_path/get_config.sh $scale_factor $num_stream $output_dir
@@ -132,9 +153,42 @@ $datacollect_sapdb_path/db_stats.sh $SID $output_dir $count $interval &
 i=1
 while [ $i -le 1 ]
 do
-        echo "start performance test $i"
-	$dbdriver_sapdb_path/run_perf_test.sh $scale_factor $i $num_stream
-        let "i=$i+1"
+	echo "`date`:=======performance test $i========"
+	s_time=`$GTIME`
+	echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', timestamp, $s_time)"
+	dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', timestamp, $s_time)"
+
+	#***run power test
+        if [ -f /proc/profile ]; then
+                clearprof
+        fi
+        #execute the power test
+        echo "run power test for scale factor $scale_factor perf_run_number $i"
+        $dbdriver_sapdb_path/run_power_test.sh $scale_factor $i
+
+        if [ -f /proc/profile ]; then
+                profname="power$i"
+                getprof
+        fi
+	
+	#***run throughput test
+        if [ -f /proc/profile ]; then
+                clearprof
+        fi
+        echo "run throughput query for scale factor $scale_factor 
+                perf_run_number $i $num_stream streams"
+	$dbdriver_sapdb_path/run_throughput_test.sh $scale_factor $i $num_stream
+	echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${i}' and int_time=$s_time"
+	dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${i}' and int_time=$s_time"
+	e_time=`$GTIME`
+	echo "`date`: end performance test run ${i} "
+	let "diff_time=$e_time-$s_time"
+	echo "elapsed time for performance test ${i} $diff_time"
+        if [ -f /proc/profile ]; then
+                profname="throughput$i"
+                getprof
+        fi
+	let "i=$i+1"
 done
 
 e_time_dbt3=`$GTIME`
