@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "common.h"
-#include "get_statement.h"
 
 extern struct sql_statement_t sql_statement;
 
