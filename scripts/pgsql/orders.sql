@@ -1,4 +1,4 @@
 truncate orders;
-SET autocommit = false;
+\set AUTOCOMMIT off
 COPY orders FROM '/tmp/orders.tbl' USING DELIMITERS '|';
 commit;

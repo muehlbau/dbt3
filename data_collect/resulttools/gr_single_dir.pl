@@ -141,7 +141,7 @@ elsif ( $options{ 'xrange' } ) {
 }
 else 
 {
-	print "XRange set to Autio\n";
+	print "XRange set to Auto\n";
 }
 
 if ( $yrange ) { $options{ 'yrange' } = $yrange; }
@@ -150,7 +150,7 @@ elsif ( $options{ 'yrange' } ) {
 }
 else 
 {
-	print "YRange set to Autio\n";
+	print "YRange set to Auto\n";
 }
 
 if ( $bstr ) { $options{ 'bstr' } = $bstr; }
@@ -211,6 +211,10 @@ print $fout "set grid xtics ytics\n";
 if ( $yrange ) {
 	print $fout "set yrange [", $yrange, "]\n";
 }
+else
+{
+	print $fout "set yrange [0:]\n";
+}
 if ( $xrange ) {
 	print $fout "set xrange [", $xrange, "]\n";
 }
@@ -256,7 +260,7 @@ if ( $hlabel ) {
 	print $fout "set xlabel \"", $hlabel, "\" \n";
 }
 
-print $fout "set term png medium color\n";
+print $fout "set term png small color\n";
 print $fout "set output \"$outfile.png\" \n";
 print $fout "replot\n";
 $fout->close;

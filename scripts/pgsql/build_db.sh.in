@@ -2,22 +2,34 @@
 #this script is used to build the database
 # ./build_db.sh -g <scale_factor> will generate data and build the database
 # ./build_db.sh will load the database from previously generated data files
+set -x
 
-if [ $# -ne 0 ] # Script invoked with command-line args
-then
-	getopts "g" Option
-	if [ $Option != "g" ]
-		then echo "usage: $0 -g <scale_factor>" 
-		exit 1
-	else
-		if [ $# -ne 2 ]
-			then echo "usage: $0 -g <scale_factor>" 
+#if [ $# -lt 1 ]; then
+#	echo "usage: $0 <db_param> [-g <scale_factor>]"
+#	exit 1
+#fi
+db_param=$1
+shift 1
+
+data_file=0
+redirect_tmp=0
+redirect_xlog=0
+# if with -g, generate data file
+while getopts "r:x:g:" opt; do
+	case $opt in
+		r) redirect_tmp=$OPTARG
+			;;
+		x) redirect_xlog=$OPTARG
+			;;
+		g) SF=$OPTARG
+		   $data_file=1;
+			;;
+		?) echo "Usage: $0 <db_param> [-g <scale_factor> -r <redirect_tmp> -x <redirect_xlog>]"
 			exit 1
-		else
-			SF=$2
-		fi
-	fi
+	esac
+done
 
+if [ $data_file -eq 1 ]; then
 	echo "Generating data... scale factor $SF"
 	cd @TOPDIR@/datagen/dbgen
 	date
@@ -30,16 +42,38 @@ else
 fi
 	echo "drop db"
 	@TOPDIR@/scripts/pgsql/drop_db.sh
+	rm -rf $PGDATA/$SID
 	echo
 	
 	echo "create db"
-	@TOPDIR@/scripts/pgsql/create_db.sh
+	@TOPDIR@/scripts/pgsql/create_db.sh "$db_param"
 	echo
 	
 	echo "create tables"
 	@TOPDIR@/scripts/pgsql/create_tables.sh
 	echo
-	
+
+	if [ $redirect_tmp -eq 1 ]
+	then 
+		@TOPDIR@/scripts/pgsql/stop_db.sh
+		echo "create symbolic links for pgsql_tmp"
+		rm -rf /db_tmp/*
+		@TOPDIR@/scripts/pgsql/ln_pgsql_tmp.sh
+		@TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
+	fi
+	#not sure if I can just remove everything
+	if [ $redirect_xlog -eq 1 ]
+	then 
+		@TOPDIR@/scripts/pgsql/stop_db.sh
+		echo "create symbolic links for pgsql_xlog"
+		rm -rf /db_xlog/*
+		ln -s /db_xlog $PGDATA/pg_xlog_tmp
+		mv $PGDATA/pg_xlog/* $PGDATA/pg_xlog_tmp
+		rm -rf $PGDATA/pg_xlog
+		mv $PGDATA/pg_xlog_tmp $PGDATA/pg_xlog
+		@TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
+	fi
+
 	date
 	echo "start loading db"
 	@TOPDIR@/scripts/pgsql/load_db.sh

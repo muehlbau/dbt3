@@ -14,7 +14,7 @@ set -x
 # History: June-19-2003 Created by Jenny Zhang
 
 if [ $# -lt 3 ]; then
-        echo "usage: dbt3_stats.sh <scale_factor> <num_stream> <output_dir> [-s seed -d duration -i interval]"
+        echo "usage: dbt3_stats.sh <scale_factor> <num_stream> <output_dir> [-s seed -d duration -i interval -e explain_analyze]"
         exit
 fi
 
@@ -36,17 +36,20 @@ perf_test_time=21607
 duration=0
 interval=0
 seed=0
+explain_analyze=0
 shift 3
 # process the command line parameters
-while getopts ":s:d:i:" opt; do
+while getopts "e:s:d:i:" opt; do
 	case $opt in
 		d) duration=$OPTARG
+				;;
+		e) explain_analyze=$OPTARG
 				;;
 		i) interval=$OPTARG
 				;;
 		s) seed=$OPTARG
 				;;
-		?) echo "Usage: $0 <scale_factor> <num_stream> [-d duration -i interval -s seed]"
+		?) echo "Usage: $0 <scale_factor> <num_stream> [-d duration -i interval -s seed -e explain_analyze]"
 			exit ;;
 		esac
 done
@@ -100,10 +103,6 @@ echo "get meminfo0"
 cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
-#start sys_stats.sh
-echo "start sys_stats.sh"
-$datacollect_path/sys_stats.sh $interval $duration $output_dir &
-
 #get run config
 $datacollect_pgsql_path/get_config.sh $scale_factor $num_stream $output_dir
 
@@ -117,7 +116,7 @@ fi
 #get one more count
 let "count=$count+1"
 #get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval &
+$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "perf" &
 
 i=1
 while [ $i -le 1 ]
@@ -128,6 +127,10 @@ do
 	psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', current_timestamp, $s_time)"
 
 	#***run power test
+	#start sys_stats.sh
+	echo "start power_sys_stats.sh"
+	$datacollect_path/power_sys_stats.sh $interval $duration $output_dir &
+
         if [ -f /proc/profile ]; then
                 clearprof
         fi
@@ -140,13 +143,26 @@ do
                 getprof
         fi
 	
+	 #kill the system statistic collector
+        ps -ef | grep -v grep | grep power_sys_stats | awk '{ print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+	#kill ziostat first
+	ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xarg
+
 	#***run throughput test
+	#start sys_stats.sh
+	echo "start thuput_sys_stats.sh"
+	$datacollect_path/thuput_sys_stats.sh $interval $duration $output_dir &
+
         if [ -f /proc/profile ]; then
                 clearprof
         fi
         echo "run throughput query for scale factor $scale_factor 
                 perf_run_number $i $num_stream streams"
-	$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $i $num_stream
+	$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $i $num_stream $explain_analyze
 	echo "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
 	psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
 	e_time=`$GTIME`
@@ -157,6 +173,16 @@ do
                 profname="throughput$i"
                 getprof
         fi
+
+        #kill the system statistic collector
+	ps -ef | grep -v grep | grep thuput_sys_stats | awk '{ print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+	#kill ziostat first
+	ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xargs kill -9
+
 	let "i=$i+1"
 done
 
@@ -165,9 +191,6 @@ echo "`date`: performance test end"
 let "diff_time_dbt3=$e_time_dbt3-$s_time_dbt3"
 echo "elapsed time for performance test $diff_time_dbt3" 
 
-ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
-ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
-ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
 pgrep db_stats.sh | xargs kill -9
 
 #get meminfo

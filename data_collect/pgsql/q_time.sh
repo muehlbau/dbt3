@@ -10,9 +10,9 @@
 #
 if [ $# -eq 1 ];
 then
-	psql -d $SID -U $PGUSER -c "select task_name, s_time, e_time, (e_time-s_time) as diff_time from time_statistics;" -o $1/q_time.out
+	psql -d $SID -U $PGUSER -c "select task_name, s_time, e_time, (e_time-s_time) as diff_time, (extract(hour from (e_time-s_time)) * 3600) + (extract(minute from (e_time-s_time)) * 60) + (extract(second from (e_time-s_time))) as seconds from time_statistics;" -o $1/q_time.out
 else
-	psql -d $SID -U $PGUSER -c "select task_name, s_time, e_time, (e_time-s_time) as diff_time from time_statistics;"
+	psql -d $SID -U $PGUSER -c "select task_name, s_time, e_time, (e_time-s_time) as diff_time, (extract(hour from (e_time-s_time)) * 3600) + (extract(minute from (e_time-s_time)) * 60) + (extract(second from (e_time-s_time))) as seconds from time_statistics;"
 fi
 
 

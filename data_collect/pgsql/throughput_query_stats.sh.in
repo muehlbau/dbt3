@@ -112,7 +112,7 @@ fi
 #get one more count
 let "count=$count+1"
 #get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval &
+$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "thruput_q" &
 
 #execute the query
 echo "run throughput query for scale factor $scale_factor perf_run_number 1 $num_stream streams"

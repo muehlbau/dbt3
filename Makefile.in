@@ -9,3 +9,9 @@ util_exe:
 clean:
 	cd datagen/dbgen; $(MAKE) clean
 	cd dbdriver/utils; $(MAKE) clean
+
+install:
+	chmod +x data_collect/@DATABASE_TO_USE@/*.sh
+	chmod +x scripts/@DATABASE_TO_USE@/*.sh
+	chmod +x dbdriver/scripts/@DATABASE_TO_USE@/*.sh
+	chmod +x dbdriver/scripts/*.pl

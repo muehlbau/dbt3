@@ -105,6 +105,9 @@ if ( $writeme ) {
 my ($thuput_time);
 $thuput_time = `psql -d $SID -U $PGUSER -c "select (e_time-s_time) as diff_time from time_statistics where task_name='PERF$perf_run_number.THRUPUT';"|grep -v row | grep -v diff`;
 $thuput_time =~ s/-*//;
+print "thuput_time is ", $thuput_time, "\n";
+$thuput_time =~ s/\n//;
+$thuput_time =~ s/^\s//;
 chop($thuput_time);
 $throughput_time=convert_to_seconds($thuput_time);
 

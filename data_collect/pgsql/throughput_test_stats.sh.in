@@ -11,7 +11,7 @@
 # History: June-17-2003 Create by Jenny Zhang
 
 if [ $# -lt 3 ]; then
-        echo "usage: throughput_test_stats.sh <scale_factor> <num_stream> <output_dir> [-s seed -d duration -i interval]"
+        echo "usage: throughput_test_stats.sh <scale_factor> <num_stream> <output_dir> [-s seed -d duration -i interval -e explain_analyze]"
         exit
 fi
 
@@ -22,17 +22,20 @@ output_dir=$3
 duration=0
 interval=0
 seed=0
+explain_analyze=0
 shift 3
 # process the command line parameters
-while getopts ":d:i:" opt; do
+while getopts "d:e:i:s:" opt; do
 	case $opt in
+		e) explain_analyze=$OPTARG
+				;;
 		s) seed=$OPTARG
 				;;
 		d) duration=$OPTARG
 				;;
 		i) interval=$OPTARG
 				;;
-		?) echo "Usage: $0 <scale_factor> <num_stream> [-s seed -d duration -i interval]"
+		?) echo "Usage: $0 <scale_factor> <num_stream> [-s seed -d duration -i interval -e explain_analyze]"
 			exit ;;
 		esac
 done
@@ -95,8 +98,8 @@ $datacollect_pgsql_path/get_config.sh $scale_factor $num_stream $output_dir
 cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
-#start sys_stats.sh
-$datacollect_path/sys_stats.sh $interval $duration $output_dir &
+#start thuput_sys_stats.sh
+$datacollect_path/thuput_sys_stats.sh $interval $duration $output_dir &
 
 #calculate count
 let "count=$duration/$interval"
@@ -108,11 +111,11 @@ fi
 #get one more count
 let "count=$count+1"
 #get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval &
+$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "thuput" &
 
 #execute the query
 echo "run throughput test for scale factor $scale_factor perf_run_number 1"
-$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor 1 $num_stream
+$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor 1 $num_stream $explain_analyze
 
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
@@ -132,7 +135,10 @@ cp $run_path/*param* $output_dir/
 
 mv $datacollect_pgsql_path/thuput.out $output_dir/
 
+ps -ef | grep -v grep | grep thuput_sys_stats | awk '{ print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xargs kill -9
 pgrep db_stats.sh | xargs kill -9

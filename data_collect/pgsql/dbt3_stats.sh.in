@@ -12,14 +12,18 @@
 # Author: Jenny Zhang
 # March 2003
 
-if [ $# -lt 3 ]; then
-        echo "usage: dbt3_stats.sh <scale_factor> <num_stream> <output_dir> [-s seed -d duration -i interval]"
+if [ $# -lt 6 ]; then
+        echo "usage: $0 <scale_factor> <num_stream> <redirect_tmp> <redirect_xlog> <db_param> <output_dir> [-s seed -d duration -i interval -e explain_analyze -u for_stp -o use_oprofile]"
         exit
 fi
 
 scale_factor=$1
 num_stream=$2
-output_dir=$3
+redirect_tmp=$3
+redirect_xlog=$4
+db_param=$5
+output_dir=$6
+oprofile_output_dir=$output_dir/oprofile
 
 clearprof () {
 	sudo /usr/sbin/readprofile -m /boot/System.map -r
@@ -29,23 +33,54 @@ getprof () {
 	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $output_dir/${profname}.prof
 }
 
+clearoprof () {
+	sudo opcontrol --vmlinux=/boot/vmlinux
+	sleep 2
+	sudo opcontrol --start-daemon
+	sleep 2
+	sudo opcontrol --start
+	sleep 2
+	# If opcontrol ever gets stuck here, sometimes it helps to remove
+	# everything in this dir:
+	# /var/lib/oprofile
+	sudo opcontrol --reset
+}
+
+getoprof () {
+	mkdir -p $oprofile_output_dir/${profname}/annotate
+	sudo opcontrol --dump
+	sudo opreport -l -o $oprofile_output_dir/${profname}/oprofile.txt
+	sudo opcontrol --stop
+	cp -pR /var/lib/oprofile/samples/current $oprofile_output_dir/${profname}/
+	sudo opannotate --source --assembly > $oprofile_output_dir/${profname}/assembly.txt 2>&1
+	sudo opannotate --source --output-dir=$oprofile_output_dir/${profname}/annotate
+}
+
 #estimated dbt3 run time
-dbt3_test_time=21607
+dbt3_test_time=24000
 
 duration=0
 interval=0
 seed=0
-shift 3
+explain_analyze=0
+for_stp=0
+shift 6
 # process the command line parameters
-while getopts ":s:d:i:" opt; do
+while getopts "e:s:d:i:u:o:" opt; do
 	case $opt in
 		d) duration=$OPTARG
+				;;
+		e) explain_analyze=$OPTARG
 				;;
 		i) interval=$OPTARG
 				;;
 		s) seed=$OPTARG
 				;;
-		?) echo "Usage: $0 <scale_factor> <num_stream> [-d duration -i interval -s seed]"
+		u) for_stp=$OPTARG
+				;;
+		o) use_oprofile=$OPTARG
+				;;
+		?) echo "Usage: $0 <scale_factor> <num_stream> [-d duration -i interval -s seed -e explain_analyze -u for_stp -o use_oprofile]"
 			exit ;;
 		esac
 done
@@ -60,7 +95,12 @@ datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
 GTIME="@TOPDIR@/dbdriver/utils/gtime"
 
 #clean run dir
-rm $run_path/*
+if [ -d $run_path ]; then
+	rm $run_path/*
+else
+	mkdir $run_path
+	chown -R pgsql:pgsql $run_path
+fi
 
 #set run environment
 . @TOPDIR@/scripts/pgsql/set_run_env.sh
@@ -96,50 +136,112 @@ done
 #make output directory
 echo "make output dir"
 mkdir -p $output_dir
+if [ $for_stp -eq 0 ] 
+then
+mkdir -p $oprofile_output_dir
+fi
 
 #get meminfo
 echo "get meminfo0"
 cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
-#start sys_stats.sh
-echo "start sys_stats.sh"
-$datacollect_path/sys_stats.sh $interval $duration $output_dir &
-
+# Get /etc/mtab just to make sure partitions are mounted where we think they
+# should be.
+cp -p /etc/mtab $output_dir/mtab
 
 #execute the query
 echo "run dbt3 test for scale factor $scale_factor $num_stream streams"
-
 
 #get time stamp
 s_time_dbt3=`$GTIME`
 
 #***load test
-if [ -f /proc/profile ]; then
-        clearprof
+#start load_sys_stats.sh
+echo "start sys_stats.sh"
+
+$datacollect_path/load_sys_stats.sh $interval $duration $output_dir &
+
+if [ $for_stp -eq 1 ]; then
+	stp_profile "before load test"
+else
+	if [ -f /proc/profile ]; then
+        	clearprof
+	fi
 fi
+
+# OProfile
+if [ $use_oprofile -eq 1 ]; then
+	if [ $for_stp -eq 1 ]; then
+		# setup oprofile
+		. /usr/bin/stp_include.sh
+		. /usr/bin/stp_oprofile.sh
+		setup_oprofile
+		start_oprofile
+	else
+		if [ -d /dev/oprofile ]; then
+			clearoprof
+		fi
+	fi
+fi
+
 echo "`date +'%Y-%m-%d %H:%M:%S'` start load test" 
 #get the start time
 s_time=`$GTIME`
-$pgsql_script_path/build_db.sh
+if [ $for_stp -eq 1 ]; then
+	su --command="$pgsql_script_path/build_db.sh \"$db_param\" -r $redirect_tmp -x $redirect_xlog 2>&1 | tee $output_dir/builddb.log" pgsql
+else
+	$pgsql_script_path/build_db.sh "$db_param" -r $redirect_tmp -x $redirect_xlog 2>&1 | tee $output_dir/builddb.log
+fi
+
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` load test end" 
 let "diff_time_load=$e_time-$s_time"
 echo "elapsed time for load test $diff_time_load" 
-if [ -f /proc/profile ]; then
-        profname='load'
-        getprof
+
+if [ $for_stp -eq 1 ]; then
+	stp_profile "after load test"
+else
+	if [ -f /proc/profile ]; then
+		profname='load'
+		getprof
+	fi
 fi
 
-#create symbolic links for pgsql_tmp
-#echo "create symbolic links for pgsql_tmp"
-#$datacollect_pgsql_path/ln_pgsql_tmp.sh
+if [ $use_oprofile -eq 1 ]; then
+	if [ $for_stp -eq 1 ]; then
+		mark_oprofile "load"
+	else
+		if [ -d /dev/oprofile ]; then
+			profname='load'
+			getoprof
+		fi
+	fi
+fi
+
+#check if database build is successful
+builderr=`cat $output_dir/builddb.log | grep -i fail | grep -v 'database removal failed'`
+if [ "$builderr" != "" ]; then
+	echo "build $SID failed, check database log"
+	exit 1
+fi
+
+psql $SID -c "select * from pg_stats" -o $output_dir/pg_stats.txt
+
+#kill the system statistic collector
+ps -ef | grep -v grep | grep load_sys_stats | awk '{ print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+#kill ziostat first
+ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9 
+ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xargs kill -9
 
 #get execution plan
 $dbdriver_pgsql_path/explain_power_query.sh $scale_factor $output_dir
 
 #get run config
-$datacollect_pgsql_path/get_config.sh $scale_factor $num_stream $output_dir
+$datacollect_pgsql_path/get_config.sh $scale_factor $num_stream $redirect_tmp $redirect_xlog "$db_param" $output_dir
 
 #calculate count 
 let "count=($duration-$diff_time_load)/$interval"
@@ -150,47 +252,160 @@ fi
 
 #get one more count
 let "count=$count+1"
-#get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval &
 
 i=1
 while [ $i -le 1 ]
 do
 	echo "`date`:=======performance test $i========"
+
+	if [ $for_stp -eq 1 ]; then
+		su --command="$pgsql_script_path/stop_db.sh" pgsql
+		su --command="$pgsql_script_path/start_db.sh \"$db_param\"" pgsql
+	else
+		$pgsql_script_path/stop_db.sh
+		$pgsql_script_path/start_db.sh "$db_param"
+	fi
+
 	s_time=`$GTIME`
 	echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', current_timestamp, $s_time)"
 	psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', current_timestamp, $s_time)"
 
 	#***run power test
-        if [ -f /proc/profile ]; then
-                clearprof
+
+	echo "start power_sys_stats.sh"
+	$datacollect_path/power_sys_stats.sh $interval $duration $output_dir &
+	#get database statistics
+	$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "power" &
+
+
+	if [ $for_stp -eq 1 ]; then
+		stp_profile "before power test"
+	else
+		if [ -f /proc/profile ]; then
+                	clearprof
+        	fi
+	fi
+
+	if [ $use_oprofile -eq 1 ]; then
+		if [ $for_stp -eq 0 ]; then
+			if [ -d /dev/oprofile ]; then
+				clearoprof
+			fi
+		fi
         fi
+
         #execute the power test
         echo "run power test for scale factor $scale_factor perf_run_number $i"
-        $dbdriver_pgsql_path/run_power_test.sh $scale_factor $i
+	if [ $for_stp -eq 1 ]; then
+		su --command="$dbdriver_pgsql_path/run_power_test.sh $scale_factor $i $explain_analyze" pgsql
+	else
+		$dbdriver_pgsql_path/run_power_test.sh $scale_factor $i $explain_analyze
+	fi
 
-        if [ -f /proc/profile ]; then
-                profname="power$i"
-                getprof
+	if [ $for_stp -eq 1 ]; then
+		stp_profile "after power test"
+	else
+		if [ -f /proc/profile ]; then
+			profname="power$i"
+			getprof
+		fi
+	fi
+
+	if [ $use_oprofile -eq 1 ]; then
+		if [ $for_stp -eq 1 ]; then
+			mark_oprofile "power$i"
+		else
+			if [ -d /dev/oprofile ]; then
+				profname="power$i"
+				getoprof
+			fi
+		fi
         fi
+
+	#kill the system statistic collector
+        ps -ef | grep -v grep | grep power_sys_stats | awk '{ print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+	#kill ziostat first
+	ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xargs kill -9
+	pgrep db_stats.sh | xargs kill -9
 	
 	#***run throughput test
-        if [ -f /proc/profile ]; then
-                clearprof
+	if [ $for_stp -eq 1 ]; then
+		su --command="$pgsql_script_path/stop_db.sh" pgsql
+		su --command="$pgsql_script_path/start_db.sh \"$db_param\"" pgsql
+	else
+		$pgsql_script_path/stop_db.sh
+		$pgsql_script_path/start_db.sh "$db_param"
+	fi
+
+	echo "start thuput_sys_stats.sh"
+	$datacollect_path/thuput_sys_stats.sh $interval $duration $output_dir &
+	#get database statistics
+	$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "thruput" &
+
+	if [ $for_stp -eq 1 ]; then
+		stp_profile "before throughput test $i"
+	else
+		if [ -f /proc/profile ]; then
+			clearprof
+		fi
+	fi
+
+	if [ $use_oprofile -eq 1 ]; then
+		if [ $for_stp -eq 0 ]; then
+			if [ -d /dev/oprofile ]; then
+				clearoprof
+			fi
+		fi
         fi
+
         echo "run throughput query for scale factor $scale_factor 
                 perf_run_number $i $num_stream streams"
-	$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $i $num_stream
+	if [ $for_stp -eq 1 ]; then
+		su --command="$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $i $num_stream $explain_analyze" pgsql
+	else
+		$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $i $num_stream $explain_analyze
+	fi
+
 	echo "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
 	psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
 	e_time=`$GTIME`
 	echo "`date`: end performance test run ${i} "
 	let "diff_time=$e_time-$s_time"
 	echo "elapsed time for performance test ${i} $diff_time"
-        if [ -f /proc/profile ]; then
-                profname="throughput$i"
-                getprof
-        fi
+
+	if [ $for_stp -eq 1 ]; then
+		stp_profile "after throughput test $i"
+	else
+		if [ -f /proc/profile ]; then
+			profname="throughput$i"
+			getprof
+		fi
+	fi
+
+	if [ $use_oprofile -eq 1 ]; then
+		if [ $for_stp -eq 1 ]; then
+			mark_oprofile "throughput$i"
+		else
+			if [ -d /dev/oprofile ]; then
+				profname="throughput$i"
+				getoprof
+			fi
+		fi
+	fi
+
+	#kill the system statistic collector
+	ps -ef | grep -v grep | grep thuput_sys_stats | awk '{ print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+	#kill ziostat first
+	ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xargs kill -9
+	pgrep db_stats.sh | xargs kill -9
 	let "i=$i+1"
 done
 
@@ -198,11 +413,6 @@ e_time_dbt3=`$GTIME`
 echo "`date`: dbt3 test end" 
 let "diff_time_dbt3=$e_time_dbt3-$s_time_dbt3"
 echo "elapsed time for dbt3 test $diff_time_dbt3" 
-
-ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
-ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
-ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
-pgrep db_stats.sh | xargs kill -9
 
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
@@ -212,6 +422,28 @@ $datacollect_pgsql_path/q_time.sh > $output_dir/q_time.out
 
 #calculate composite power
 $dbdriver_script_path/get_composite.pl -p 1 -s $scale_factor -n $num_stream -o $output_dir/calc_composite.out
+
+# Stop the database.
+if [ $for_stp -eq 1 ]; then
+	su --command="$pgsql_script_path/stop_db.sh" pgsql
+else
+	$pgsql_script_path/stop_db.sh
+fi
+
+if [ $use_oprofile -eq 1 ]; then
+	if [ $for_stp -eq 1 ]; then
+		report_kern_oprofile "load"
+		report_all_oprofile "load"
+		report_ass_oprofile "load"
+		report_kern_oprofile "power1"
+		report_all_oprofile "power1"
+		report_ass_oprofile "power1"
+		report_kern_oprofile "throughput1"
+		report_all_oprofile "throughput1"
+		report_ass_oprofile "throughput1"
+		stop_oprofile
+	fi
+fi
 
 #copy dbt3.out
 mv $datacollect_pgsql_path/dbt3.out $output_dir/dbt3.out
@@ -223,4 +455,8 @@ cp $run_path/thuput_qs*.result $output_dir/
 cp $run_path/tmp_throughput_query*.sql $output_dir/
 cp $run_path/power_query $output_dir/
 cp $run_path/refresh_stream* $output_dir/
-cp $run_path/*param* $output_dir/
+cp $run_path/power_param* $output_dir/
+cp $run_path/throughput_param* $output_dir/
+mv $run_path/plan $output_dir
+mv $run_path/db_logfile.txt $output_dir
+chmod 644 $output_dir/db_logfile.txt

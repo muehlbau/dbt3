@@ -9,4 +9,5 @@ int main()
 	
 	gettimeofday(&tp, NULL);
 	printf("%ld\n", tp.tv_sec);
+	return 1;
 }

@@ -1,3 +1,4 @@
-echo "restore db"
-./define_medium.sh
-pg_restore -v Fc -a -d $SID1 $SID1_BACKUP
+echo "recover db"
+pg_restore -v Fc -a -d $SID $DBT3_BACKUP
+echo
+

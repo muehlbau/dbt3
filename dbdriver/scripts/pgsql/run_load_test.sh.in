@@ -10,12 +10,15 @@
 #
 #!/bin/sh
 
-if [ $# -lt 1 ]; then
-        echo "Usage: ./run_load_test.sh <scale_factor>"
+if [ $# -lt 4 ]; then
+        echo "Usage: $0 <scale_factor> <db_param> <redirect_tmp> <redirect_xlog>"
         exit
 fi
 
 scale_factor=$1
+db_param=$2
+redirect_tmp=1
+redirect_xlog=1
 
 GTIME="@TOPDIR@/dbdriver/utils/gtime"
 
@@ -23,7 +26,7 @@ GTIME="@TOPDIR@/dbdriver/utils/gtime"
 echo "`date +'%Y-%m-%d %H:%M:%S'` start load test" 
 #get the start time
 s_time=`$GTIME`
-@TOPDIR@/scripts/pgsql/build_db.sh > @TOPDIR@/run/build_db.log
+@TOPDIR@/scripts/pgsql/build_db.sh "$db_param" -r $redirect_tmp -x $redirect_xlog > @TOPDIR@/run/build_db.log
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` load test end" 
 let "diff_time=$e_time-$s_time"

@@ -57,7 +57,7 @@ datacollect_path=@TOPDIR@/data_collect
 datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
 
 #set run environment
-. @TOPDIR@/scripts/set_run_env.sh
+. @TOPDIR@/scripts/pgsql/set_run_env.sh
 
 #make output directory
 output_dir=q$query_num
@@ -81,7 +81,7 @@ cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
 # clean time_statistics
-psql -d $SID -U dbt -c "delete from time_statistics;"
+psql -d $SID -U $PGUSER -c "delete from time_statistics;"
 
 #start sys_stats.sh
 $datacollect_path/sys_stats.sh $interval $duration $output_dir &
@@ -95,7 +95,7 @@ fi
 #get one more count
 let "count=$count+1"
 #get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval &
+$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "single" &
 
 #execute the query
 echo "$dbdriver_pgsql_path/run_single_query.sh $scale_factor $query_num $output_dir"

@@ -10,19 +10,20 @@
 #
 #!/bin/sh
 
-if [ $# -lt 2 ]; then
-        echo "Usage: ./run_dbt3.sh <scale_factor> <num_stream> [seed]"
+if [ $# -lt 3 ]; then
+        echo "Usage: $0 <scale_factor> <num_stream> <db_param> [seed]"
         exit
 fi
 
 scale_factor=$1
 num_stream=$2
+db_param=$3
 run_dir="@TOPDIR@/run"
 seed_file="$run_dir/seed"
 dbdriver_pgsql_path="@TOPDIR@/dbdriver/scripts/pgsql"
 pgsql_path="@TOPDIR@/scripts/pgsql"
 
-if [ $# -eq 3 ]; then
+if [ $# -eq 4 ]; then
 	echo "running $SID with seed $3"
 	echo "$3" > $seed_file
 else
@@ -40,7 +41,7 @@ s_time_dbt3=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` start load test" 
 #get the start time
 s_time=`$GTIME`
-$pgsql_path/build_db.sh
+$pgsql_path/build_db.sh "$db_param"
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` load test end" 
 let "diff_time_load=$e_time-$s_time"

@@ -62,6 +62,7 @@ fi
 #iostat
 echo "start iostat"
 iostat -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
+iostat -x -d $INTERVAL $COUNT >> $RESULTS_PATH/iostatx.txt &
 # collect vmstat 
 echo "start vmstat"
 echo "vmstat $INTERVAL $COUNT" > $RESULTS_PATH/vmstat.out

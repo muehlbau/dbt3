@@ -21,7 +21,7 @@ DATABASE_TO_USE="pgsql"
 SEPARATOR_FOR_DB="|"
 AC_ARG_WITH(postgres,
 	[  --with-postgresql default],
-	[ DATABASE_TO_USE="pgsql" SEPARATOR_FOR_DB="|"])
+	[ DATABASE_TO_USE="pgsql" SEPARATOR_FOR_DB="|" ])
 AC_ARG_WITH(sapdb,
 	[  --with-sapdb],
 	[DATABASE_TO_USE="sapdb" SEPARATOR_FOR_DB=","])

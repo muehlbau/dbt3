@@ -1,13 +1,14 @@
 #!/bin/sh
 
-if [ $# -ne 4 ]; then
-	echo "usage: db_stats.sh <database_name> <output_dir> <iterations> <interval>"
-	exit
+if [ $# -ne 5 ]; then
+	echo "usage: db_stats.sh <database_name> <output_dir> <iterations> <interval> <phase>"
+	exit 1
 fi
 
 OUTPUT_DIR=$2
 ITERATIONS=$3
 SAMPLE_LENGTH=$4
+PHASE=$5
 
 COUNTER=0
 
@@ -17,11 +18,11 @@ echo "the database statistics is taken at $SAMPLE_LENGTH interval and $ITERATION
 #echo >> $OUTPUT_DIR/readme.txt
 
 # save the database parameters
-psql -d $SID -U $PGUSER -c "show all"  > $OUTPUT_DIR/param.out
+psql -d $SID -U $PGUSER -c "show all"  > $OUTPUT_DIR/$PHASE.param.out
 
 #record indexes
 echo "collect index and key infomation"
-psql -d $SID -U $PGUSER -c "select * from pg_stat_user_indexes;" -o $OUTPUT_DIR/indexes.out
+psql -d $SID -U $PGUSER -c "select * from pg_stat_user_indexes;" -o $OUTPUT_DIR/$PHASE.indexes.out
 
 mkdir -p $OUTPUT_DIR/db_stat
 mkdir -p $OUTPUT_DIR/ipcs
@@ -34,22 +35,22 @@ date
 echo "starting database statistics collection iteration $ITERATIONS"
 while [ $COUNTER -lt $ITERATIONS ]; do
 	# collent ipcs stats
-        ipcs >> $OUTPUT_DIR/ipcs/ipcs${COUNTER}.out
+        ipcs >> $OUTPUT_DIR/ipcs/$PHASE.ipcs${COUNTER}.out
 
 	# check lock statistics
-	psql -d $SID -U $PGUSER -c "select relname,pid, mode, granted from pg_locks, pg_class where relfilenode = relation;" -o  $OUTPUT_DIR/db_stat/lockstats${COUNTER}.out
-	psql -d $SID -U $PGUSER -c "select * from pg_locks where transaction is not NULL;" -o $OUTPUT_DIR/db_stat/tran_lock${COUNTER}.out
+	psql -d $SID -c "SELECT relname,pid, mode, granted FROM pg_locks, pg_class WHERE relfilenode = relation;" >> $OUTPUT_DIR/db_stat/$PHASE.lockstats.out
+	psql -d $SID -c "SELECT * FROM pg_locks WHERE transaction IS NOT NULL;" >> $OUTPUT_DIR/db_stat/$PHASE.tran_lock.out
 
 	# read the database activity table
-	psql -d $SID -U $PGUSER -c "select * from pg_stat_activity;" -o $OUTPUT_DIR/db_stat/db_activity${COUNTER}.out
+	psql -d $SID -c "SELECT * FROM pg_stat_activity;" >> $OUTPUT_DIR/db_stat/$PHASE.db_activity.out
 	# database load
-	psql -d $SID -U $PGUSER -c "select * from pg_stat_database where datname='DBT3';" -o $OUTPUT_DIR/db_stat/db_load${COUNTER}.out
+	psql -d $SID -c "SELECT * FROM pg_stat_database WHERE datname ='dbt2';" >> $OUTPUT_DIR/db_stat/$PHASE.db_load.out
 	# table info
-	psql -d $SID -U $PGUSER -c "select relid, relname, heap_blks_read, heap_blks_hit, idx_blks_read, idx_blks_hit from pg_statio_user_tables;" -o $OUTPUT_DIR/db_stat/table_info${COUNTER}.out
-	psql -d $SID -U $PGUSER -c "select  relid, indexrelid, relname, indexrelname, idx_blks_read, idx_blks_hit from pg_statio_user_indexes;" -o $OUTPUT_DIR/db_stat/index_info${COUNTER}.out
+	psql -d $SID -c "SELECT relid, relname, heap_blks_read, heap_blks_hit, idx_blks_read, idx_blks_hit FROM pg_statio_user_tables;" >> $OUTPUT_DIR/db_stat/$PHASE.table_info.out
+	psql -d $SID -c "SELECT relid, indexrelid, relname, indexrelname, idx_blks_read, idx_blks_hit FROM pg_statio_user_indexes;" >> $OUTPUT_DIR/db_stat/$PHASE.index_info.out
 	# scans 
-	psql -d $SID -U $PGUSER -c "select * from pg_stat_user_tables;" -o $OUTPUT_DIR/db_stat/table_scan${COUNTER}.out
-	psql -d $SID -U $PGUSER -c "select * from pg_stat_user_indexes;" -o $OUTPUT_DIR/db_stat/indexes_scan${COUNTER}.out
+	psql -d $SID -c "SELECT * FROM pg_stat_user_tables;" >> $OUTPUT_DIR/db_stat/$PHASE.table_scan.out
+	psql -d $SID -c "SELECT * FROM pg_stat_user_indexes;" >> $OUTPUT_DIR/db_stat/$PHASE.indexes_scan.out
 	let "COUNTER=$COUNTER+1"
 	sleep $SAMPLE_LENGTH
 done

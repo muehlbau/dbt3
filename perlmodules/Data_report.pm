@@ -169,7 +169,7 @@ The output format can be cvs or gnuplot data
 sub extract_columns_rows
 {
 	my ( $infile, $outfile, $key, $comment_key, $comment, $format, @column ) = @_;
-	my ($finput, $foutput, @data, $comment_flag, $lcnt, $sum); 
+	my ($finput, $foutput, @data, $comment_flag, $lcnt, $sum, $first_line); 
 	
 	$finput = new FileHandle;		
 	unless ( $finput->open( "< $infile" ) ) 
@@ -182,6 +182,7 @@ sub extract_columns_rows
 	$comment_flag = 0;
 	$lcnt = 0;
 	$sum = 0;
+	$first_line = 1;
 	if ( $comment )
 	{
 		print $foutput "# $comment\n";
@@ -213,6 +214,12 @@ sub extract_columns_rows
 			}
 			if ( $data[0] =~ /^$key$/ )
 			{
+				if ( $first_line )
+				{
+					$first_line = 0;
+					next;
+				}
+
 				for (my $i=0; $i<$#column; $i++)
 				{
 					print $foutput "$data[$column[$i]],";
@@ -242,6 +249,11 @@ sub extract_columns_rows
 			}
 			if ( $data[0] =~ /^$key$/ )
 			{
+				if ( $first_line )
+				{
+					$first_line = 0;
+					next;
+				}
 				print $foutput "$lcnt ";
 				for (my $i=0; $i<$#column; $i++)
 				{
@@ -261,13 +273,6 @@ sub extract_columns_rows
 	}
 	close($finput);
 	close($foutput);
-
-	# if there is no data, remove this file
-	if ( $sum == 0 )
-	{
-		print "data is all zero\n";
-		unlink( $outfile );
-	}
 }
 
 
@@ -602,13 +607,31 @@ sub convert_to_seconds
 	my ($input_time, $output_time) = @_;
 	
 	# get execution time for the throughput test
-	my @time_fields;
+	my (@day_fields, @time_fields);
+	# the format is '2 days 22:07:30.292698'
+	chop($input_time);
+	if ( $input_time =~ /days/ )
+	{
+		@day_fields=split / /, $input_time;
+		$input_time =~ s/(\d+) days //;
+		if ( $day_fields[0] ne "")
+		{
+			#print "day fields is ", $day_fields[0];
+			$output_time = 24*$day_fields[0]*60*60;
+		}
+	}
+
 	@time_fields=split /:/, $input_time;
 	# chop the miliseconds
 	$time_fields[$#time_fields] =~ s/\..*//;
 	$output_time = 0;
 
-	$output_time = 60*60*$time_fields[0];
+	#if ( $day_fields[0] ne "") 
+	#{ 
+		#print "day fields is ", $day_fields[0];  
+	#	$output_time = 24*$day_fields[0]*60*60;
+	#}
+	$output_time += 60*60*$time_fields[0];
 	$output_time += 60*$time_fields[1];
 	$output_time += $time_fields[2];
 

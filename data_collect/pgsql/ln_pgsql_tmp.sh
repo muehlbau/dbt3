@@ -9,5 +9,6 @@ do
 	dbdir=$i
 done
 
+rm -rf /db_tmp/*
 rm -rf $dbdir/pgsql_tmp
-ln -s /dbt3_tmp/dbt3 $dbdir/pgsql_tmp
+ln -s /db_tmp $dbdir/pgsql_tmp

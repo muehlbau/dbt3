@@ -61,6 +61,7 @@ dbdriver_pgsql_path=@TOPDIR@/dbdriver/scripts/pgsql
 datacollect_path=@TOPDIR@/data_collect
 datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
 run_path=@TOPDIR@/run
+seed_file=$run_path/seed
 
 #set run environment
 . @TOPDIR@/scripts/pgsql/set_run_env.sh
@@ -96,8 +97,8 @@ sleep 2
 #get run configuration
 $datacollect_pgsql_path/get_config.sh $scale_factor 1 $output_dir
 
-#start sys_stats.sh
-$datacollect_path/sys_stats.sh $interval $duration $output_dir &
+#start power_sys_stats.sh
+$datacollect_path/power_sys_stats.sh $interval $duration $output_dir &
 
 #calculate count
 let "count=$duration/$interval"
@@ -109,7 +110,7 @@ fi
 #get one more count
 let "count=$count+1"
 #get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval &
+$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "power" &
 
 #execute the query
 echo "run power test for scale factor $scale_factor perf_run_number 1"
@@ -130,7 +131,10 @@ cp $run_path/power_query $output_dir/
 cp $run_path/*param* $output_dir/
 mv $datacollect_pgsql_path/power.out $output_dir/power.out
 
+ps -ef | grep -v grep | grep power_sys_stats | awk '{ print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep sleep | awk '{ print $2}' | xarg kill -9
 pgrep db_stats.sh | xargs kill -9

@@ -13,7 +13,6 @@ export DSS_PATH=/dbt3_data
 export DSS_CONFIG=@TOPDIR@/datagen/dbgen
 export SID=DBT3
 export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
-export DBT3_BACKUP=/dbt3_backup/dbt3.bak
 export PATH=/usr/local/pgsql/bin:$PATH
 export PGDATA=/dbt3/pgsql
 export PGUSER=pgsql

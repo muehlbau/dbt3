@@ -1,4 +1,4 @@
 truncate supplier;
-SET autocommit = false;
+\set AUTOCOMMIT off
 COPY supplier FROM '/tmp/supplier.tbl' USING DELIMITERS '|';
 commit;

@@ -1,4 +1,4 @@
 truncate nation;
-SET autocommit = false;
+\set AUTOCOMMIT off
 COPY nation FROM '/tmp/nation.tbl' USING DELIMITERS '|';
 commit;

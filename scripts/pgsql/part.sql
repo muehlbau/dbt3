@@ -1,4 +1,4 @@
 truncate part;
-SET autocommit = false;
+\set AUTOCOMMIT off
 COPY part FROM '/tmp/part.tbl' USING DELIMITERS '|';
 commit;

@@ -10,22 +10,34 @@
 #
 #!/bin/sh
 
-if [ $# -ne 2 ]; then
-        echo "Usage: ./run_power_test.sh <scale_factor> <perf_run_number>"
+if [ $# -ne 3 ]; then
+        echo "Usage: ./run_power_test.sh <scale_factor> <perf_run_number> <0/1 - explain analyze off/on>"
         exit
 fi
 
 scale_factor=$1
 perf_run_num=$2
+explain_analyze=$3
+
 qgen_dir="@TOPDIR@/datagen/dbgen"
 run_dir="@TOPDIR@/run"
-seed_file="@TOPDIR@/seed"
 query_file="$run_dir/power_query"
 tmp_query_file="$run_dir/tmp_query.sql"
 param_file="$run_dir/power_param"
 dbdriver_pgsql_path="@TOPDIR@/dbdriver/scripts/pgsql"
 
 GTIME="@TOPDIR@/dbdriver/utils/gtime"
+
+# get the execution plan for each query
+mkdir -p $run_dir/plan
+i=1
+while [ $i -le 22 ]
+do
+	if [ $i -ne 15 ]; then
+		$dbdriver_pgsql_path/explain_single_query.sh $scale_factor $i $run_dir/plan/power_query$i.txt
+	fi
+	let "i=$i+1"
+done
 
 echo "`date`: =======power test $perf_run_num========"
 
@@ -48,7 +60,7 @@ let "diff_time=$e_time-$s_time"
 echo "elapsed time for rf1 $diff_time" 
 
 #run the queries
-$dbdriver_pgsql_path/run_power_query.sh $scale_factor $perf_run_num
+$dbdriver_pgsql_path/run_power_query.sh $scale_factor $perf_run_num $explain_analyze
 
 #get the start time
 echo "`date`: start rf2 " 

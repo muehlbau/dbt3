@@ -105,6 +105,8 @@ for ($i=1; $i<=2; $i++)
 {
 	$tmp_power_refresh[$i] = `psql -d $SID -U $PGUSER -c "select (e_time-s_time) as diff_time from time_statistics where task_name='PERF$perf_run_number.POWER.RF$i';"|grep -v row|grep -v diff`;
 	$tmp_power_refresh[$i] =~ s/-*//;
+	$tmp_power_refresh[$i] =~ s/\n//;
+	$tmp_power_refresh[$i] =~ s/^\s//;
 	chop($tmp_power_refresh[$i]);
 	$power_refresh[$i]=convert_to_seconds($tmp_power_refresh[$i]);
 	# in case the refresh functions finished within 1 second

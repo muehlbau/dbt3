@@ -9,25 +9,32 @@
 #
 # History: June-19-2003 Created by Jenny Zhang
 
-if [ $# -lt 2 ]; then
-        echo "usage: load_test_stats.sh <scale_factor> <output_dir> [-d duration -i interval]"
+if [ $# -lt 3 ]; then
+        echo "usage: $0 <scale_factor> <db_param> <output_dir> [-d duration -i interval -r redirect_tmp -x redirect_xlog]"
         exit
 fi
 
 scale_factor=$1
-output_dir=$2
+db_param=$2
+output_dir=$3
 
 duration=0
 interval=0
+redirect_tmp=0
+redirect_xlog=0
 shift 2
 # process the command line parameters
-while getopts ":d:i:" opt; do
+while getopts ":d:i:r:x:" opt; do
 	case $opt in
 		d) duration=$OPTARG
 				;;
 		i) interval=$OPTARG
 				;;
-		?) echo "Usage: $0 <scale_factor> [-d duration -i interval]"
+		r) redirect_tmp=$OPTARG
+				;;
+		x) redirect_xlog=$OPTARG
+				;;
+		?) echo "Usage: $0 <scale_factor> [-d duration -i interval -r redirect_tmp -x redirect_xlog]"
 			exit ;;
 		esac
 done
@@ -70,11 +77,11 @@ sleep 2
 $datacollect_pgsql_path/get_config.sh $scale_factor 1 $output_dir
 
 #start sys_stats.sh
-$datacollect_path/sys_stats.sh $interval $duration $output_dir &
+$datacollect_path/load_sys_stats.sh $interval $duration $output_dir &
 
 #call the load script
 echo "run load test for scale factor $scale_factor"
-$dbdriver_pgsql_path/run_load_test.sh $scale_factor
+$dbdriver_pgsql_path/run_load_test.sh $scale_factor "$db_param" $redirect_tmp $redirect_xlog
 
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
@@ -83,6 +90,6 @@ cat /proc/meminfo > $output_dir/meminfo1.out
 mv $run_path/build_db.log $output_dir/build_db.out.txt
 
 ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
-pgrep db_stats.sh | xargs kill -9

@@ -3,7 +3,6 @@
 -- Functional Query Definition
 -- Approved February 1998
 :b
-:x
 create view revenue:s (supplier_no, total_revenue) as
 	select
 		l_suppkey,
@@ -16,6 +15,7 @@ create view revenue:s (supplier_no, total_revenue) as
 	group by
 		l_suppkey;
 
+:x
 :o
 select
 	s_suppkey,

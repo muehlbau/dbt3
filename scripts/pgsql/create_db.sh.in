@@ -10,7 +10,9 @@
 # History:
 # June-4-2003: Jenny Zhang
 
-@TOPDIR@/scripts/pgsql/set_db_env.sh
+db_param=$1
+
+@TOPDIR@/scripts/pgsql/set_db_env.sh "$db_param"
 @TOPDIR@/scripts/pgsql/drop_db.sh
 
 # create database

@@ -9,13 +9,15 @@
 # History: June-12-2003 Created by Jenny Zhang
 #
 #!/bin/sh
-if [ $# -ne 2 ]; then
-        echo "Usage: ./run_power_query.sh <scale_factor> <perf_run_number>"
+
+if [ $# -ne 3 ]; then
+        echo "Usage: ./run_power_query.sh <scale_factor> <perf_run_number> <0/1 - explain analyze off/on>"
         exit
 fi
 
 scale_factor=$1
 perf_run_number=$2
+explain_analyze=$3
 GTIME="@TOPDIR@/dbdriver/utils/gtime"
 
 qgen_dir="@TOPDIR@/datagen/dbgen"
@@ -35,7 +37,12 @@ fi
 #generate the queries for power test
 rm $query_file
 echo "generate queries in $qgen_dir"
-$qgen_dir/qgen -c -r `cat $seed_file` -p 0 -s $scale_factor -l $param_file> $query_file
+if [ $explain_analyze -eq 0 ]
+then
+	$qgen_dir/qgen -c -r `cat $seed_file` -p 0 -s $scale_factor -l $param_file> $query_file
+else
+	$qgen_dir/qgen -c -r `cat $seed_file` -p 0 -s $scale_factor -l $param_file -y > $query_file
+fi
 # modify $query_file so that the commands are in one line
 $parsequery_dir/parse_query $query_file $tmp_query_file P $perf_run_number
 
@@ -43,7 +50,9 @@ $parsequery_dir/parse_query $query_file $tmp_query_file P $perf_run_number
 echo "`date`: start power queries "
 s_time=`$GTIME`
 psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.POWER.QS', current_timestamp, $s_time);"
-psql $SID -f $tmp_query_file -o $run_dir/power_query.result
+# You can't use -a and have the query redirected to a file with -o, so use -a
+# and redirect.
+psql $SID -f $tmp_query_file -a >> $run_dir/power_query.result 2>&1
 psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_number}.POWER.QS' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: end queries "
