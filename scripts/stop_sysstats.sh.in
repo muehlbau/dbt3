@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
@@ -7,5 +7,11 @@
 #
 # 17 october 2002
 
+OUTPUT_DIR=$1
+
 killall @SAR@ @IOSTAT@ @VMSTAT@ /usr/lib/sa/sadc > /dev/null 2> /dev/null
 ps -ef | grep -v grep | grep db_stats | awk '{ print $2}' | xargs kill > /dev/null 2> /dev/null
+
+# We are done collecting stats, so transform the sar output to something
+# readable.
+@SAR@ -f $OUTPUT_DIR/sar.out -A > $OUTPUT_DIR/sar.txt
