@@ -49,7 +49,7 @@ sub init_db
 	# create database, I do not know how to force it not checking 
 	# credentials
 	# so I call dbmcli directly, and check the result in dbm.out file
-	system("dbmcli -s -R /opt/sapdb/depend74 db_create $dbname dbm,dbm 2>&1 | tee dbm.out") && die "system function failed: $!\n";
+	system("dbmcli -s -R /opt/sapdb/depend db_create $dbname dbm,dbm 2>&1 | tee dbm.out") && die "system function failed: $!\n";
 
 	$ftmp = new FileHandle;
 	unless ( $ftmp->open( "< dbm.out" ) )
