@@ -18,6 +18,9 @@ use FileHandle;
 use Getopt::Long;
 use CGI qw(:standard *table start_ul :html3);
 use Pod::Usage;
+use Env qw(DBT3_INSTALL_PATH SID DBT3_PERL_MODULE);
+use lib "$DBT3_PERL_MODULE";
+use Data_report;
 
 =head1 NAME
 
@@ -103,18 +106,13 @@ if ( $writeme ) {
 #read configuration from config.txt file
 my $fconfig = new FileHandle;
 
+print "indir is $indir\n";
 unless ( $fconfig->open( "< $indir/config.txt" ) )   { die "No config file $!"; }
-my (%configs, $num_data, $num_sys, $num_log);
+my (%configs);
 
-$num_data=0;
-$num_sys=0;
-$num_log=0;
 while (<$fconfig>)
 {
 	chop $_;
-	if (/^DATADEV/) { $num_data++; }
-	if (/^SYSDEV/) { $num_sys++; }
-	if (/^ARCHIVE/) { $num_log++; }
 	my ( $var, $value ) = split /:/, $_;
 	$configs{ $var } = $value;
 }
@@ -129,7 +127,7 @@ print $fh table({-border=>undef},
 		th(["Software Version", "Hardware Configuration", "Run Parameters"]),
 		td(["Linux Kernel: $configs{'kernel'}", "$configs{'CPUS'} CPUS @ $configs{'MHz'} MHz", "Database Scale Factor: $configs{'scale_factor'}"]),
 		td(["SAP DB: $configs{'sapdb'}", "CPU model $configs{'model'}", "Number of streams for throughput run: $configs{'num_stream'}"]),
-		td(["sysstat:  $configs{'sysstat'}", "$configs{'memory'} Memory", ""]),
+		td(["sysstat:  $configs{'sysstat'}", "$configs{'memory'} Memory", "shmmax: $configs{'shmmax'}"]),
 		td(["procps: $configs{'procps'}", "$configs{'data_dev_space'}", ""]),
 		td(["Test Kit Version 1.0", "$configs{'sys_dev_space'}", ""]),
 		td(["", "$configs{'log_dev_space'}", ""])
@@ -143,19 +141,18 @@ $thuput=0;
 #get run results
 if ( -e "$indir/calc_composite.out" )
 {
-	print "calc_composite.out exist\n";
 	my $fcomposite = new FileHandle;
 	unless ( $fcomposite->open( "< $indir/calc_composite.out" ) )   { die "No composite file $!"; }
 	while (<$fcomposite>)
 	{
-		next if (/^call/ || /^the/);
-		chop $_;
+		chop;
 		
-		#the lines are in the order: power, throughput, composite
-		if ($power==0) {$power=$_;}
-		elsif ($thuput==0) {$thuput=$_;}
-		else {$composite=$_;}
+		my ( $var, $value ) = split /=/;
+		if ( /power/ ) { $power = $value; }
+		elsif ( /throughput/ ) { $thuput = $value; }
+		elsif ( /composite/) { $composite = $value; }
 	}
+	close($fcomposite);
 	print "power $power, thuput $thuput, composite $composite\n";
 }	
 elsif ( -e "$indir/calc_power.out" )
@@ -164,10 +161,11 @@ elsif ( -e "$indir/calc_power.out" )
 	unless ( $fpower->open( "< $indir/calc_power.out" ) )   { die "No power file $!"; }
 	while (<$fpower>)
 	{
-		next if (!/^[0-9]/);
-		chop $_;
-		$power=$_;
+		chop;
+		my ( $var, $value ) = split /=/;
+		$power=$value;
 	}
+	close($fpower);
 }	
 elsif ( -e "$indir/calc_thuput.out" )
 {
@@ -175,10 +173,11 @@ elsif ( -e "$indir/calc_thuput.out" )
 	unless ( $fthuput->open( "< $indir/calc_thuput.out" ) )   { die "No thuput file $!"; }
 	while (<$fthuput>)
 	{
-		next if (!/^[0-9]/);
-		chop $_;
-		$thuput=$_;
+		chop;
+		my ( $var, $value ) = split /=/;
+		$thuput=$value;
 	}
+	close($fthuput);
 }	
 
 print $fh h2("DBT-3 Metrics: ");
@@ -246,19 +245,19 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 		}
 	}
 	$fdbt3->close;
+	if ( -e "$indir/calc_composite.out" )
+	{
+		my $fcomposite = new FileHandle;
+		unless ( $fcomposite->open( ">> $indir/calc_composite.out" ) ) 
+			{ die "No composite file $!"; }
+		print $fcomposite "load = $diffload";
+		close($fcomposite);
+	}
+		
 	#convert load test time from seconds to hh:mm:ss format
 	print "diffload $diffload\n";
 	my ($h, $m, $s, $tmp_index);
-	$h=$diffload/3600;
-	#find the maximum integer that is less than $h
-	for ($tmp_index=1; $tmp_index<$h; $tmp_index++) {};
-	$h=$tmp_index-1;
-	$diffload=$diffload-$h*3600;
-	$m=$diffload/60;
-	#find the maximum integer that is less than $h
-	for ($tmp_index=1; $tmp_index<$m; $tmp_index++) {};
-	$m=$tmp_index-1;
-	$s=$diffload-$m*60;
+	($h, $m, $s) = convert_time_format($diffload);
 #	print $fh Tr(td[("LOAD", $sload, $eload, "$h:$m:$s")]);
 	print $fh "<tr><td><a href=\"./dbt3_explain.html#Load\"> LOAD</a></td><td>$sload</td><td>$eload</td>";
 	printf $fh "<td>%02d:%02d:%02d</td></tr>", $h, $m, $s;
@@ -313,8 +312,9 @@ elsif ($composite==0 && $power!=0 && $thuput==0)
 	}
 	$fqtime->close;
 }
-#if it is a throughput run
-elsif ($composite==0 && $power==0 && $thuput!=0)
+#if it is a throughput run or others
+#elsif ($composite==0 && $power==0 && $thuput!=0)
+else
 {
 	my $fqtime = new FileHandle;
 	unless ( $fqtime->open( "< $indir/q_time.out" ) )   { die "No q_time file $!"; }
@@ -334,30 +334,6 @@ elsif ($composite==0 && $power==0 && $thuput!=0)
 	$fqtime->close;
 }
 print $fh end_table, "\n";
-
-#generate gnuplot files
-#change dbt3.sar.config file
-my $fsarcfg = new FileHandle;
-unless ( $fsarcfg->open( "< dbt3.sar.config" ) )   { die "No dbt3.sar.config file $!"; }
-my $ftmp = new FileHandle;
-unless ( $ftmp->open( "> tmp.sar.config" ) )   { die "No tmp.sar.config file $!"; }
-while (<$fsarcfg>)
-{
-	if (!(/^INDIR/ || /^OUTDIR/))
-	{
-		print $ftmp $_;
-	}
-	else
-	{
-		chop $_;
-		if (/^INDIR/) { s/=.*/=$indir/g; }
-		else {s/=.*\//=$indir\//g;}
-		print $ftmp $_, "\n";
-	}
-}
-$fsarcfg->close;
-$ftmp->close;
-system("mv", "tmp.sar.config", "dbt3.sar.config");
 
 #generate $indir/plot directory
 if (! -d "$indir/plot")
@@ -383,9 +359,34 @@ print $fh endform;
 
 print $fh h2("Run log data");
 my @runlog;
-if ($composite != 0) {@runlog=("dbt3.out", "q_time.out", "calc_composite.out","thuput_qs1","thuput_qs2","refresh_stream1","refresh_stream2");} 
-elsif ($power != 0) {@runlog=("power.out", "q_time.out", "calc_power.out");} 
-elsif ($thuput != 0) {@runlog=("thuput.out", "q_time.out", "calc_thuput.out","thuput_qs1", "thuput_qs2","refresh_stream1","refresh_stream2");} 
+
+#if it is a power run
+if ($power != 0 && $composite == 0 && $thuput==0) {@runlog=("power.out", "q_time.out", "calc_power.out");} 
+else 
+{
+	if ($composite != 0) 
+	{
+		@runlog=("dbt3.out", "q_time.out", "calc_composite.out");
+	}
+	elsif ($thuput != 0) 
+	{
+		@runlog=("thuput.out", "q_time.out", "calc_thuput.out");
+	} 
+	else {@runlog=("q_time.out");}
+
+	my ($num_stream, $log_index);
+	$num_stream = $configs{'num_stream'};
+	$log_index = $#runlog+1;
+	for ( my $i=1; $i<=$num_stream; $i++, $log_index++)
+	{
+		$runlog[$log_index] = "thuput_qs$i";
+	}
+	for ( my $i=1; $i<=$num_stream; $i++, $log_index++)
+	{
+		$runlog[$log_index] = "refresh_stream$i";
+	}
+}
+	
 print $fh start_ul;
 foreach my $name (@runlog)
 {
