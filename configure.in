@@ -1,0 +1,23 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(datagen/dbgen/bm_utils.c)
+
+dnl Checks for programs.
+AC_PROG_AWK
+AC_PROG_CC
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(strings.h sys/time.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+TOPDIR=$DBT3_INSTALL_PATH
+AC_SUBST(TOPDIR)
+
+AC_OUTPUT(make.common Makefile dbdriver/utils/Makefile dbdriver/utils/sapdb/Makefile datagen/dbgen/Makefile)
+
