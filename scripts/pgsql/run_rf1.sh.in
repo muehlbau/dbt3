@@ -13,7 +13,7 @@ SRCDIR=@TOPDIR@
 
 if [ $# -ne 2 ]; then
         echo "Usage: ./run_rf1.sh <scale_factor> <run dir>"
-        exit
+        exit 1
 fi
 
 scale_factor=$1
@@ -91,3 +91,5 @@ e_time=`$GTIME`
 echo "`date`: Stream ${set_num} : Refresh Stream 1 completed."
 let "diff_time=$e_time-$s_time"
 echo "Stream ${set_num} : Elapsed time for Refresh Stream 1 : $diff_time seconds"
+
+exit 0

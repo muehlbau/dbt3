@@ -24,7 +24,7 @@ lockfile -s 0 $lock_file_rf1
 if [ ! -f $curr_set_file_rf1 ];
 then
         echo "Stream ${set_num} : please run run_rf1.sh first"
-	exit
+	exit 1
 fi
 set_num_rf1=`cat $curr_set_file_rf1`
 rm -f $lock_file_rf1
@@ -42,7 +42,7 @@ if [ $set_num -gt $set_num_rf1 ]
 then
 	echo "Stream ${set_num} : rf2 set number is greater than rf1 set number"
 	echo "Stream ${set_num} : please execute run_rf1.sh first"
-	exit
+	exit 1
 fi
 
 echo $set_num > $curr_set_file_rf2
@@ -70,3 +70,5 @@ e_time=`$GTIME`
 echo "`date`: Stream ${set_num} : Refresh Stream 2 completed."
 let "diff_time=$e_time-$s_time"
 echo "Stream ${set_num} : Elapsed time for Refresh Stream 2 : $diff_time seconds"
+
+exit 0

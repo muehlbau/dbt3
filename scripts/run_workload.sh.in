@@ -25,7 +25,7 @@ USE_OPROFILE=0
 MAX=1
 GENERATE=0
 TEST_ARGS=
-while getopts "ef:gn:op:r:s:x:" opt; do
+while getopts "ef:gn:op:r:s:x:z" opt; do
 	case $opt in
 		e)
 			# PostgreSQL only.
@@ -58,6 +58,10 @@ while getopts "ef:gn:op:r:s:x:" opt; do
 			# PostgreSQL only.
 			REDIR_LOG=$OPTARG
 			;;
+		z)
+			SHELL="${SHELL} -x"
+			export SHELL;
+			;;
 	esac
 done
 
@@ -79,34 +83,34 @@ mkdir -p $RUN_PATH
 # Set the seed file.
 SEED_FILE=$RUN_PATH/seed
 if [ $SEED -eq 0 ]; then
-	bash $SRCDIR/scripts/init_seed.sh > $SEED_FILE
+	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
 else
 	echo $SEED > $SEED_FILE
 fi
 echo "Using seed: `cat $SEED_FILE`"
 
 # Load Test
-bash $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE || exit 1
+${SHELL} $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE || exit 1
 
 i=1
 while [ $i -le $MAX ]
 do
 	# Start time of a Power and Throughput test.
 	s_time=`$GTIME`
-	bash $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
+	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
 
 	# Power Test
-	bash $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
+	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
 
 	# Throughput Test
-	bash $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
+	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
 
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
-	bash  $DBSCRIPTDIR/start_db.sh "$PARAMETERS"
+	${SHELL}  $DBSCRIPTDIR/start_db.sh "$PARAMETERS"
 
 	# End time of a Power and Throughput test.
-	bash $DBSCRIPTDIR/record_end.sh -n "PERF${i}"
+	${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${i}"
 	e_time=`$GTIME`
 	let "diff_time=$e_time-$s_time"
 	echo "Elapsed time for performance test ${i} : $diff_time seconds"
@@ -116,17 +120,17 @@ do
 done
 
 # Get system details.
-bash $DBSCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS $REDIR_TMP $REDIR_LOG "$PARAMETERS" $OUTPUT_DIR
+${SHELL} $DBSCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS $REDIR_TMP $REDIR_LOG "$PARAMETERS" $OUTPUT_DIR
 
 # Get query times.
-bash $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out
+${SHELL} $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out
 
 # Calculate composite score.      
 perl $SRCDIR/scripts/get_composite.pl -p 1 -s $SCALE_FACTOR -n $STREAMS -o $OUTPUT_DIR/calc_composite.out
 cp -p dbt3.out $OUTPUT_DIR
-bash $SRCDIR/data_collect/resulttools/dbt3_gen_graphs.sh $OUTPUT_DIR/plot $OUTPUT_DIR/plot
+${SHELL} $SRCDIR/data_collect/resulttools/dbt3_gen_graphs.sh $OUTPUT_DIR/plot $OUTPUT_DIR/plot
 perl $SRCDIR/data_collect/resulttools/graph_query_time.pl --if $OUTPUT_DIR/q_time.out
-bash $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html
+${SHELL} $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
 echo $RUN_NUMBER > run_number

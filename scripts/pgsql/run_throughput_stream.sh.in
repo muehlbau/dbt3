@@ -40,7 +40,7 @@ if [ ! -f $seed_file ];
 then
         echo "creating seed file $seed_file, you can change the seed by "
 	echo "modifying this file"
-	bash $SRCDIR/scripts/init_seed.sh > $seed_file
+	${SHELL} $SRCDIR/scripts/init_seed.sh > $seed_file
 fi
 
 seed=`cat $seed_file`
@@ -64,7 +64,7 @@ i=1
 while [ $i -le 22 ]
 do
 	if [ $i -ne 15 ]; then
-		bash $DBSCRIPTDIR/get_query_plan.sh $scale_factor $i $RUNDIR/plan/throughput_stream${stream_num}_query$i.txt $RUNDIR
+		${SHELL} $DBSCRIPTDIR/get_query_plan.sh $scale_factor $i $RUNDIR/plan/throughput_stream${stream_num}_query$i.txt $RUNDIR
 	fi
 	let "i=$i+1"
 done
@@ -72,11 +72,11 @@ done
 # run the queries
 echo "`date`: start throughput queries for stream $stream_num "
 s_time=`$GTIME`
-bash $DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
 @PSQL@ $SID -f $tmp_query_file -a >> $OUTPUT_DIR/results/thruput_qs${stream_num}.result 2>&1 || exit 1
-bash $DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"

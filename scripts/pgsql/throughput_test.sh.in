@@ -94,34 +94,34 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	clearoprof
 fi
 
-bash $DBSCRIPTDIR/stop_db.sh
-bash $DBSCRIPTDIR/start_db.sh "$db_param"
+${SHELL} $DBSCRIPTDIR/stop_db.sh
+${SHELL} $DBSCRIPTDIR/start_db.sh "$db_param"
 
 s_time=`$GTIME`
-bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT"
 
 # Start collecting system statistics. 
-bash $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p throughput${TAG}
+${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p throughput${TAG}
 
 # Start collecting database statistics.
-bash $DBSTATS $SID $OUTPUT_DIR "throughput${TAG}" &
+${SHELL} $DBSTATS $SID $OUTPUT_DIR "throughput${TAG}" &
 
 # Start the streams.
-bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR || exit 1
+${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR || exit 1
 
 # Stop collecting system statistics.
-bash $SRCDIR/scripts/stop_sysstats.sh
+${SHELL} $SRCDIR/scripts/stop_sysstats.sh
 
 # no effect
 #killall $DBSTATS
 
-bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT"
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT"
 e_time=`$GTIME`
 let "diff_time=$e_time-$s_time"
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
 
 # Stop the database after the test.
-bash $DBSCRIPTDIR/stop_db.sh
+${SHELL} $DBSCRIPTDIR/stop_db.sh
 
 if [ -f /proc/profile ]; then
 	profname="Throughput_Test_$TAG"
