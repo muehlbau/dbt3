@@ -7,9 +7,10 @@
 #define SQL_EXEC "sql_execute"
 #endif
 
-#define SQL_TIME_P_INSERT "insert into time_statistic (task_name, s_time) values (PERF%d.POWER.Q%d, timestamp)"
-#define SQL_TIME_P_UPDATE "update time_statistic set e_time=timestamp where task_name=(PERF%d.POWER.Q%d)"
-#define SQL_TIME_T_INSERT "insert into time_statistic (task_name, s_time) values (PERF%d.THUPUT.QS%d.Q%d, timestamp)"
-#define SQL_TIME_T_UPDATE "update time_statistic set e_time=timestamp where task_name=PERF%d.THUPUT.QS%d.Q%d"
+#define SQL_TIME_P_INSERT "%s insert into time_statistics (task_name, s_time) values ('PERF%d.POWER.Q%d', timestamp)\n"
+#define SQL_TIME_P_UPDATE "%s update time_statistics set e_time=timestamp where task_name='PERF%d.POWER.Q%d'\n\n"
+#define SQL_TIME_T_INSERT "%s insert into time_statistics (task_name, s_time) values ('PERF%d.THRUPUT.QS%d.Q%d', timestamp)\n"
+#define SQL_TIME_T_UPDATE "%s update time_statistics set e_time=timestamp where task_name='PERF%d.THRUPUT.QS%d.Q%d'\n\n"
+#define SQL_COMMIT "sql_execute commit"
 
 #endif
