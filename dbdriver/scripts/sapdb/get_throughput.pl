@@ -9,13 +9,12 @@
 #
 # Author: Jenny Zhang
 use strict;
-use SAP::DBTech::dbm;
 use Pod::Usage;
 use FileHandle;
 use Getopt::Long;
-use Env qw(DBT3_INSTALL_PATH SID DBT3_PERL_MODULE);
-use lib "$DBT3_PERL_MODULE/Sapdbpms";
-use DBM::Exe_dbm_cmds;
+use Env qw(SID DBT3_PERL_MODULE DBUSER);
+use lib "$DBT3_PERL_MODULE";
+use Data_report;
 
 =head1 NAME
 
@@ -102,63 +101,12 @@ if ( $writeme ) {
 	$ncf->close;
 }
 
-system("dbmcli -d $SID -u dbm,dbm \"param_getvalue DATE_TIME_FORMAT\" 2>&1 > dbm.out") && die "param_getvalue DATE_TIME_FORMAT failed $_\n";
-
-$ftmp = new FileHandle;
-unless ( $ftmp->open( "< dbm.out" ) )
-	{ die "open file dbm.out failed $!"; }
-# read the first line to find out if there is any errors
-my $line1 = <$ftmp>;
-$_ = $line1;
-if ( /ERR/i )
-{
-	close($ftmp);
-	system("rm", "dbm.out");
-	die "param_getval DATETIME_FORMAT failed\n";
-}
-else 
-{
-	$line1 = <$ftmp>;
-	$_ = $line1;
-	if ( /INTERNAL/i )
-	{
-		close($ftmp);
-		system("rm", "dbm.out");
-		#print "DATETIME_FORMAT is internal\n";
-	}
-	else
-	{
-		close($ftmp);
-		system("rm", "dbm.out");
-
-		@cmdfiles = ("$DBT3_INSTALL_PATH/dbdriver/scripts/sapdb/change_datetime_format");
-		eval {exe_dbm_cmds("dbm", "dbm", "$SID", "localhost", @cmdfiles)};
-		if ( $@ )
-		{
-			die "error changing datetime format: $@";
-		}
-	}
-}
-
 # get execution time for the throughput test
-system ("dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt \"sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF$perf_run_number.THRUPUT'\"|grep -v 'OK' |grep -v 'END' | xargs $DBT3_INSTALL_PATH/dbdriver/scripts/string_to_number.sh>> thruput.out");
-
-unless ( $ftmp->open( "< thruput.out" ) )
-	{ die "open file thruput.out failed $!"; }
-$_ = <$ftmp>;
-chop;
-if ( /ERR/i )
-{
-	close($ftmp);
-	system("rm", "thruput.out");
-	die "query throughput execution time failed";
-}
-else
-{
-	$throughput_time = $_; 
-}
-close($ftmp);
-system("rm", "thruput.out");
+my ($thuput_time);
+$thuput_time = `dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute select timediff(e_time,s_time) from time_statistics where task_name='PERF$perf_run_number.THRUPUT'"|grep -v OK | grep -v END`;
+$thuput_time =~ s/'//g;
+chop($thuput_time);
+$throughput_time=convert_to_seconds($thuput_time);
 
 $throughput = 22 * 3600 * $num_of_streams * $scale_factor / $throughput_time;
 printf "throughput = %.2f\n", $throughput;

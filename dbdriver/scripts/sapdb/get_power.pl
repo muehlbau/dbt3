@@ -9,14 +9,12 @@
 #
 # Author: Jenny Zhang
 use strict;
-use SAP::DBTech::dbm;
 use Pod::Usage;
 use FileHandle;
 use Getopt::Long;
-use Env qw(DBT3_INSTALL_PATH SID DBT3_PERL_MODULE);
-use lib "$DBT3_PERL_MODULE/Sapdbpms";
-use DBM::Exe_dbm_cmds;
-use REPM::Exe_repm_cmds;
+use Env qw(SID DBT3_PERL_MODULE DBUSER);
+use lib "$DBT3_PERL_MODULE";
+use Data_report;
 
 =head1 NAME
 
@@ -35,8 +33,7 @@ calculate the power metrics
 =cut
 
 my ( $perf_run_number, $hlp, $scale_factor, $configfile, $writeme, 
-	$dbdriver_sapdb_path, $power, @cmdfiles, @power_query, @power_refresh,
-	$ftmp, $i );
+	$power, @power_query, @power_refresh, $i );
 
 GetOptions(
 	"perf_run_number=i" => \$perf_run_number,
@@ -93,113 +90,36 @@ if ( $writeme ) {
 	$ncf->close;
 }
 
-$dbdriver_sapdb_path = "$DBT3_INSTALL_PATH/dbdriver/scripts/sapdb";
-
-system("dbmcli -d $SID -u dbm,dbm \"param_getvalue DATE_TIME_FORMAT\" 2>&1 > dbm.out") && die "param_getvalue DATE_TIME_FORMAT failed $_\n";
-
-$ftmp = new FileHandle;
-unless ( $ftmp->open( "< dbm.out" ) )
-	{ die "open file dbm.out failed $!"; }
-# read the first line to find out if there is any errors
-my $line1 = <$ftmp>;
-$_ = $line1;
-if ( /ERR/i )
-{
-	close($ftmp);
-	system("rm", "dbm.out");
-	die "param_getval DATETIME_FORMAT failed\n";
-}
-else 
-{
-	$line1 = <$ftmp>;
-	$_ = $line1;
-	if ( /INTERNAL/i )
-	{
-		close($ftmp);
-		system("rm", "dbm.out");
-		#print "DATETIME_FORMAT is internal\n";
-	}
-	else
-	{
-		close($ftmp);
-		system("rm", "dbm.out");
-
-		@cmdfiles = ("$dbdriver_sapdb_path/change_datetime_format");
-		eval {exe_dbm_cmds("dbm", "dbm", "$SID", "localhost", @cmdfiles)};
-		if ( $@ )
-		{
-			die "error changing datetime format: $@";
-		}
-	}
-}
-
 # get execution time for the power queries
+my (@tmp_power_query, @tmp_power_refresh);
 for ($i=1; $i<=22; $i++)
 {
-	# using repman interface returns only the status
-	# in this case, I need the sql result, maybe DBI can solve this problem
-	# for now I just used system cammand
-	system ("dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt \"sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF$perf_run_number.POWER.Q$i'\"|grep -v 'OK' |grep -v 'END' | xargs $DBT3_INSTALL_PATH/dbdriver/scripts/string_to_number.sh>> query.out");
+	$tmp_power_query[$i] = `dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute select timediff(e_time,s_time) from time_statistics where task_name='PERF$perf_run_number.POWER.Q$i'"|grep -v OK|grep -v END`;
+	$tmp_power_query[$i] =~ s/'//g;
+#	print "query $i: $tmp_power_query[$i]\n";
+	chop($tmp_power_query[$i]);
+	$power_query[$i]=convert_to_seconds($tmp_power_query[$i]);
 }
-
-unless ( $ftmp->open( "< query.out" ) )
-	{ die "open file query.out failed $!"; }
-$i = 0;
-while (<$ftmp>)
-{
-	chop;
-	if ( /ERR/i )
-	{
-		close($ftmp);
-		system("rm", "query.out");
-		die "query power query execution time failed";
-	}
-	else
-	{
-		$power_query[$i] = $_; 
-		$i++;
-	}
-}
-close($ftmp);
-system("rm", "query.out");
 
 # get execution time for the power refresh functions
 for ($i=1; $i<=2; $i++)
 {
-	# using repman interface returns only the status
-	# in this case, I need the sql result, maybe DBI can solve this problem
-	# for now I just used system cammand
-	system ("dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt \"sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF$perf_run_number.POWER.RF$i'\"|grep -v 'OK' |grep -v 'END' | xargs $DBT3_INSTALL_PATH/dbdriver/scripts/string_to_number.sh>> refresh.out");
+	$tmp_power_refresh[$i] = `dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute select timediff(e_time,s_time) from time_statistics where task_name='PERF$perf_run_number.POWER.RF$i'"|grep -v OK|grep -v END`;
+	$tmp_power_refresh[$i] =~ s/'//g;
+#	print "RF $i: $tmp_power_refresh[$i]\n";
+	chop($tmp_power_refresh[$i]);
+	$power_refresh[$i]=convert_to_seconds($tmp_power_refresh[$i]);
+	# in case the refresh functions finished within 1 second
+	if ( $power_refresh[$i] == 0 ) { $power_refresh[$i] = 1; }
 }
-
-unless ( $ftmp->open( "< refresh.out" ) )
-	{ die "open file refresh.out failed $!"; }
-$i = 0;
-while (<$ftmp>)
-{
-	chop;
-	if ( /ERR/i )
-	{
-		close($ftmp);
-		system("rm", "refresh.out");
-		die "query power refresh function execution time failed";
-	}
-	else
-	{
-		$power_refresh[$i] = $_; 
-		$i++;
-	}
-}
-close($ftmp);
-system("rm", "refresh.out");
 
 my $tmp_query = 1;
-for ( $i=0; $i<22; $i++ )
+for ( $i=1; $i<=22; $i++ )
 {
 	$tmp_query = $power_query[$i] * $tmp_query;
 }
 my $tmp_refresh = 1;
-for ( $i=0; $i<2; $i++ )
+for ( $i=1; $i<=2; $i++ )
 {
 	$tmp_refresh = $power_refresh[$i] * $tmp_refresh
 }
