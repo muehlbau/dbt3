@@ -20,15 +20,9 @@ analyzetool_path=$DBT3_INSTALL_PATH/data_collect/analyzetools/sapdb
 CPUS=`grep -c ^processor /proc/cpuinfo`
 
 VERSION=`uname -r | awk -F "." '{print $2}'`
-
-if [ $VERSION -eq 5 ]
-then
-	`alias "sar=/usr/local/bin/sar"`
-	`alias "iostat=/usr/local/bin/iostat"`
-else
-	`alias "sar=/usr/bin/sar"`
-	`alias "iostat=/usr/bin/iostat"`
-fi
+sar -V &> .sar.tmp
+sysstat_version=`cat .sar.tmp |grep version | awk '{print $3}'`
+rm .sar.tmp
 
 echo "making output dir  $output_dir"
 mkdir -p $output_dir
@@ -53,7 +47,7 @@ echo "parse sar -u";
 #parse sar total cpu
 ./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
 
-if [ $VERSION -eq 5 ]
+if [ $sysstat_version = '4.1.2' ]
 then
 	echo "parse sar -P";
 	#parse sar individual cpu
