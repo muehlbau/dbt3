@@ -9,7 +9,7 @@ parse_query:
 	cd sapdb; $(MAKE)
 
 gtime:	get_time.c
-	$(CC) -o gtime get_time.c
+	$(CC) $(CFLAGS) -o gtime get_time.c
 
 clean:
 	cd sapdb; $(MAKE) clean

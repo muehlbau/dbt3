@@ -13,7 +13,7 @@ PRGS = $(UTIL_PRGS)
 all: parse_query
 
 parse_query: Makefile $(OBJS) $(INCLUDE_DIR)/common.h $(INCLUDE_DIR)/sapdb.h
-	$(CC) -o $@ $(OBJS)
+	$(CC) -I$(INCLUDE_DIR) $(CFLAGS) -o $@ $(OBJS)
 
 %.so:%.c
 	$(CC) -c -shared -fpic $(CFLAGS) -o $@ $<
