@@ -15,6 +15,7 @@ use English;
 use FileHandle;
 use vars qw(@ISA @EXPORT);
 use Exporter;
+use CGI qw(:standard *table start_ul :html3);
 
 =head1 NAME
 
@@ -34,7 +35,10 @@ the separator is spaces
 =cut
 
 @ISA = qw(Exporter);
-@EXPORT = qw(extract_columns extract_rows extract_columns_rows get_header extract_columns_rows_sar convert_time_format);
+@EXPORT = qw(extract_columns extract_rows extract_columns_rows get_header 
+		extract_columns_rows_sar convert_time_format get_os_version
+		get_iostat_version get_sar_version get_vmstat_version
+		get_max_row_number get_max_col_value gen_html_table);
 
 sub extract_columns
 {
@@ -457,6 +461,124 @@ sub convert_time_format
 	$ret[2] = $s;
 
 	return @ret;
+}
+
+sub get_os_version
+{
+	my $line = `uname -a`;
+	chop $line;
+	my @str = split / /, $line;
+	for (my $i=0; $i<=$#str; $i++)
+	{
+		if ($str[$i] =~ /[0-9]+\.[0-9]+\.[0-9]+/)
+		{
+			return $str[$i];
+		}
+	}
+	die "did not find kernel info";
+}
+
+# get iostat version info so that we know whick key file to look at
+sub get_iostat_version {
+	my ($exe_path) = @_;
+	my $str = `$exe_path/iostat -V 2>&1 | head -1 `;
+	chomp $str;
+	my @outline = split / /, $str;
+	return $outline[ 2 ];
+}
+
+# get sar version info so that we know whick key file to look at
+sub get_sar_version {
+	my ($exe_path) = @_;
+	my $str = `$exe_path/sar -V 2>&1 | head -1 `;
+	chomp $str;
+	my @outline = split / /, $str;
+	return $outline[ 2 ];
+}
+
+sub get_vmstat_version
+{
+	my $str = `vmstat -V 2>&1 `;
+	chomp $str;
+	my @outline = split / /, $str;
+	return $outline[ 2 ];
+}
+
+# read a bunch of files and return the max row number
+sub get_max_row_number
+{
+	my ( @filelist ) = @_;
+	my ( $max_row, $fin );
+	$fin = new FileHandle;
+	$max_row = 0;
+	for ( my $i=0; $i<=$#filelist; $i++ ) 
+	{
+		print "file is $filelist[$i]\n";
+		unless ( $fin->open( "< $filelist[$i]" ) )   { die "No data file $!"; }
+		while ( <$fin> )
+		{
+			next if ( /^#/ || /^$/ );
+			chop;
+			my @value = split / /;
+			my $cur_row = $value[0];
+			if ( $cur_row > $max_row )	
+			{
+				$max_row = $cur_row;	
+			}
+		}
+		close( $fin );
+	}
+	return $max_row;
+}
+
+# read a bunch of files and return the maximum value for column
+sub get_max_col_value
+{
+	my ( $col, @filelist ) = @_;
+	my ( $max_value, $fin );
+	$fin = new FileHandle;
+
+	# the calling script start the column from ZERO
+	# but it starts from ONE due to to row number column 
+	$col = $col + 1;
+	$max_value = 0;
+	for ( my $i=0; $i<=$#filelist; $i++ ) 
+	{
+		unless ( $fin->open( "< $filelist[$i]" ) )   { die "No data file $!"; }
+		while ( <$fin> )
+		{
+			next if ( /^#/ || /^$/ );
+			chop;
+			my @value = split /\s+/;
+			my $cur_value = $value[$col];
+			if ( $cur_value > $max_value )	
+			{
+				$max_value = $cur_value;	
+			}
+		}
+		close( $fin );
+	}
+	return $max_value;
+}
+
+
+# put a list of files into a table
+sub gen_html_table
+{
+	my ($outfile, @filelist) = @_;
+	
+	my $fout = new FileHandle;
+	unless ( $fout->open( "> $outfile" ) ) { die "cannot open output $!"; }
+	
+	#print $fout "<table>";
+	print $fout start_table;
+	for (my $i=0; $i<=$#filelist; $i++)
+	{
+		print $fout "<tr><td> <img src=\"$filelist[$i]\"> </td></tr>\n";
+	}
+	print $fout end_table;
+
+	close($fout);
 }
 
 1;
