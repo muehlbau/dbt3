@@ -9,7 +9,7 @@
 
 #!/bin/sh
 if [ $# -ne 3 ]; then
-	echo "Usage: ./collect_data.sh <interval> <duration> <result_dir>"
+	echo "Usage: ./sys_stat.sh <interval> <duration> <result_dir>"
 	exit
 fi
 
@@ -36,25 +36,12 @@ if [ -f $RESULTS_PATH/run.sar.data ]; then
 fi
 
 echo "start sar"
-VERSION=`uname -r | awk -F "." '{print $2}'`
-
-if [ $VERSION -eq 5 ]
-then 
 #use sysstat 4.1.2
 #sar
-/usr/local/bin/sar -u -P ALL -d -B -r -q -W -b -o $RESULTS_PATH/run.sar.data $INTERVAL $COUNT &
+sar -u -P ALL -d -B -r -q -W -b -o $RESULTS_PATH/run.sar.data $INTERVAL $COUNT &
+echo "start iostat"
 #iostat
-echo "ziostat";
-/usr/src/ziostat/ziostat -a -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
-/usr/src/ziostat/ziostat -a -x $INTERVAL $COUNT >> $RESULTS_PATH/iostat-x.txt &
-#/usr/local/bin/iostat -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
-else
-#use sysstat 4.0.3
-#sar
-/usr/bin/sar -u -U ALL -d -B -r -q -W -b -o $RESULTS_PATH/run.sar.data $INTERVAL $COUNT &
-#iostat
-/usr/bin/iostat -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
-fi
+iostat -d $INTERVAL $COUNT >> $RESULTS_PATH/iostat.txt &
 
 # collect vmstat 
 echo "start vmstat"
