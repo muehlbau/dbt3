@@ -27,19 +27,19 @@ GTIME="${DBT3_INSTALL_PATH}/dbdriver/utils/gtime"
 s_time_dbt3=`$GTIME`
 
 #***load test
-echo "`date`: start load test" 
+echo "`date +'%Y-%m-%d %H:%M:%S'`: start load test" 
 #cd $DBT3_INSTALL_PATH/scripts/sapdb
 #get the start time
 s_time=`$GTIME`
 $db_path/build_db.sh
 e_time=`$GTIME`
-echo "`date`: load test end" 
+echo "`date +'%Y-%m-%d %H:%M:%S'`: load test end" 
 let "diff_time_load=$e_time-$s_time"
 echo "elapsed time for load test $diff_time_load" 
 
 #cd $DBT3_INSTALL_PATH/dbdriver/scripts
 i=1
-while [ $i -le 2 ]
+while [ $i -le 1 ]
 do
         echo "start performance test $i"
 	$dbdriver_path/run_perf_test.sh $scale_factor $i $num_stream
@@ -54,5 +54,4 @@ echo "elapsed time for dbt3 test $diff_time_dbt3"
 cd $DBT3_INSTALL_PATH/dbdriver/scripts
 echo "execution time"
 ./q_time.sh
-echo "elapsed time for load test $diff_time_load"
 echo "elapsed time for dbt3 test $diff_time_dbt3"
