@@ -23,6 +23,8 @@ fi
 
 db_param=$1
 
+${SHELL} @TOPDIR@/scripts/pgsql/stop_db.sh
+
 # since we are on STP, we can delete the database dir
 if [ -d $PGDATA ]; then
 	echo "======================================="
