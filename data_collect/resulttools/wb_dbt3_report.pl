@@ -351,9 +351,9 @@ print $fh h2("Raw data");
 table_of_glob("$indir/plot", "*.txt", 0);
 
 print $fh h2("gnuplot charts");
-print $fh "<form method=\"post\" action=\"http://webdev/jenny/cgi-bin/showchart.cgi \"
-	enctype=\"application/x-www-form-urlencoded\">";
-#print $fh startform({-action=>"http://webdev/jenny/cgi-bin/showchart.cgi"});
+print $fh "<form method=\"post\" 
+	action=\"http://webdev/jenny/cgi-bin/showchart.cgi \"
+        enctype=\"application/x-www-form-urlencoded\">";
 print $fh "<INPUT TYPE=\"hidden\" NAME=\"pathname\" VALUE=\"$indir/plot\">";
 table_of_glob("$indir/plot", "*.png", 1);
 print $fh "<INPUT TYPE=\"submit\" NAME=\"showchart\" VALUE=\"Show Charts\">";
@@ -426,16 +426,24 @@ sub table_of_glob {
 	my ($indir, $globname, $flag) = @_;
 	#generate a list of *.png files
 	my @filelist = glob("$indir/$globname");
-	print "table_of_glob: filelist $#filelist", join ( '  ', @filelist ), "\n";
+	print "filelist $#filelist", join ( '  ', @filelist );
 
 	print $fh start_table( { -border => undef });
-	print $fh Tr(th[("sar", "vmstat", "iostat", "xcons")]);
+	if ( $flag == 0 )
+	{
+		print $fh Tr(th[("sar", "vmstat", "iostat", "xcons", "read_profile")]);
+	}
+	else
+	{
+		print $fh Tr(th[("sar", "vmstat", "iostat", "xcons")]);
+	}
 
-	my (@sarlist, @iostatlist, @vmstatlist, @xconslist, $sar_index, $iostat_index, $vmstat_index, $xcons_index);
+	my (@sarlist, @iostatlist, @vmstatlist, @xconslist, @profilelist, $sar_index, $iostat_index, $vmstat_index, $xcons_index, $profile_index);
 	$sar_index=0;
 	$iostat_index=0;
 	$vmstat_index=0;
 	$xcons_index=0;
+	$profile_index=0;
 	for ( my $i = 0; $i <= $#filelist; $i++ ) {
 		$_=$filelist[$i];
 		if (/sar/)
@@ -458,12 +466,18 @@ sub table_of_glob {
 			$xconslist[$xcons_index]=$_;
 			$xcons_index++;
 		}
+		elsif (/prof/)
+		{
+			$profilelist[$profile_index]=$_;
+			$profile_index++;
+		}
 	}
 		
 	my $max_row=$#sarlist;
 	if ($max_row < $#vmstatlist) { $max_row=$#vmstatlist; }
 	if ($max_row < $#iostatlist) { $max_row=$#iostatlist; }
 	if ($max_row < $#xconslist) { $max_row=$#xconslist; }
+	if ($max_row < $#profilelist) { $max_row=$#profilelist; }
 	
 	for ( my $i = 0; $i <= $max_row; $i++ ) 
 	{
@@ -476,6 +490,7 @@ sub table_of_glob {
 		my $vmstatname=basename($vmstatlist[$i]);
 		my $iostatname=basename($iostatlist[$i]);
 		my $xconsname=basename($xconslist[$i]);
+		my $profilename=basename($profilelist[$i]);
 		if ($flag == 1)
 		{
 		print $fh Tr(
@@ -492,6 +507,7 @@ sub table_of_glob {
                         td( a( { -href => "$vmstatlist[$i]" }, "$vmstatname") ),
        			td( a( { -href => "$iostatlist[$i]" }, "$iostatname") ),
        			td( a( { -href => "$xconslist[$i]" }, "$xconsname") ),
+       			td( a( { -href => "$profilelist[$i]" }, "$profilename") ),
 			), "\n";
 		}
 	}
@@ -502,7 +518,7 @@ sub change_file_name {
 	my ($indir, $globname, $from, $to) = @_;
 	#generate a list of *.png files
 	my @filelist = glob("$indir/$globname");
-	print "change_file_name: filelist $#filelist", join ( '  ', @filelist ), "\n";
+	print "filelist $#filelist", join ( '  ', @filelist );
 
 	for (my $i=0; $i<=$#filelist; $i++)
 	{
