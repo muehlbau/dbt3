@@ -6,6 +6,7 @@
 #
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
+# Author: Jenny Zhang
 #
 #!/bin/sh
 if [ $# -ne 3 ]; then
@@ -47,11 +48,11 @@ $parsequery_sapdb_dir/parse_query $query_file $tmp_query_file T $perf_run_num $s
 #run the queries
 echo "`date`: start throughput queries for stream $stream_num "
 s_time=`$GTIME`
-echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THUPUT.QS${stream_num}', timestamp, $s_time)"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THUPUT.QS${stream_num}', timestamp, $s_time)"
+echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}', timestamp, $s_time)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}', timestamp, $s_time)"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt -i $tmp_query_file 
-echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THUPUT.QS${stream_num}' and int_time=$s_time"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THUPUT.QS${stream_num}' and int_time=$s_time"
+echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}' and int_time=$s_time"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}' and int_time=$s_time"
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"

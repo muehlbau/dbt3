@@ -6,6 +6,7 @@
 #
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
+# Author: Jenny Zhang
 #
 #!/bin/sh
 if [ $# -ne 2 ]; then
