@@ -18,57 +18,81 @@ input_dir=$1
 output_dir=$2
 analyzetool_path=$DBT3_INSTALL_PATH/data_collect/analyzetools/sapdb
 
+echo "making output dir  $output_dir"
+mkdir -p $output_dir
+
+echo "parse vmstat";
 #parse vmstat
-./parse_vmstat.pl -i $input_dir/vmstat.out -o $output_dir/vmstat -c "vmstat taken every 60 seconds" -v 3.1.5
+./parse_vmstat.pl -i $input_dir/vmstat.out -o $output_dir/vmstat -c "vmstat taken every 60 seconds"
 
-#generate graphs based on vmstat .dat file
-./gr_OneFileSomeData.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_cpu -t "vmstat CPU" -v "%" -hl "samples every 60 sec" -c 12,13,14,15,
-
-./gr_OneFileSomeData.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_io -t "vmstat I/O" -v "Block/Sec" -hl "samples every 60 sec" -c 8,9,
-
-./gr_OneFileSomeData.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_memory -t "vmstat memory" -v "kblock" -hl "samples every 60 sec" -c 2,3,4,5,
-
-./gr_OneFileSomeData.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_swap -t "vmstat swap" -v "kblock/sec" -hl "samples every 60 sec" -c 6,7,
-
-./gr_OneFileSomeData.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_system -t "vmstat system" -v "per sec" -hl "samples every 60 sec" -c 10,11,
-
-./gr_OneFileSomeData.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_procs -t "vmstat process" -hl "samples every 60 sec" -c 0,1,
-
+echo "parse iostat";
 #parse iostat
-./parse_iostat.pl -i $input_dir/iostat.txt -o $output_dir/iostat 
+./parse_iostat.pl -i $input_dir/iostat.txt -d $output_dir/iostat -co "iostat taken every 60 seconds" -o '-d'
+
+echo "parse sar -b";
+#parse sar io
+./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_io -c "sar -d taken every 60 seconds" -op '-b'
+
+echo "parse sar -r";
+#parse sar memory
+./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_memory -c "sar -r taken every 60 seconds" -op '-r'
+
+echo "parse sar -u";
+#parse sar total cpu
+./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
+
+echo "parse sar -P";
+#parse sar individual cpu
+./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar -c "sar -P taken every 60 seconds" -op '-P' -n 8
+
+echo "parse sar -W";
+#parse sar swapping
+./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_swap -c "sar -W taken every 60 seconds" -op '-W'
+
+#generate graphs based on vmstat.dat file
+./gr_single_dir.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_cpu -t "vmstat CPU" -b "vmstat." -e "dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_io -t "vmstat IO" -b "vmstat." -e "dat" -c 8,9 -v "Block/Sec" -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_memory -t "vmstat memory" -b "vmstat." -e "dat" -c 2,3,4,5, -v "kblock" -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_swap -t "vmstat swap" -b "vmstat." -e "dat" -c 6,7 -v "kblock/sec" -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_system -t "vmstat system" -b "vmstat." -e "dat" -c 10,11 -v "per sec" -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i $output_dir/vmstat.dat -o $output_dir/vmstat_procs -t "vmstat process" -b "vmstat." -e "dat" -c 0,1 -hl "samples every 60 sec"
 
 #generate graphs based on iostat .dat file
-./gr_ManyFilesSomeData.pl -i "$output_dir/*.read.dat" -o $output_dir/iostat_read -c 0, -b "iostat." -e ".read.dat"
-./gr_ManyFilesSomeData.pl -i "$output_dir/*.write.dat" -o $output_dir/iostat_write -c 0, -b "iostat." -e ".write.dat"
-
-#parse sar file
-./parsedata.pl -f ./dbt3.sar.config -s sarb -v 4.1.1
-./parsedata.pl -f ./dbt3.sar.config -s sarB -v 4.1.1
-./parsedata.pl -f ./dbt3.sar.config -s tsaru -v 4.1.1
-./parsedata.pl -f ./dbt3.sar.config -s sarr -v 4.1.1
-./parsedata.pl -f ./dbt3.sar.config -s sarW -v 4.1.1
-./parsedata.pl -f ./dbt3.sar.config -s Usar -v 4.1.1
+./gr_single_dir.pl -i "$output_dir/iostat.*.dat" -o $output_dir/iostat_read_sec -t "iostat read per second" -b "iostat." -e ".dat" -c 1 -hl "samples every 60 sec"
+./gr_single_dir.pl -i "$output_dir/iostat.*.dat" -o $output_dir/iostat_write_sec -t "iostat write per second" -b "iostat." -e ".dat" -c 2 -hl "samples every 60 sec"
+./gr_single_dir.pl -i "$output_dir/iostat.*.dat" -o $output_dir/iostat_tps -t "iostat tps" -b "iostat." -e ".dat" -c 0 -hl "samples every 60 sec"
 
 #generate data based on sar .dat files
-./gr_ManyFilesSomeData.pl -i "$output_dir/sar_cpu*.dat" -o $output_dir/sar_cpu -t "sar individual CPU " -v "%" -hl "sample every 60 second" -c 0,
+./gr_single_dir.pl -i "$output_dir/sar.cpu*.dat" -o $output_dir/sar_cpu_user -t "sar individual CPU pct_user" -b "sar." -e ".dat" -c 0 -hl "samples every 60 sec"
 
-./gr_OneFileAllData.pl -i $output_dir/sar_io.dat -o $output_dir/sar_io -t "sar IO all" -v "%" -hl "sample every 60 second" 
+./gr_single_dir.pl -i "$output_dir/sar.cpu*.dat" -o $output_dir/sar_cpu_system -t "sar individual CPU pct_system" -b "sar." -e ".dat" -c 2 -hl "samples every 60 sec"
 
-./gr_OneFileAllData.pl -i $output_dir/sar_tcpu_all.dat -o $output_dir/sar_cpu_all -t "sar CPU all" -hl "sample every 60 second" 
+./gr_single_dir.pl -i "$output_dir/sar.cpu*.dat" -o $output_dir/sar_cpu_iowait -t "sar individual CPU pct_iowait" -b "sar." -e ".dat" -c 3 -hl "samples every 60 sec"
 
-./gr_OneFileSomeData.pl -i $output_dir/sar_memory.dat -o $output_dir/sar_memory -t "sar memory KB" -v "kbmem" -hl "sample every 60 second" -c 0,1,3,4,5,6,7,
+./gr_single_dir.pl -i "$output_dir/sar.cpu*.dat" -o $output_dir/sar_cpu_idle -t "sar individual CPU pct_idle" -b "sar." -e ".dat" -c 4 -hl "samples every 60 sec"
 
-./gr_OneFileSomeData.pl -i $output_dir/sar_memory.dat -o $output_dir/sar_memory_pct -t "sar memory percentage" -v "%" -hl "sample every 60 second" -c 2,8,
+./gr_single_dir.pl -i "$output_dir/sar_cpu_all.dat" -o $output_dir/sar_cpu_all -t "sar CPU" -b "sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i "$output_dir/sar_io.dat" -o $output_dir/sar_io -t "sar IO" -b "sar_io" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i "$output_dir/sar_memory.dat" -o $output_dir/sar_memory -t "sar memory" -b "sar_memory" -e ".dat" -c 0,1,3,4,5,6,7 -hl "samples every 60 sec"
+
+./gr_single_dir.pl -i "$output_dir/sar_memory.dat" -o $output_dir/sar_memory_pct -t "sar memory percentage" -b "sar_memory" -e ".dat" -c 2,8 -hl "samples every 60 sec"
 
 #parse x_cons output
 $analyzetool_path/parse_xcons_io.pl -i "$input_dir/db_stat/x_cons*.out" -o $output_dir -p $input_dir/param.out 
 
 $analyzetool_path/parse_xcons_process.pl -i "$input_dir/db_stat/x_cons*.out" -o $output_dir
 
-./gr_ManyFilesSomeData.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_dataread -c 1, -b "dataio" -e ".dat"
+./gr_single_dir.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_dataread -c 1, -b "xcons_dataio" -e ".dat" -t "xcons datadevice read"
 
-./gr_ManyFilesSomeData.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_datawrite -c 2,  -b "dataio" -e ".dat"
+./gr_single_dir.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_datawrite -c 2,  -b "xcons_dataio" -e ".dat" -t "xcons datadevice write"
 
-./gr_ManyFilesSomeData.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_datatotal -c 3, -b "dataio" -e ".dat"
+./gr_single_dir.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_datatotal -c 3, -b "xcons_dataio" -e ".dat" -t "xcons datadevice total"
 
-./gr_ManyFilesSomeData.pl -i "$output_dir/xcons_logio*.dat" -o $output_dir/xcons_logwrite -c 3,
+./gr_single_dir.pl -i "$output_dir/xcons_logio*.dat" -o $output_dir/xcons_logwrite -c 3, -b "xcons_logio" -e ".dat" -t "xcons logdevice total io"
