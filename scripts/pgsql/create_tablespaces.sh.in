@@ -1,0 +1,15 @@
+#!/bin/bash
+
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_customer LOCATION '/mnt/customer'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_lineitem LOCATION '/mnt/lineitem'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_nation LOCATION '/mnt/nation'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_orders LOCATION '/mnt/orders'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_part LOCATION '/mnt/part'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_partsupp LOCATION '/mnt/partsupp'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_region LOCATION '/mnt/region'"
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_supplier LOCATION '/mnt/supplier'"
+
+exit 0

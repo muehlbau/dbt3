@@ -27,7 +27,8 @@ USE_OPROFILE=0
 MAX=1
 GENERATE=0
 TEST_ARGS=
-while getopts "ef:gn:op:r:s:x:z" opt; do
+LOAD_ARGS=
+while getopts "ef:gn:op:q:r:s:tz" opt; do
 	case $opt in
 		e)
 			# PostgreSQL only.
@@ -47,14 +48,21 @@ while getopts "ef:gn:op:r:s:x:z" opt; do
 			;;
 		p)
 			# PostgreSQL only.
-			PARAMETERS=$OPTARG
+			LOAD_PARAMETERS=$OPTARG
+			;;
+		q)
+			# PostgreSQL only.
+			POWER_PARAMETERS=$OPTARG
 			;;
 		r)
 			# PostgreSQL only.
-			REDIR_TMP=$OPTARG
+			THROUGHPUT_PARAMETERS=$OPTARG
 			;;
 		s)
 			SEED=$OPTARG
+			;;
+		t)
+			LOAD_ARGS="$LOAD_ARGS -t"
 			;;
 		x)
 			# PostgreSQL only.
@@ -90,7 +98,7 @@ fi
 echo "Using seed: `cat $SEED_FILE`"
 
 # Load Test
-${SHELL} $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR/load -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE || exit 1
+${SHELL} $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR/load -p "${LOAD_PARAMETERS}" -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE $LOAD_ARGS || exit 1
 
 i=1
 while [ $i -le $MAX ]
@@ -100,14 +108,14 @@ do
 	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
 
 	# Power Test
-	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR/power${i} -p "$PARAMETERS" $TEST_ARGS -s ${SEED_FILE} -t $i -y $USE_OPROFILE || exit 1
+	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR/power${i} -p "${POWER_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i -y $USE_OPROFILE || exit 1
 
 	# Throughput Test
-	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR/throughput${i} -p "$PARAMETERS" $TEST_ARGS -s ${SEED_FILE} -t $i -y $USE_OPROFILE || exit 1
+	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR/throughput${i} -p "${THROUGHPUT_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i -y $USE_OPROFILE || exit 1
 
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
-	${SHELL}  $DBSCRIPTDIR/start_db.sh "$PARAMETERS"
+	${SHELL} $DBSCRIPTDIR/start_db.sh
 
 	# End time of a Power and Throughput test.
 	${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${i}"
@@ -120,7 +128,7 @@ do
 done
 
 # Get system details.
-${SHELL} $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS $REDIR_TMP $REDIR_LOG "$PARAMETERS" $OUTPUT_DIR
+${SHELL} $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$POWER_PARAMETERS" "$THROUGHPUT_PARAMETERS" $OUTPUT_DIR
 
 # Get query times.
 ${SHELL} $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out

@@ -54,12 +54,10 @@ getoprof () {
 
 db_param=""
 SF=0
-redirect_tmp=0
-redirect_xlog=0
 USE_OPROFILE=0
 GENERATE=0
-
-while getopts "f:g:o:p:r:x:y:" opt; do
+TABLESPACES=0
+while getopts "f:g:o:p:ty:" opt; do
 	case $opt in
 	f)
 		SF=$OPTARG
@@ -74,11 +72,8 @@ while getopts "f:g:o:p:r:x:y:" opt; do
 	p)
 		db_param=$OPTARG
 		;;
-	r)
-		redirect_tmp=$OPTARG
-		;;
-	x)
-		redirect_xlog=$OPTARG
+	t)
+		TABLESPACES=1
 		;;
 	y)
 		USE_OPROFILE=$OPTARG
@@ -112,7 +107,12 @@ ${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
 ${SHELL} $DBSCRIPTDIR/create_db.sh "$db_param" || exit 1
 	
-${SHELL} $DBSCRIPTDIR/create_tables.sh || exit 1
+if [ $TABLESPACES -eq 1 ]; then
+	${SHELL} $DBSCRIPTDIR/create_tablespaces.sh || exit 1
+	${SHELL} $DBSCRIPTDIR/create_tables_ts.sh || exit 1
+else
+	${SHELL} $DBSCRIPTDIR/create_tables.sh || exit 1
+fi
 
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
@@ -121,32 +121,8 @@ ${SHELL} $DBSCRIPTDIR/record_start.sh -n "LOAD"
 # Collect database statistics
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 
-# Handle moving the temp space.
-if [ $redirect_tmp -eq 1 ]
-then 
-	${SHELL} $DBSCRIPTDIR/stop_db.sh
-	echo "create symbolic links for pgsql_tmp"
-	rm -rf /db_tmp/*
-	${SHELL} $DBSCRIPTDIR/ln_pgsql_tmp.sh
-	${SHELL} $DBSCRIPTDIR/start_db.sh "$db_param"
-fi
-
-# Handle moving the database log.
-if [ $redirect_xlog -eq 1 ]
-then 
-	${SHELL} $DBSCRIPTDIR/stop_db.sh
-	echo "create symbolic links for pgsql_xlog"
-	rm -rf /db_xlog/*
-	ln -s /db_xlog $PGDATA/pg_xlog_tmp
-	sudo chmod 777 $PGDATA/pg_xlog_tmp
-	mv $PGDATA/pg_xlog/* $PGDATA/pg_xlog_tmp/
-	rm -rf $PGDATA/pg_xlog
-	mv $PGDATA/pg_xlog_tmp $PGDATA/pg_xlog
-	${SHELL} $SRCDIR/scripts/pgsql/start_db.sh "$db_param"
-fi
-
 date
-${SHELL} $DBSCRIPTDIR/load_db.sh || exit 1
+${SHELL} ${DBSCRIPTDIR}/load_db.sh ${TABLESPACES}|| exit 1
 date
 	
 date

@@ -118,6 +118,8 @@ if test "$DATABASE_TO_USE" == "pgsql"; then
     scripts/pgsql/create_db.sh \
     scripts/pgsql/create_indexes.sh \
     scripts/pgsql/create_tables.sh \
+    scripts/pgsql/create_tables_ts.sh \
+    scripts/pgsql/create_tablespaces.sh \
     scripts/pgsql/db_stats.sh \
     scripts/pgsql/drop_db.sh \
     scripts/pgsql/drop_tables.sh \
