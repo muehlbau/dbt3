@@ -32,12 +32,12 @@ dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics
 
 #***load test
 echo "`date`: start load test" 
+cd $DBT3_INSTALL_PATH/scripts/sapdb
 #get the start time
 s_time=`$GTIME`
 echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('LOAD', timestamp, $s_time)"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('LOAD', timestamp, $s_time)"
-#$DBT3_INSTALL_PATH/scripts/build_db/build_db.sh > build_db.log
-sleep 3
+./build_db.sh
 echo "sql_execute update time_statistics set e_time=timestamp where task_name='LOAD' and int_time=$s_time"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='LOAD' and int_time=$s_time"
 e_time=`$GTIME`
