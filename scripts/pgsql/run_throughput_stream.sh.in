@@ -11,8 +11,8 @@
 
 SRCDIR=@TOPDIR@
 
-if [ $# -ne 5 ]; then
-        echo "Usage: $0 <scale_factor> <perf_run_num> <stream_num> <0/1 - explain analyze off/on> <run dir>"
+if [ $# -ne 6 ]; then
+        echo "Usage: $0 <scale_factor> <perf_run_num> <stream_num> <0/1 - explain analyze off/on> <run dir> <seed file>"
         exit 1
 fi
 
@@ -21,13 +21,13 @@ perf_run_num=$2
 stream_num=$3
 EXPLAIN_ANALYZE=$4
 OUTPUT_DIR=$5
+SEED_FILE=$6
 RUNDIR=$OUTPUT_DIR/run
 
 GTIME="$SRCDIR/dbdriver/utils/gtime"
 QGEN="$SRCDIR/datagen/dbgen/qgen"
 
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
-seed_file="$RUNDIR/seed"
 query_file="$RUNDIR/throughput_query$stream_num"
 tmp_query_file="$RUNDIR/tmp_throughput_query$stream_num.sql"
 param_file="$RUNDIR/throughput_param$stream_num"
@@ -36,14 +36,14 @@ parsequery_dir="$SRCDIR/dbdriver/utils"
 # output PID to a tmp file
 echo "$$" > $RUNDIR/PID$stream_num
 
-if [ ! -f $seed_file ];
+if [ ! -f $SEED_FILE ];
 then
-        echo "creating seed file $seed_file, you can change the seed by "
+        echo "creating seed file $SEED_FILE, you can change the seed by "
 	echo "modifying this file"
-	${SHELL} $SRCDIR/scripts/init_seed.sh > $seed_file
+	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
 fi
 
-seed=`cat $seed_file`
+seed=`cat $SEED_FILE`
 
 let "seed = $seed + $stream_num"
 # generate the queries for thoughput test
@@ -59,12 +59,13 @@ fi
 $parsequery_dir/parse_query $query_file $tmp_query_file T $perf_run_num $stream_num
 
 # get the execution plan for each query
-mkdir -p $RUNDIR/plan
+PLANDIR=$OUTPUT_DIR/db/plans
+mkdir -p $PLANDIR
 i=1
 while [ $i -le 22 ]
 do
 	if [ $i -ne 15 ]; then
-		${SHELL} $DBSCRIPTDIR/get_query_plan.sh $scale_factor $i $RUNDIR/plan/throughput_stream${stream_num}_query$i.txt $RUNDIR
+		${SHELL} $DBSCRIPTDIR/get_query_plan.sh $scale_factor $i $PLANDIR/throughput_stream${stream_num}_query$i.txt $RUNDIR $SEED_FILE
 	fi
 	let "i=$i+1"
 done

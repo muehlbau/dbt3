@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_iostat.pl 1214 2005-03-06 10:05:56Z fimath $ $Author: fimath $ $Date
+# $Id: parse_iostat.pl 1239 2005-03-10 22:46:12Z fimath $ $Author: fimath $ $Date
 
 use strict;
 use English;
@@ -257,9 +257,10 @@ if ( $writeme ) {
 $os_version = get_os_version;
 
 $iostat_version = get_iostat_version();
-print "os is $os_version, iostat is  $iostat_version\n";
+#print "os is $os_version, iostat is  $iostat_version\n";
 
-my $keyfile = "iostat.$iostat_version.key";
+#my $keyfile = "iostat.$iostat_version.key";
+my $keyfile = "iostat.key";
 my $header_type = 'ap';
 # if the key file exists for this version
 # use human readable header

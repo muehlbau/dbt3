@@ -26,8 +26,7 @@ clearprof () {
 }
 
 getprof () {
-        mkdir -p $OUTPUT_DIR/prof
-        sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/prof/${profname}.prof
+        sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/readprofile.txt
 }
 
 clearoprof () {
@@ -44,29 +43,32 @@ clearoprof () {
 }
 
 getoprof () {
-        mkdir -p $OUTPUT_DIR/oprofile/${profname}/annotate
+        mkdir -p $OUTPUT_DIR/oprofile/annotate
         sudo opcontrol --dump
-        sudo opreport -l -o $OUTPUT_DIR/oprofile/${profname}/oprofile.txt
+        sudo opreport -l -o $OUTPUT_DIR/oprofile/oprofile.txt
         sudo opcontrol --stop
-        cp -pR /var/lib/oprofile/samples/current $OUTPUT_DIR/oprofile/${profname}/
-        sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/${profname}/assembly.txt 2>&1
-        sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/${profname}/annotate
-        sudo opstack > $OUTPUT_DIR/oprofile/${profname}/call-graph.txt
+        cp -pR /var/lib/oprofile/samples/current $OUTPUT_DIR/oprofile/
+        sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/assembly.txt 2>&1
+        sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/annotate
+        sudo opstack > $OUTPUT_DIR/oprofile/call-graph.txt
 }
 
 TEST_ARGS=
 
-while getopts "ef:n:o:p:t:y:" opt; do
+while getopts "ef:n:o:p:s:t:y:" opt; do
 	case $opt in
 	e) TEST_ARGS="$TEST_ARGS -e"
 		;;
 	f) scale_factor=$OPTARG
 		;;
+	n) num_stream=$OPTARG
+		;;
 	o) OUTPUT_DIR=$OPTARG
+	   mkdir -p $OUTPUT_DIR/results
 		;;
 	p) db_param=$OPTARG
 		;;
-	n) num_stream=$OPTARG
+	s) SEED_FILE=$OPTARG
 		;;
 	t) TAG=$OPTARG
 		;;
@@ -75,9 +77,13 @@ while getopts "ef:n:o:p:t:y:" opt; do
 	esac
 done
 
-RUNDIR="$OUTPUT_DIR/run"
+SEED=`cat $SEED_FILE`
+echo "Seed : $SEED" > $OUTPUT_DIR/readme.txt
+
+RUNDIR=$OUTPUT_DIR/run
+mkdir -p $RUNDIR
+
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
-seed_file="$RUNDIR/seed"
 parsequery_dir="$SRCDIR/dbdriver/utils"
 
 GTIME="$SRCDIR/dbdriver/utils/gtime"
@@ -101,16 +107,16 @@ s_time=`$GTIME`
 ${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT"
 
 # Start collecting system statistics. 
-${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p throughput${TAG}
+${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
 # Start collecting database statistics.
-${SHELL} $DBSTATS $SID $OUTPUT_DIR "throughput${TAG}" &
+${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 
 # Start the streams.
-${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR || exit 1
+${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} || exit 1
 
 # Stop collecting system statistics.
-${SHELL} $SRCDIR/scripts/stop_sysstats.sh
+${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR
 
 # no effect
 #killall $DBSTATS

@@ -1,22 +1,76 @@
 #!/bin/bash
 
+DIR=`dirname $0`
+. ${DIR}/dbt3_profile || exit 1
+
 if [ $# -ne 1 ]; then
 	echo "usage: gen_html.sh <results directory>"
 fi
 
 DIR=$1
+
+SRCDIR=@TOPDIR@
 DBDIR=@DATABASE_TO_USE@
 
-OS=`uname -s -r`
-CPU=`uname -p`
+OSVER=`uname -s -r`
+DBVER=`${SHELL} $DBDIR/get_version.sh`
 
-DBPARAM=`grep db_param ${DIR}/config.txt | awk '{print $2}'`
+CPU_MODEL=`uname -p`
+CPUS=`grep CPUS ${DIR}/config.txt | awk '{print $2}'`
+CPU_MHZ=`grep MHz ${DIR}/config.txt | awk '{print $2}'`
+RAM=`grep memory ${DIR}/config.txt | awk '{print $2}'`
+
 SF=`grep scale_factor ${DIR}/config.txt | awk '{print $2}'`
 STREAMS=`grep num_stream ${DIR}/config.txt | awk '{print $2}'`
 
+LOAD=`grep LOAD ${DIR}/q_time.out | awk '{ print $9 }'`
 COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{print $3}'`
 POWER=`grep power ${DIR}/calc_composite.out | awk '{print $3}'`
 THROUGHPUT=`grep throughput ${DIR}/calc_composite.out | awk '{print $3}'`
+
+gen_results()
+{
+	SUBDIR=$2
+
+	echo "<html>" > ${SUBDIR}/index.html
+	echo "<head>" >> ${SUBDIR}/index.html
+	echo "<title>Database Test 3 $1 Results</title>" >> ${SUBDIR}/index.html
+	echo "</head>" >> ${SUBDIR}/index.html
+	echo "<body>" >> ${SUBDIR}/index.html
+
+	echo "<img src=\"plots/vmstat_cpu.png\" />" >> ${SUBDIR}/index.html
+
+	echo "<h2>System Statistics</h2>" >> ${SUBDIR}/index.html
+	echo "<a href=\"sar.txt\">sar</a><br />" >> ${SUBDIR}/index.html
+	echo "<a href=\"vmstat.out\">vmstat</a><br />" >> ${SUBDIR}/index.html
+	echo "<a href=\"iostatx.out\">iostat</a><br />" >> ${SUBDIR}/index.html
+	echo "<a href=\"ipcs.out\">ipcs</a><br />" >> ${SUBDIR}/index.html
+
+	echo "<h2>Kernel and Application Profiles</h2>" >> ${SUBDIR}/index.html
+	echo "<p>"
+	if [ -f "${SUBDIR}/readprofile.txt" ]; then
+		echo "<a href=\"readprofile.txt\">readprofile</a><br />" >> ${SUBDIR}/index.html
+	fi
+	if [ -d "${SUBDIR}/oprofile" ]; then
+		echo "<a href=\"oprofile/oprofile.txt\">oprofile</a><br />" >> ${SUBDIR}/index.html
+		echo "<a href=\"oprofile/assembly.txt\">annotated assembly</a><br />" >> ${SUBDIR}/index.html
+	fi
+	echo "</p>" >> ${SUBDIR}/index.html
+
+	echo "<h2>Database Information</h2>" >> ${SUBDIR}/index.html
+	echo "<a href=\"param.out\">database parameters</a><br />" >> ${SUBDIR}/index.html
+	if [ "$1" != "Load Test" ]; then
+		echo "<a href=\"db/\">database raw statistics</a><br />" >> ${SUBDIR}/index.html
+		echo "<a href=\"db/indexes.out\">table indexes</a><br />" >> ${SUBDIR}/index.html
+		echo "<a href=\"db/plans\">query plans</a><br />" >> ${SUBDIR}/index.html
+		echo "<a href=\"results\">query results</a><br />" >> ${SUBDIR}/index.html
+	fi
+
+	echo "</body>" >> ${SUBDIR}/index.html
+	echo "</html>" >> ${SUBDIR}/index.html
+
+	${SHELL} $SRCDIR/scripts/gen_graphs.sh ${SUBDIR} ${SUBDIR}/plots > ${SUBDIR}/gen_graphs.out 2>&1
+}
 
 echo "<html>"
 echo "<head>"
@@ -27,68 +81,63 @@ echo "<h1>Database Test 3 Results</h1>"
 
 echo "<table border=\"1\">"
 echo "<tr>"
-echo "<th>Software Version</th><th>Hardware Configuration</th><th>Run Parameters</th>"
+echo "<th>Software Version</th><th>Hardware Configuration</th><th>Workload Parameters</th>"
 echo "</tr>"
 echo "<tr>"
-echo "<td>Operating System: ${OS}</td><td>Processor: ${CPU}</td><td>Scale Factor: ${SF}</td>"
+echo "<td>Operating System: ${OSVER}</td><td>${CPUS} CPUs @ ${CPU_MHZ}</td><td>Scale Factor: ${SF}</td>"
 echo "</tr>"
 echo "<tr>"
-echo "<td></td><td></td><td>Streams: ${STREAMS}</td>"
+echo "<td>Database Server: ${DBVER}</td><td>${CPU_MODEL}</td><td>Streams: ${STREAMS}</td>"
 echo "</tr>"
 echo "<tr>"
-echo "<td></td><td></td><td>Database Parameters: ${DBPARAM}</td>"
+echo "<td></td><td>${RAM} KB RAM</td><td></td>"
 echo "</tr>"
 echo "</table>"
 
 echo "<h2>Metrics</h2>"
-echo "<table border=\"1\">"
-echo "<th>Composite</th><th>Query Processing Power</th><th>Throughput Numerical Quantity</th>"
-echo "<tr>"
-echo "<td>${COMPOSITE}</td><td>${POWER}</td><td>${THROUGHPUT}</td>"
-echo "</tr>"
-echo "</table>"
+echo "<p>"
+echo "Composite: ${COMPOSITE}<br />"
+echo "Load Time: ${LOAD}<br />"
+echo "Query Processing Power: ${POWER}<br />"
+echo "Throughput Numerical Quantity: ${THROUGHPUT}"
+echo "</p>"
 
 echo "<h2>Query Times</h2>"
 echo "<img src=\"q_time.png\" />"
 echo "<p>"
-echo "<a href=\"q_time.out\">Text Version</a>"
+echo "<a href=\"q_time.out\">Text Version of Chart</a>"
 echo "</p>"
 
-echo "<h2>System Statistics</h2>"
-echo "<table border=\"1\">"
-echo "<tr>"
-echo "<th>Load Test</th><th>Power Test</th><th>Throughput Test</th>"
-echo "</tr>"
-echo "<tr>"
-echo "<td><a href=\"plot/load.sar.txt\">sar</a></td><td><a href=\"plot/power.sar.txt\">sar</a></td><td><a href=\"plot/thruput.sar.txt\">sar</a></td>"
-echo "</tr>"
-echo "<tr>"
-echo "<td><a href=\"plot/load.vmstat.txt\">vmstat</a></td><td><a href=\"plot/power.vmstat.txt\">vmstat</a></td><td><a href=\"plot/thruput.vmstat.txt\">vmstat</a></td>"
-echo "</tr>"
-echo "<tr>"
-echo "<td><a href=\"plot/load.iostatx.txt\">iostatx</a></td><td><a href=\"plot/power.iostatx.txt\">iostatx</a></td><td><a href=\"plot/thruput.iostatx.txt\">iostatx</a></td>"
-echo "</tr>"
-echo "</table>"
+# Generate individual Web pages for each test result directory.
+echo "<h2>Individual Test Results</h2>"
 
-echo "<h2>Kernel and Application Profiles</h2>"
-echo "<table border=\"1\">"
-echo "<tr>"
-echo "<th>Load Test</th><th>Power Test</th><th>Throughput Test</th>"
-echo "</tr>"
-if [ -d ${DIR}/prof ]; then
-	echo "<tr>"
-	echo "<td><a href=\"prof/Load_Test.prof\">readprofile</a></td><td><a href=\"prof/Power_Test_1.prof\">readprofile</a></td><td><a href=\"prof/Throughput_Test_1.prof\">readprofile</a></td>"
-	echo "</tr>"
-fi
-if [ -d ${DIR}/oprofile ]; then
-	echo "<tr>"
-	echo "<td><a href=\"oprofile/Load_Test/oprofile.txt\">oprofile</a></td><td><a href=\"oprofile/Power_Test_1/oprofile.txt\">oprofile</a></td><td><a href=\"oprofile/Throughput_Test_1/Throughput_Test_1/oprofile.txt\">oprofile</a></td>"
-	echo "</tr>"
-	echo "<tr>"
-	echo "<td><a href=\"oprofile/Load_Test/assembly.txt\">annotated assembly</a></td><td><a href=\"oprofile/Power_Test_1/assembly.txt\">annotated assembly</a></td><td><a href=\"oprofile/Throughput_Test_1/Throughput_Test_1/assembly.txt\">annotated assembly</a></td>"
-	echo "</tr>"
-fi
-echo "</table>"
+cd ${DIR}
+
+# There will always only be 1 load test.
+gen_results "Load Test" "load"
+echo "<p>"
+echo "<a href=\"load\">Load Test</a>"
+echo "</p>"
+
+echo "<p>"
+i=1
+for ARG in `ls -d power*`
+do
+	gen_results "Power Test" $ARG
+	echo "<a href=\"$ARG\">Power Test ${i}</a>"
+	let "i=$i+1"
+done
+echo "</p>"
+
+echo "<p>"
+i=1
+for ARG in `ls -d throughput*`
+do
+	gen_results "Throughput Test" $ARG
+	echo "<a href=\"$ARG\">Throughput Test ${i}</a>"
+	let "i=$i+1"
+done
+echo "</p>"
 
 echo "</body>"
 echo "</html>"

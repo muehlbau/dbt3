@@ -1,3 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/drop_tables.sql
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+@PSQL@ -d $SID -c "DROP TABLE supplier;"
+@PSQL@ -d $SID -c "DROP TABLE part;"
+@PSQL@ -d $SID -c "DROP TABLE partsupp;"
+@PSQL@ -d $SID -c "DROP TABLE customer;"
+@PSQL@ -d $SID -c "DROP TABLE orders;"
+@PSQL@ -d $SID -c "DROP TABLE lineitem;"
+@PSQL@ -d $SID -c "DROP TABLE nation;"
+@PSQL@ -d $SID -c "DROP TABLE region;"
+
+exit 0

@@ -10,10 +10,11 @@
 
 SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
+SCRIPTDIR=$SRCDIR/scripts
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
 DIR=`dirname $0`
-. ${DIR}/dbt3_profile
+. ${DIR}/dbt3_profile || exit 1
 
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
@@ -77,12 +78,10 @@ fi
 
 # Create output directories.
 OUTPUT_DIR=$SRCDIR/scripts/output/$RUN_NUMBER
-RUN_PATH=$OUTPUT_DIR/run
 mkdir -p $OUTPUT_DIR
-mkdir -p $RUN_PATH
 
 # Set the seed file.
-SEED_FILE=$RUN_PATH/seed
+SEED_FILE=$OUTPUT_DIR/seed
 if [ $SEED -eq 0 ]; then
 	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
 else
@@ -91,7 +90,7 @@ fi
 echo "Using seed: `cat $SEED_FILE`"
 
 # Load Test
-${SHELL} $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE || exit 1
+${SHELL} $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR/load -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE || exit 1
 
 i=1
 while [ $i -le $MAX ]
@@ -101,10 +100,10 @@ do
 	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
 
 	# Power Test
-	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
+	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR/power${i} -p "$PARAMETERS" $TEST_ARGS -s ${SEED_FILE} -t $i -y $USE_OPROFILE || exit 1
 
 	# Throughput Test
-	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
+	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR/throughput${i} -p "$PARAMETERS" $TEST_ARGS -s ${SEED_FILE} -t $i -y $USE_OPROFILE || exit 1
 
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
@@ -121,17 +120,19 @@ do
 done
 
 # Get system details.
-${SHELL} $DBSCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS $REDIR_TMP $REDIR_LOG "$PARAMETERS" $OUTPUT_DIR
+${SHELL} $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS $REDIR_TMP $REDIR_LOG "$PARAMETERS" $OUTPUT_DIR
 
 # Get query times.
 ${SHELL} $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out
 
 # Calculate composite score.      
 perl $SRCDIR/scripts/get_composite.pl -p 1 -s $SCALE_FACTOR -n $STREAMS -o $OUTPUT_DIR/calc_composite.out
-cp -p dbt3.out $OUTPUT_DIR
-${SHELL} $SRCDIR/data_collect/resulttools/dbt3_gen_graphs.sh $OUTPUT_DIR/plot $OUTPUT_DIR/plot
 perl $SRCDIR/data_collect/resulttools/graph_query_time.pl --if $OUTPUT_DIR/q_time.out
 ${SHELL} $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
 echo $RUN_NUMBER > run_number
+
+echo "Results are in $OUTPUT_DIR"
+
+exit 0

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_sar.pl 1214 2005-03-06 10:05:56Z fimath $ $Author: fimath $ $Date
+# $Id: parse_sar.pl 1239 2005-03-10 22:46:12Z fimath $ $Author: fimath $ $Date
 
 use strict;
 use English;
@@ -156,7 +156,8 @@ if ( $writeme ) {
 $os_version = get_os_version;
 
 $sar_version = get_sar_version();
-my $keyfile = "sar.$sar_version.key";
+#my $keyfile = "sar.$sar_version.key";
+my $keyfile = "sar.key";
 my $header_type = 'ap';
 # if the key file exists for this version
 # use human readable header

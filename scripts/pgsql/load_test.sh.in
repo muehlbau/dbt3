@@ -17,6 +17,7 @@ SRCDIR=@TOPDIR@
 
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
 
+DBSTATS="$DBSCRIPTDIR/db_stats.sh"
 GTIME="$SRCDIR/dbdriver/utils/gtime"
 
 clearprof () {
@@ -24,8 +25,7 @@ clearprof () {
 }
 
 getprof () {
-        mkdir -p $OUTPUT_DIR/prof
-	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/prof/${profname}.prof
+	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/readprofile.txt
 }
 
 clearoprof () {
@@ -42,14 +42,14 @@ clearoprof () {
 }
 
 getoprof () {
-	mkdir -p $OUTPUT_DIR/oprofile/${profname}/annotate
+	mkdir -p $OUTPUT_DIR/oprofile/annotate
 	sudo opcontrol --dump
-	sudo opreport -l -o $OUTPUT_DIR/oprofile/${profname}/oprofile.txt
+	sudo opreport -l -o $OUTPUT_DIR/oprofile/oprofile.txt
 	sudo opcontrol --stop
-	cp -pR /var/lib/oprofile/samples/current $OUTPUT_DIR/oprofile/${profname}/
-	sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/${profname}/assembly.txt 2>&1
-	sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/${profname}/annotate
-	sudo opstack > $OUTPUT_DIR/oprofile/${profname}/call-graph.txt
+	cp -pR /var/lib/oprofile/samples/current $OUTPUT_DIR/oprofile/
+	sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/assembly.txt 2>&1
+	sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/annotate
+	sudo opstack > $OUTPUT_DIR/oprofile/call-graph.txt
 }
 
 db_param=""
@@ -69,6 +69,7 @@ while getopts "f:g:o:p:r:x:y:" opt; do
 		;;
 	o)
 		OUTPUT_DIR=$OPTARG
+		mkdir -p $OUTPUT_DIR
 		;;
 	p)
 		db_param=$OPTARG
@@ -89,13 +90,10 @@ while getopts "f:g:o:p:r:x:y:" opt; do
 done
 
 if [ $GENERATE -ne 0 ]; then
-	echo "Generating data... scale factor $SF"
-	cd $SRCDIR/datagen/dbgen
+	echo "Generating data for scale factor $SF..."
 	date
 	$SRCDIR/datagen/dbgen/dbgen -s $SF
-	echo "data files are generated"
 	date
-	cd $SRCDIR/scripts/pgsql
 else
 	echo "Create the database using existing datafiles."
 fi
@@ -110,30 +108,33 @@ if [ $USE_OPROFILE -eq 1 ]; then
 fi
 
 # Start collecting system statistics.
-${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p load
+${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
-${SHELL} $SRCDIR/scripts/pgsql/create_db.sh "$db_param"
+${SHELL} $DBSCRIPTDIR/create_db.sh "$db_param" || exit 1
 	
-${SHELL} $SRCDIR/scripts/pgsql/create_tables.sh
+${SHELL} $DBSCRIPTDIR/create_tables.sh || exit 1
 
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
 ${SHELL} $DBSCRIPTDIR/record_start.sh -n "LOAD"
 
+# Collect database statistics
+${SHELL} $DBSTATS $SID $OUTPUT_DIR &
+
 # Handle moving the temp space.
 if [ $redirect_tmp -eq 1 ]
 then 
-	${SHELL} $SRCDIR/scripts/pgsql/stop_db.sh
+	${SHELL} $DBSCRIPTDIR/stop_db.sh
 	echo "create symbolic links for pgsql_tmp"
 	rm -rf /db_tmp/*
-	${SHELL} $SRCDIR/scripts/pgsql/ln_pgsql_tmp.sh
-	${SHELL} $SRCDIR/scripts/pgsql/start_db.sh "$db_param"
+	${SHELL} $DBSCRIPTDIR/ln_pgsql_tmp.sh
+	${SHELL} $DBSCRIPTDIR/start_db.sh "$db_param"
 fi
 
 # Handle moving the database log.
 if [ $redirect_xlog -eq 1 ]
 then 
-	${SHELL} $SRCDIR/scripts/pgsql/stop_db.sh
+	${SHELL} $DBSCRIPTDIR/stop_db.sh
 	echo "create symbolic links for pgsql_xlog"
 	rm -rf /db_xlog/*
 	ln -s /db_xlog $PGDATA/pg_xlog_tmp
@@ -145,15 +146,15 @@ then
 fi
 
 date
-${SHELL} $SRCDIR/scripts/pgsql/load_db.sh || exit 1
+${SHELL} $DBSCRIPTDIR/load_db.sh || exit 1
 date
 	
 date
-${SHELL} $SRCDIR/scripts/pgsql/create_indexes.sh || exit 1
+${SHELL} $DBSCRIPTDIR/create_indexes.sh || exit 1
 date
 	
 date
-${SHELL} $SRCDIR/scripts/pgsql/update_statistics.sh || exit 1
+${SHELL} $DBSCRIPTDIR/update_statistics.sh || exit 1
 date
 
 ${SHELL} $DBSCRIPTDIR/record_end.sh -n "LOAD"
@@ -163,7 +164,7 @@ let "diff_time=$e_time-$s_time"
 echo "Elapsed time for Load Test : $diff_time seconds"
 
 # Stop collecting system statistics.
-${SHELL} $SRCDIR/scripts/stop_sysstats.sh
+${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR
 
 # Collect profile data.
 if [ -f /proc/profile ]; then
