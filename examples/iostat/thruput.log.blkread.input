@@ -1,0 +1,7 @@
+plot "thruput.iostat.rd!c0d13.dat" using 1:5 title "rd!c0d13" with lines, "thruput.iostat.rd!c0d27.dat" using 1:5 title "rd!c0d27" with lines, "thruput.iostat.rd!c1d13.dat" using 1:5 title "rd!c1d13" with lines, "thruput.iostat.rd!c1d27.dat" using 1:5 title "rd!c1d27" with lines 
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Blocks Read"
+set term png small color
+set output "thruput.log.blkread.png"
+set yrange [0:]
+replot

@@ -1,0 +1,7 @@
+plot "power.iostat.sde.dat" using 1:3 title "sde" with lines, "power.iostat.sdf.dat" using 1:3 title "sdf" with lines, "power.iostat.sdg.dat" using 1:3 title "sdg" with lines, "power.iostat.sdh.dat" using 1:3 title "sdh" with lines, "power.iostat.sdi.dat" using 1:3 title "sdi" with lines, "power.iostat.sdj.dat" using 1:3 title "sdj" with lines, "power.iostat.sdk.dat" using 1:3 title "sdk" with lines, "power.iostat.sdl.dat" using 1:3 title "sdl" with lines, "power.iostat.sdm.dat" using 1:3 title "sdm" with lines, "power.iostat.sdn.dat" using 1:3 title "sdn" with lines, "power.iostat.sdo.dat" using 1:3 title "sdo" with lines, "power.iostat.sdp.dat" using 1:3 title "sdp" with lines, "power.iostat.sdq.dat" using 1:3 title "sdq" with lines, "power.iostat.sdr.dat" using 1:3 title "sdr" with lines
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Blocks Read per Second"
+set term png small color
+set output "power.temp.blkreadps.png"
+set yrange [0:]
+replot

@@ -1,0 +1,7 @@
+plot "load.iostat.sde.dat" using 1:2 title "sde" with lines, "load.iostat.sdf.dat" using 1:2 title "sdf" with lines, "load.iostat.sdg.dat" using 1:2 title "sdg" with lines, "load.iostat.sdh.dat" using 1:2 title "sdh" with lines, "load.iostat.sdi.dat" using 1:2 title "sdi" with lines, "load.iostat.sdj.dat" using 1:2 title "sdj" with lines, "load.iostat.sdk.dat" using 1:2 title "sdk" with lines, "load.iostat.sdl.dat" using 1:2 title "sdl" with lines, "load.iostat.sdm.dat" using 1:2 title "sdm" with lines, "load.iostat.sdn.dat" using 1:2 title "sdn" with lines, "load.iostat.sdo.dat" using 1:2 title "sdo" with lines, "load.iostat.sdp.dat" using 1:2 title "sdp" with lines, "load.iostat.sdq.dat" using 1:2 title "sdq" with lines, "load.iostat.sdr.dat" using 1:2 title "sdr" with lines
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Transactions per Second"
+set term png small color
+set output "load.temp.tps.png"
+set yrange [0:]
+replot

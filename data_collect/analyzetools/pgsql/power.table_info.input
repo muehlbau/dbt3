@@ -1,0 +1,7 @@
+plot "power.supplier.table_info.data" title "supplier" with lines, "power.part.table_info.data" title "part" with lines, "power.partsupp.table_info.data" title "partsupp" with lines, "power.customer.table_info.data" title "customer" with lines, "power.orders.table_info.data" title "orders" with lines, "power.lineitem.table_info.data" title "lineitem" with lines, "power.nation.table_info.data" title "nation" with lines, "power.region.table_info.data" title "region" with lines, "power.time_statistics.table_info.data" title "time_statistics" with lines
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Blocks Read"
+set term png small color
+set output "power.table_info.png"
+set yrange [0:]
+replot

@@ -1,0 +1,7 @@
+plot "thruput.iostat.sde.dat" using 1:5 title "sde" with lines, "thruput.iostat.sdf.dat" using 1:5 title "sdf" with lines, "thruput.iostat.sdg.dat" using 1:5 title "sdg" with lines, "thruput.iostat.sdh.dat" using 1:5 title "sdh" with lines, "thruput.iostat.sdi.dat" using 1:5 title "sdi" with lines, "thruput.iostat.sdj.dat" using 1:5 title "sdj" with lines, "thruput.iostat.sdk.dat" using 1:5 title "sdk" with lines, "thruput.iostat.sdl.dat" using 1:5 title "sdl" with lines, "thruput.iostat.sdm.dat" using 1:5 title "sdm" with lines, "thruput.iostat.sdn.dat" using 1:5 title "sdn" with lines, "thruput.iostat.sdo.dat" using 1:5 title "sdo" with lines, "thruput.iostat.sdp.dat" using 1:5 title "sdp" with lines, "thruput.iostat.sdq.dat" using 1:5 title "sdq" with lines, "thruput.iostat.sdr.dat" using 1:5 title "sdr" with lines
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Blocks Read"
+set term png small color
+set output "thruput.temp.blkread.png"
+set yrange [0:]
+replot

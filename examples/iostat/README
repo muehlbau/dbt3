@@ -1,0 +1,3 @@
+These are sample files for graphing iostat data when PostgreSQL has been
+painstakingly partitioned such that the log and temp space has been
+manually moved to separate disk partitions for each test phase.

@@ -1,0 +1,7 @@
+plot "load.iostat.rd!c0d13.dat" using 1:2 title "rd!c0d13" with lines, "load.iostat.rd!c0d27.dat" using 1:2 title "rd!c0d27" with lines, "load.iostat.rd!c1d13.dat" using 1:2 title "rd!c1d13"  with lines, "load.iostat.rd!c1d27.dat" using 1:2 title "rd!c1d27" with lines 
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Transactions per Second"
+set term png small color
+set output "load.log.tps.png"
+set yrange [0:]
+replot

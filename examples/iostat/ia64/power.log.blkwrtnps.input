@@ -1,0 +1,7 @@
+plot "power.iostat.cciss!c0d5.dat" using 1:5 title "cciss!c0d5" with lines, "power.iostat.cciss!c0d12.dat" using 1:5 title "cciss!c0d12" with lines, "power.iostat.cciss!c1d5.dat" using 1:5 title "cciss!c1d5" with lines, "power.iostat.cciss!c1d12.dat" using 1:5 title "cciss!c1d12" with lines, "power.iostat.cciss!c2d5.dat" using 1:5 title "cciss!c2d5" with lines, "power.iostat.cciss!c2d12.dat" using 1:5 title "cciss!c2d12" with lines, "power.iostat.cciss!c0d6.dat" using 1:5 title "cciss!c0d6" with lines, "power.iostat.cciss!c0d13.dat" using 1:5 title "cciss!c0d13" with lines, "power.iostat.cciss!c1d6.dat" using 1:5 title "cciss!c1d6" with lines, "power.iostat.cciss!c1d13.dat" using 1:5 title "cciss!c1d13" with lines, "power.iostat.cciss!c2d6.dat" using 1:5 title "cciss!c2d6" with lines, "power.iostat.cciss!c2d13.dat" using 1:5 title "cciss!c2d13" with lines
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Blocks Written per Second"
+set term png small color
+set output "power.log.blkwrtnps.png"
+set yrange [0:]
+replot

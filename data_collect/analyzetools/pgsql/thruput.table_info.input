@@ -1,0 +1,7 @@
+plot "thruput.supplier.table_info.data" title "supplier" with lines, "thruput.part.table_info.data" title "part" with lines, "thruput.partsupp.table_info.data" title "partsupp" with lines, "thruput.customer.table_info.data" title "customer" with lines, "thruput.orders.table_info.data" title "orders" with lines, "thruput.lineitem.table_info.data" title "lineitem" with lines, "thruput.nation.table_info.data" title "nation" with lines, "thruput.region.table_info.data" title "region" with lines, "thruput.time_statistics.table_info.data" title "time_statistics" with lines
+set xlabel "Elapsed Time (Minutes)"
+set ylabel "Blocks Read"
+set term png small color
+set output "thruput.table_info.png"
+set yrange [0:]
+replot
