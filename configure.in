@@ -110,6 +110,7 @@ AC_OUTPUT([
 Makefile \
 datagen/dbgen/Makefile \
 scripts/dbt3_profile \
+scripts/gen_data.sh \
 data_collect/sapdb/dbt3_stats.sh \
 data_collect/sapdb/power_test_stats.sh \
 data_collect/sapdb/single_query_stats.sh \

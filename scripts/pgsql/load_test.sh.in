@@ -90,12 +90,9 @@ done
 
 if [ $GENERATE -ne 0 ]; then
 	echo "Generating data... scale factor $SF"
-	cd $SRCDIR/datagen/dbgen
-	date
-	$SRCDIR/datagen/dbgen/dbgen -s $SF
+	bash $SRCDIR/scripts/gen_data.sh $SF
 	echo "data files are generated"
 	date
-	cd $SRCDIR/scripts/pgsql
 else
 	echo "build the database without generating the data files"
 fi
