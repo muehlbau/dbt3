@@ -1,6 +1,6 @@
 #!/bin/sh
 #this script is used to build the database
-# ./build_db.sh -g <items> <eus> will generate data and build the database
+# ./build_db.sh -g <scale_factor> will generate data and build the database
 # ./build_db.sh will load the database from previously generated data files
 
 if [ $# -ne 0 ] # Script invoked with command-line args
