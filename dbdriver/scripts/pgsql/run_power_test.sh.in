@@ -31,17 +31,17 @@ echo "`date`: =======power test $perf_run_num========"
 
 s_time_power=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER', current_timestamp, $s_time_power)"
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER', current_timestamp, $s_time_power);"
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER', current_timestamp, $s_time_power);"
 
 #***run rf1
 #get the start time
 echo "`date`: start rf1 " 
 s_time=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER.RF1', current_timestamp, $s_time)"
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER.RF1', current_timestamp, $s_time);"
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER.RF1', current_timestamp, $s_time);"
 $dbdriver_pgsql_path/run_rf1.sh $scale_factor 
 echo "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER.RF1' and int_time=$s_time"
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER.RF1' and int_time=$s_time;"
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER.RF1' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: rf1 end " 
 let "diff_time=$e_time-$s_time"
@@ -54,18 +54,18 @@ $dbdriver_pgsql_path/run_power_query.sh $scale_factor $perf_run_num
 echo "`date`: start rf2 " 
 s_time=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER.RF2', current_timestamp, $s_time)"
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER.RF2', current_timestamp, $s_time);"
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.POWER.RF2', current_timestamp, $s_time);"
 # not execute rf2 for now wait for 7.4
 #$dbdriver_pgsql_path/run_rf2.sh
 echo "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER.RF2' and int_time=$s_time"
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER.RF2' and int_time=$s_time;"
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER.RF2' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: rf2 end " 
 let "diff_time=$e_time-$s_time"
 echo "elapsed time for rf2 $diff_time" 
 
 echo "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER' and int_time=$s_time_power"
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER' and int_time=$s_time_power;"
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.POWER' and int_time=$s_time_power;"
 
 e_time_power=`$GTIME`
 echo "`date`: end power test run "
