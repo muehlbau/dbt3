@@ -10,7 +10,7 @@ extern struct sql_statement_t sql_statement;
 int get_statement(FILE *query_input)
 {
 	char line[128];
-	char *pos_begin, *pos_end;
+	char *pos_begin;
 	int comment_index, statement_index;
 
 	sql_statement.statement[0]='\0';
