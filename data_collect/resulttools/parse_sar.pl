@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_sar.pl 903 2003-04-09 22:18:05Z jztpcw $ $Author: jztpcw $ $Date
+# $Id: parse_sar.pl 996 2003-05-16 00:22:14Z jztpcw $ $Author: jztpcw $ $Date
 
 use strict;
 use English;
@@ -63,7 +63,7 @@ open sar binary with option and generate gnuplot data files
 my ( $option, $infile, $outfile, $comment, $num_cpus, $configfile, 
 	$writeme, $hlp );
 
-my ( %options, $cline, $num_columns, $start_column, $sar_path, $os_version,
+my ( %options, $cline, $num_columns, $start_column, $os_version,
 	$sar_version );
 
 my $fcf = new FileHandle;
@@ -155,17 +155,7 @@ if ( $writeme ) {
 
 $os_version = get_os_version;
 
-# this is used my system, you might need to change it
-if ( $os_version =~ /2\.4\./ )
-{
-	$sar_path = "/usr/bin";
-}
-elsif ( $os_version =~ /2\.5\./ )
-{
-	$sar_path = "/usr/local/bin";
-}
-
-$sar_version = get_iostat_version($sar_path);
+$sar_version = get_sar_version();
 my $keyfile = "sar.$sar_version.key";
 my $header_type = 'ap';
 # if the key file exists for this version
@@ -198,12 +188,12 @@ if ( $option eq '-P' || $option eq '-U' )
 	if ( $sar_version =~ /4\.1\.2/ ) { $option = '-P';}
 	for (my $i=0; $i<$num_cpus; $i++)
 	{
-		eval {sar_parse( "$sar_path/sar $option $i -f $infile |", "$outfile.cpu$i", $comment, $option, $num_columns, $start_column)};
+		eval {sar_parse( "sar $option $i -f $infile |", "$outfile.cpu$i", $comment, $option, $num_columns, $start_column)};
 	}
 }
 else
 {
-	eval {sar_parse( "$sar_path/sar $option -f $infile |", $outfile, $comment, $option, $num_columns, $start_column)};
+	eval {sar_parse( "sar $option -f $infile |", $outfile, $comment, $option, $num_columns, $start_column)};
 	if ( $@ )
 	{
 		die "error executing iostat_parse: $@\n";
