@@ -1,4 +1,7 @@
 #!/bin/sh
+#convert string time to number of seconds
+#if DATE_TIME_FORMAT is set to internal, timediff() returns a value in 
+# hhhhmmss. This is strange, but I have to convert it to seconds
 
 if [ $# -ne 1 ]; then
         echo "Usage: ./string_to_number.sh <string>"
@@ -6,19 +9,21 @@ if [ $# -ne 1 ]; then
 fi
 
 string=$1
-index=0
+index=7
 number=0
-while [ "$index" -le 7 ]
-do
-let "index2=$index+1"
 base=1
-while [ "$index2" -le 7 ]
+while [ "$index" -gt 0 ]
 do
-	let "base = $base * 10"
-	let "index2 = $index2 + 1"
-done 
-let "number = ${string:$index:1}* ${base} + $number"
-let "index = $index + 1"
+let "index2=$index-1"
+if [ "${string:$index2:1}" == 0 ] 
+then
+	let "number = ${string:$index:1}* ${base} + $number"
+else
+	let "number = ${string:$index2:2}* ${base} + $number"
+fi
+
+let "index = $index - 2"
+let "base = base*60"
 done
 
 echo $number
