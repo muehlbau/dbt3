@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Minimum Cost Supplier Query (Q2)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -48,3 +49,4 @@ order by
 	s_name,
 	p_partkey
 :n 100;
+:e

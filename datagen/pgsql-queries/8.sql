@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R National Market Share Query (Q8)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -41,3 +42,4 @@ group by
 	o_year
 order by
 	o_year;
+:e

@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Local Supplier Volume Query (Q5)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -28,3 +29,4 @@ group by
 	n_name
 order by
 	revenue desc;
+:e

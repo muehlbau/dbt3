@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Volume Shipping Query (Q7)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -43,3 +44,4 @@ order by
 	supp_nation,
 	cust_nation,
 	l_year;
+:e

@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Forecasting Revenue Change Query (Q6)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -13,3 +14,4 @@ where
 	and l_shipdate < date ':1' + interval '1 year'
 	and l_discount between :2 - 0.01 and :2 + 0.01
 	and l_quantity < :3;
+:e

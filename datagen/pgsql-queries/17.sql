@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Small-Quantity-Order Revenue Query (Q17)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -21,3 +22,4 @@ where
 		where
 			l_partkey = p_partkey
 	);
+:e

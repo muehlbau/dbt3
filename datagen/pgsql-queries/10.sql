@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Returned Item Reporting Query (Q10)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -36,3 +37,4 @@ group by
 order by
 	revenue desc
 :n 20;
+:e

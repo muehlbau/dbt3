@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Shipping Priority Query (Q3)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -27,3 +28,4 @@ order by
 	revenue desc,
 	o_orderdate
 :n 10;
+:e

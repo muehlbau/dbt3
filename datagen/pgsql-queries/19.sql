@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Discounted Revenue Query (Q19)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -36,3 +37,4 @@ where
 		and p_size between 1 and 15
 	  )
 	);
+:e

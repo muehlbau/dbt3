@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Customer Distribution Query (Q13)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -24,3 +25,4 @@ group by
 order by
 	custdist desc,
 	c_count desc;
+:e

@@ -2,6 +2,7 @@
 -- TPC-H/TPC-R Important Stock Identification Query (Q11)
 -- Functional Query Definition
 -- Approved February 1998
+:b
 :x
 :o
 select
@@ -31,3 +32,4 @@ group by
 		)
 order by
 	value desc;
+:e
