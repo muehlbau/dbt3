@@ -65,7 +65,7 @@ while getopts "ef:p:o:t:y:" opt; do
 			;;
 		y) USE_OPROFILE=$OPTARG
 			;;
-		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e EXPLAIN_ANALYZE -p <db_params> -t <tag> -y USE_OPROFILE]"
+		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e -p <db_params> -t <tag> -y USE_OPROFILE]"
 			exit ;;
 		esac
 done

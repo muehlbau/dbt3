@@ -54,9 +54,11 @@ getoprof () {
         sudo opstack > $OUTPUT_DIR/oprofile/${profname}/call-graph.txt
 }
 
-while getopts "e:f:n:o:p:t:y:" opt; do
+TEST_ARGS=
+
+while getopts "ef:n:o:p:t:y:" opt; do
 	case $opt in
-	e) explain_analyze=$OPTARG
+	e) TEST_ARGS="$TEST_ARGS -e"
 		;;
 	f) scale_factor=$OPTARG
 		;;
@@ -105,7 +107,7 @@ bash $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p throughput${TAG}
 bash $DBSTATS $SID $OUTPUT_DIR "throughput${TAG}" &
 
 # Start the streams.
-bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream -e $explain_analyze -o $OUTPUT_DIR || exit 1
+bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR || exit 1
 
 # Stop collecting system statistics.
 bash $SRCDIR/scripts/stop_sysstats.sh

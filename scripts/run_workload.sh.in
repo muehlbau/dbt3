@@ -16,7 +16,6 @@ DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
-EXPLAIN_ANALYZE=0
 SEED=0
 REDIR_LOG=0
 REDIR_TMP=0
@@ -25,11 +24,12 @@ STREAMS=1
 USE_OPROFILE=0
 MAX=1
 GENERATE=0
-while getopts "e:f:gn:o:p:r:s:x:" opt; do
+TEST_ARGS=
+while getopts "ef:gn:o:p:r:s:x:" opt; do
 	case $opt in
 		e)
 			# PostgreSQL only.
-			EXPLAIN_ANALYZE=$OPTARG
+			TEST_ARGS="$TEST_ARGS -e"
 			;;
 		f)
 			SCALE_FACTOR=$OPTARG
@@ -96,10 +96,10 @@ do
 	bash $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
 
 	# Power Test
-	bash $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE || exit 1
+	bash $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
 
 	# Throughput Test
-	bash $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE || exit 1
+	bash $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" $TEST_ARGS -t $i -y $USE_OPROFILE || exit 1
 
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.

@@ -18,7 +18,7 @@ fi
 
 scale_factor=$1
 perf_run_number=$2
-explain_analyze=$3
+EXPLAIN_ANALYZE=$3
 OUTPUT_DIR=$4
 RUNDIR=$OUTPUT_DIR/run
 
@@ -39,7 +39,7 @@ fi
 
 #generate the queries for power test
 rm -f $query_file
-if [ $explain_analyze -eq 0 ]
+if [ $EXPLAIN_ANALYZE -eq 0 ]
 then
 	$qgen_dir/qgen -c -r `cat $seed_file` -p 0 -s $scale_factor -l $param_file> $query_file
 else

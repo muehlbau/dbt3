@@ -9,9 +9,10 @@
 
 SRCDIR=@TOPDIR@
 
-while getopts "e:f:n:o:r:t:" opt; do
+EXPLAIN_ANALYZE=0
+while getopts "ef:n:o:r:t:" opt; do
 	case $opt in
-	e) explain_analyze=$OPTARG
+	e) EXPLAIN_ANALYZE=1
 		;;
 	f) scale_factor=$OPTARG
 		;;
@@ -33,7 +34,7 @@ GTIME="$SRCDIR/dbdriver/utils/gtime"
 i=1
 while [ $i -le $num_stream ] 
 do
-	bash $DBSCRIPTDIR/run_throughput_stream.sh $scale_factor $TAG $i $explain_analyze $OUTPUT_DIR > $RUNDIR/thruput_qs$i 2>&1 || exit 1 &
+	bash $DBSCRIPTDIR/run_throughput_stream.sh $scale_factor $TAG $i $EXPLAIN_ANALYZE $OUTPUT_DIR > $RUNDIR/thruput_qs$i 2>&1 || exit 1 &
 	
 	let "i=$i+1"
 done

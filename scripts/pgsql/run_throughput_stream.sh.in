@@ -19,7 +19,7 @@ fi
 scale_factor=$1
 perf_run_num=$2
 stream_num=$3
-explain_analyze=$4
+EXPLAIN_ANALYZE=$4
 OUTPUT_DIR=$5
 RUNDIR=$OUTPUT_DIR/run
 
@@ -49,7 +49,7 @@ let "seed = $seed + $stream_num"
 # generate the queries for thoughput test
 rm -f $query_file
 rm -f $tmp_query_file
-if [ $explain_analyze -eq 0 ]
+if [ $EXPLAIN_ANALYZE -eq 0 ]
 then
 	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file> $query_file
 else
