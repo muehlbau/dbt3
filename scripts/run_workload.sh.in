@@ -12,7 +12,7 @@ SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
-. dbt3_profile
+. $DATABASE/set_run_env.sh
 
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
@@ -25,11 +25,11 @@ STREAMS=1
 USE_OPROFILE=0
 MAX=1
 GENERATE=0
-while getopts "ef:gn:o:p:r:s:x:" opt; do
+while getopts "e:f:gn:o:p:r:s:x:" opt; do
 	case $opt in
 		e)
 			# PostgreSQL only.
-			EXPLAIN_ANALYZE=1
+			EXPLAIN_ANALYZE=$OPTARG
 			;;
 		f)
 			SCALE_FACTOR=$OPTARG
@@ -124,9 +124,9 @@ bash $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out
 # Calculate composite score.      
 perl $SRCDIR/scripts/get_composite.pl -p 1 -s $SCALE_FACTOR -n $STREAMS -o $OUTPUT_DIR/calc_composite.out
 cp -p dbt3.out $OUTPUT_DIR
+perl $SRCDIR/data_collect/resulttools/wb_dbt3_report_pgsql.pl --indir $OUTPUT_DIR --outfile $OUTPUT_DIR/index.html
 bash $SRCDIR/data_collect/resulttools/dbt3_gen_graphs.sh $OUTPUT_DIR/plot $OUTPUT_DIR/plot
 perl $SRCDIR/data_collect/resulttools/graph_query_time.pl --if $OUTPUT_DIR/q_time.out
-perl $SRCDIR/data_collect/resulttools/wb_dbt3_report_pgsql.pl --indir $OUTPUT_DIR --outfile $OUTPUT_DIR/index.html
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
 echo $RUN_NUMBER > run_number
