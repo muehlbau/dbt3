@@ -10,23 +10,23 @@
 #
 # 28 Jan 2003
 
-if [ $# -lt 2 ]; then
-        echo "usage: throughput_test_stats.sh <scale_factor> <num_stream> [-d duration -i interval]"
+if [ $# -lt 3 ]; then
+        echo "usage: throughput_test_stats.sh <scale_factor> <num_stream> <output_dir> [-d duration -i interval]"
         exit
 fi
 
 scale_factor=$1
 num_stream=$2
+output_dir=$3
 CPUS=`grep -c '^processor' /proc/cpuinfo`
 echo $CPUS
-exit
 
 #estimated power test time
 throughput_test_time=5379
 
 duration=0
 interval=0
-shift 1
+shift 3
 # process the command line parameters
 while getopts ":d:i:" opt; do
 	case $opt in
@@ -82,14 +82,14 @@ sapdb_script_path=$DBT3_INSTALL_PATH/scripts/sapdb
 dbdriver_path=$DBT3_INSTALL_PATH/dbdriver/scripts
 
 #make output directory
-output_dir=throughput
+#output_dir=throughput
 mkdir -p $output_dir
 
 # restart the database
 echo "stopping the database"
-$sapdb_script_path/stop_db.sh
+#$sapdb_script_path/stop_db.sh
 echo "starting the database"
-$sapdb_script_path/start_db.sh
+#$sapdb_script_path/start_db.sh
 
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo0.out
@@ -104,3 +104,17 @@ $dbdriver_path/run_throughput_test.sh $scale_factor 1 $num_stream
 
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
+
+#move sar binary to output_dir
+mv ./run.sar.data $output_dir
+
+#get query time
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select * from time_statistics" 2>&1 > $output_dir/q_time.out
+
+#calculate throutput power
+$dbdriver_path/get_throughput.sh 1 $scale_factor $num_stream 2>&1 >$output_dir/calc_thuput.out
+
+#copy thuput_qs* and refresh_stream* to output
+cp ../run/thuput_qs* $output_dir/
+cp ../run/refresh_stream* $output_dir/
+
