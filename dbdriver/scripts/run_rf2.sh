@@ -45,8 +45,8 @@ echo "fastload table tmp_orderkey$set_num" > tmp_orderkey$set_num.sql
 echo "orderkey 1" >> tmp_orderkey$set_num.sql
 echo "infile '/tmp/delete.$set_num'" >> tmp_orderkey$set_num.sql
 
-echo "sql_execute drop table tmp_orderkey$set_num"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
+#echo "sql_execute drop table tmp_orderkey$set_num"
+#dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
 
 echo "sql_execute create table tmp_orderkey$set_num (orderkey fixed(10))"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_orderkey$set_num (orderkey fixed(10))"
@@ -62,10 +62,9 @@ dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from orders where o_
 
 #clean up
 echo "sql_execute drop table tmp_orderkey$set_num"
-rm -f tmp_orderkey$set_num.sql
-
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
 rm tmp_orderkey$set_num.sql
+
 e_time=`$GTIME`
 echo "`date`: end rf2 "
 let "diff_time=$e_time-$s_time"

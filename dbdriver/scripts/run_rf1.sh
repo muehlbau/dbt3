@@ -83,8 +83,8 @@ echo "o_shippriority 8" >> tmp_orders$set_num.sql
 echo "o_comment 9" >> tmp_orders$set_num.sql
 echo "infile '/tmp/orders.tbl.u$set_num' date 'yyyy-mm-dd'" >> tmp_orders$set_num.sql
 
-echo "sql_execute drop table tmp_lineitem$set_num"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_lineitem$set_num"
+#echo "sql_execute drop table tmp_lineitem$set_num"
+#dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_lineitem$set_num"
 
 echo "sql_execute create table tmp_lineitem$set_num"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_lineitem$set_num (l_orderkey fixed(10), l_partkey fixed(10), l_suppkey fixed(10), l_linenumber fixed(10), l_quantity fixed(12,2), l_extendedprice fixed(12,2), l_discount fixed(12,2), l_tax fixed(12,2), l_returnflag char(1), l_linestatus char(1), l_shipdate date, l_commitdate date, l_receiptdate date, l_shipinstruct char(25), l_shipmode char(10), l_comment varchar(44))"
@@ -95,8 +95,8 @@ echo "load table tmp_lineitem$set_num"
 echo "sql_execute insert into lineitem (select * from tmp_lineitem$set_num)"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into lineitem (select * from tmp_lineitem$set_num)"
 
-echo "sql_execute drop table tmp_orders$set_num"
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orders$set_num"
+#echo "sql_execute drop table tmp_orders$set_num"
+#dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orders$set_num"
 
 echo "sql_execute create table tmp_orders$set_num"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_orders$set_num (o_orderkey fixed(10), o_custkey fixed(10), o_orderstatus char(1), o_totalprice fixed(12,2), o_orderdate date, o_orderpriority char(15), o_clerk char(15), o_shippriority fixed(10), o_comment varchar(79))"
