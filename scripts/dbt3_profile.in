@@ -8,6 +8,8 @@
 # History:
 # June-6-2003 Create by Jenny Zhang
 
+DIR=`dirname $0`
+
 DATABASE=@DATABASE_TO_USE@
 
 export DSS_QUERY=@TOPDIR@/datagen/@DATABASE_TO_USE@-queries
@@ -15,4 +17,4 @@ export DSS_PATH=/mnt/data
 export DSS_CONFIG=@TOPDIR@/datagen/dbgen
 export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
 
-. ${DATABASE}/${DATABASE}_profile
+. ${DIR}/${DATABASE}/${DATABASE}_profile
