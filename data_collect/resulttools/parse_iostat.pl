@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_iostat.pl 910 2003-04-09 22:31:45Z jztpcw $ $Author: jztpcw $ $Date
+# $Id: parse_iostat.pl 997 2003-05-16 00:23:32Z jztpcw $ $Author: jztpcw $ $Date
 
 use strict;
 use English;
@@ -160,8 +160,7 @@ parse iostat output and generate gnuplot data files for each disk
 my ( $option, $infile, $diskout, $cpuout, $comment, $configfile, 
 	$writeme, $hlp );
 
-my ( %options, $cline, $line, $num_columns, $os_version, $iostat_version,
-	$iostat_path);
+my ( %options, $cline, $line, $num_columns, $os_version, $iostat_version);
 
 my $fcf = new FileHandle;
 GetOptions(
@@ -252,17 +251,7 @@ if ( $writeme ) {
 
 $os_version = get_os_version;
 
-# this is used my system, you might need to change it
-if ( $os_version =~ /2\.4\./ )
-{
-	$iostat_path = "/usr/bin";
-}
-elsif ( $os_version =~ /2\.5\./ )
-{
-	$iostat_path = "/usr/local/bin";
-}
-
-$iostat_version = get_iostat_version($iostat_path);
+$iostat_version = get_iostat_version();
 print "os is $os_version, iostat is  $iostat_version\n";
 
 my $keyfile = "iostat.$iostat_version.key";
