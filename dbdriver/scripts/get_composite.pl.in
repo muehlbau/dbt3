@@ -35,7 +35,7 @@ call get_power.pl and get_throughput.pl and calculate composite metrics
 =cut
 
 my ( $perf_run_number, $num_of_streams, $hlp, $scale_factor, $configfile, 
-	$writeme, $dbdriver_sapdb_path, $power, $throughput, $composite,
+	$writeme, $dbdriver_path, $power, $throughput, $composite,
 	$outfile );
 
 GetOptions(
@@ -113,13 +113,13 @@ if ( $writeme ) {
 	$ncf->close;
 }
 
-$dbdriver_sapdb_path = "$DBT3_INSTALL_PATH/dbdriver/scripts/sapdb";
+$dbdriver_path = "@TOPDIR@/dbdriver/scripts/@DATABASE_TO_USE@";
 
 print "calculate power\n";
-system("$dbdriver_sapdb_path/get_power.pl -p $perf_run_number -s $scale_factor > composite.out ") && die "execute $dbdriver_sapdb_path/get_power.pl failed"; 
+system("$dbdriver_path/get_power.pl -p $perf_run_number -s $scale_factor > composite.out ") && die "execute $dbdriver_path/get_power.pl failed"; 
 
 print "calculate throughput\n";
-system("$dbdriver_sapdb_path/get_throughput.pl -p $perf_run_number -s $scale_factor -n $num_of_streams >> composite.out ") && die "execute $dbdriver_sapdb_path/get_throughput.pl failed"; 
+system("$dbdriver_path/get_throughput.pl -p $perf_run_number -s $scale_factor -n $num_of_streams >> composite.out ") && die "execute $dbdriver_path/get_throughput.pl failed"; 
 
 my $fcomp = new FileHandle;
 unless ( $fcomp->open( "< composite.out" ) ) { die "can't open file $!"; }
