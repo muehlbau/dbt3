@@ -1,5 +1,5 @@
 #!/bin/sh
 
-/opt/sapdb/depend/bin/dbmcli -s -d DBT3 -u dbm,dbm db_stop
-/opt/sapdb/depend/bin/dbmcli -s -d DBT3 -u dbm,dbm db_offline
-/opt/sapdb/depend/bin/dbmcli -s -d DBT3 -u dbm,dbm db_drop
+dbmcli -s -d $SID -u dbm,dbm db_stop
+dbmcli -s -d $SID -u dbm,dbm db_offline
+dbmcli -s -d $SID -u dbm,dbm db_drop
