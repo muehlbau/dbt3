@@ -180,7 +180,7 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 {
 	print $fh Tr({-valign=>"TOP"},
 	[
-		th(["Composite<sup>1</sup>", "Query Processing Power<sup>2</sup>", "Throughput Numerical Quantity<sup>3</sup>"]), 
+		th([a( {-href=>"./dbt3_explain.html#Composite"}, "Composite"), a( {-href=>"./dbt3_explain.html#Power"}, "Query Processing Power"), a( {-href=>"./dbt3_explain.html#Throughput"}, "Throughput Numerical Quantity")]), 
 		td(["$composite", "$power", "$thuput"])
 	]);
 }
@@ -208,7 +208,7 @@ print $fh end_table, "\n";
 print $fh br;
 print $fh start_table( { -border => undef });
 print $fh caption("Task Execution Time");
-print $fh Tr(th[("Task<sup>4-10</sup>","Start Time", "End Time", "Elapsed Time")]);
+print $fh Tr(th[(a( {-href=>"./dbt3_explain.html#DBT-3"},"Task"),"Start Time", "End Time", "Elapsed Time")]);
 #if it is a complete dbt3 run
 if ($composite != 0 && $power !=0 && $thuput != 0) 
 {
@@ -251,7 +251,7 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 	$m=$tmp_index-1;
 	$s=$diffload-$m*60;
 #	print $fh Tr(td[("LOAD", $sload, $eload, "$h:$m:$s")]);
-	print $fh "<tr><td>LOAD</td><td>$sload</td><td>$eload</td>";
+	print $fh "<tr><td><a href=\"./dbt3_explain.html#Load\"> LOAD</a></td><td>$sload</td><td>$eload</td>";
 	printf $fh "<td>%02d:%02d:%02d</td></tr>", $h, $m, $s;
 	
 	my $fqtime = new FileHandle;
@@ -262,14 +262,23 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 		if (/^'PERF1'/ || /^'PERF1\.POWER'/ || /^'PERF1\.POWER\.RF.'/ 
 			|| /^'PERF1\.POWER\.QS'/ || /^'PERF1\.THRUPUT'/ ||
 			/^'PERF1\.THRUPUT\.RFST.'/ || /^'PERF1\.THRUPUT\.QS.'/
-			|| /^'PERF1\.THRUPUT\.QS.'/)
+			)
 		{
 			my ( $taskname, $stime, $etime, $difftime ) = split /';'/, $_;
 			$taskname=~s/'//g;
 			$difftime=~s/'//g;
 			$stime=~s/.[0-9]+$//g;
 			$etime=~s/.[0-9]+$//g;
-			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
+			my $pointer;
+			$_=$taskname;
+			if (/PERF1$/) {$pointer="./dbt3_explain.html#Performance";}
+			elsif (/PERF1\.POWER$/) {$pointer="./dbt3_explain.html#Power_Test";}
+			elsif (/PERF1\.THRUPUT$/) {$pointer="./dbt3_explain.html#Throughput_Test";}
+			elsif (/PERF1\..*.QS/) {$pointer="./dbt3_explain.html#Query_Stream";}
+			elsif (/PERF1\..*\.RFST/) {$pointer="./dbt3_explain.html#Refresh_Stream";}
+			elsif (/PERF1\..*\.RF1/) {$pointer="./dbt3_explain.html#Refresh_Function_1";}
+			elsif (/PERF1\..*\.RF2/) {$pointer="./dbt3_explain.html#Refresh_Function_2";}
+			print $fh Tr(td[(a( {-href=>"$pointer"}, "$taskname"), $stime, $etime, $difftime)]);
 		}
 	}
 	$fqtime->close;
@@ -352,11 +361,16 @@ system("./dbt3_gen_graphs_2.5.sh", "$indir", "$indir/plot");
 
 system("cp", "$indir/io.txt", "$indir/plot/iostat.txt");
 system("cp", "$indir/vmstat.out", "$indir/plot/vmstat.txt");
-print $fh h2("Raw data generated from system monitors");
-table_of_glob("$indir/plot", "*.txt");
+change_file_name("$indir/plot", "xcons*.dat", ".dat", ".txt");
+print $fh h2("Raw data");
+table_of_glob("$indir/plot", "*.txt", 0);
 
-print $fh h2("gnuplot charts generated from system monitors");
-table_of_glob("$indir/plot", "*.png");
+print $fh h2("gnuplot charts");
+print $fh startform({-action=>"http://webdev/jenny/cgi-bin/showchart.cgi"});
+print $fh "<INPUT TYPE=\"hidden\" NAME=\"pathname\" VALUE=\"$indir/plot\">";
+table_of_glob("$indir/plot", "*.png", 1);
+print $fh "<INPUT TYPE=\"submit\" NAME=\"showchart\" VALUE=\"Show Charts\">";
+print $fh endform;
 
 print $fh h2("Run log data");
 my @runlog;
@@ -370,41 +384,46 @@ foreach my $name (@runlog)
 }
 print $fh end_ul;
 
+print $fh h2("Database Monitor Data");
+print $fh start_ul;
+if (!-e "$indir/db_stat.tar.gz")
+{
+	system("tar cvfz $indir/db_stat.tar.gz $indir/db_stat");
+	system("rm -rf $indir/db_stat");
+}
+print $fh li(a( { -href=>"$indir/param.out"}, "database parameters")), "\n";
+print $fh li(a( { -href=>"$indir/primary_keys.out"}, "database primary keys")), "\n";
+print $fh li(a( { -href=>"$indir/all_ind_columns.out"}, "database indexes")), "\n";
+print $fh li(a( { -href=>"$indir/db_stat.tar.gz"}, "database monitor files")), "\n";
+print $fh end_ul;
+
 print $fh h2("Other data");
 print $fh start_ul;
 print $fh li(a( { -href=>"$indir/meminfo0.out"}, "meminfo before run")), "\n";
 print $fh li(a( { -href=>"$indir/meminfo1.out"}, "meminfo after run")), "\n";
+if (!-e "$indir/ipcs.tar.gz")
+{
+	system("tar cvfz $indir/ipcs.tar.gz $indir/ipcs");
+	system("rm -rf $indir/ipcs");
+}
+print $fh li(a( { -href=>"$indir/ipcs.tar.gz"}, "ipcs data")), "\n";
 print $fh end_ul;
-
-print $fh br, "Note:";
-print $fh "<OL>";
-print $fh li ("The results of the power test are used to compute DBT-3 Query Processing Power at the chosen database size.  The units of power\@size is 'queries per hour'.");
-print $fh li("The results of the throughput test are used to compute DBT-3 Througput at the chosen database size.  The units of throughput\@size is 'queries per hour'.");
-print $fh li("The numerical quantities DBT-3 Power and Throughtput are combined to form the DBT-3 composite-query-per-hour performance metrics.  The units of throughput\@size is 'queries per hour'.");
-print $fh li ("Sub-tasks are identified by \'.\'.  For example, 'PERF1.POWER' means 'the power test is part of the performance test1'; 'PERF1.POWER.RF1' means 'the refresh function1 is part of the power test, which is part of the performance test1.'");
-print $fh li("LOAD: Load test which loads the database");
-print $fh li("PERF: Performance test which consists of one power test and one throughput test");
-print $fh li("POWER: Power test which consists of refresh function 1, 1 query stream, and refresh function 2");
-print $fh li("QS: Query stream which consists of twenty-two queries"); 
-print $fh li("THRUPUT: Throughput test which consists of two refresh streams and two query streams");
-print $fh li("RFST: Refresh stream which consists of fresh function 1 and refresh function 2");
-print $fh li("The shorter the elapsed time for each task, the better the DBT-3 performance metrics");
-print $fh "</OL>";
 
 #write table of files 
 sub table_of_glob {
-	my ($indir, $globname) = @_;
+	my ($indir, $globname, $flag) = @_;
 	#generate a list of *.png files
 	my @filelist = glob("$indir/$globname");
 	print "filelist $#filelist", join ( '  ', @filelist );
 
 	print $fh start_table( { -border => undef });
-	print $fh Tr(th[("sar", "vmstat", "iostat")]);
+	print $fh Tr(th[("sar", "vmstat", "iostat", "xcons")]);
 
-	my (@sarlist, @iostatlist, @vmstatlist, $sar_index, $iostat_index, $vmstat_index);
+	my (@sarlist, @iostatlist, @vmstatlist, @xconslist, $sar_index, $iostat_index, $vmstat_index, $xcons_index);
 	$sar_index=0;
 	$iostat_index=0;
 	$vmstat_index=0;
+	$xcons_index=0;
 	for ( my $i = 0; $i <= $#filelist; $i++ ) {
 		$_=$filelist[$i];
 		if (/sar/)
@@ -422,26 +441,62 @@ sub table_of_glob {
 			$iostatlist[$iostat_index]=$_;
 			$iostat_index++;
 		}
+		elsif (/xcons/)
+		{
+			$xconslist[$xcons_index]=$_;
+			$xcons_index++;
+		}
 	}
 		
 	my $max_row=$#sarlist;
 	if ($max_row < $#vmstatlist) { $max_row=$#vmstatlist; }
 	if ($max_row < $#iostatlist) { $max_row=$#iostatlist; }
+	if ($max_row < $#xconslist) { $max_row=$#xconslist; }
 	
 	for ( my $i = 0; $i <= $max_row; $i++ ) 
 	{
 		if ($i>$#sarlist) {$sarlist[ $i ]="";}
 		if ($i>$#vmstatlist) {$vmstatlist[ $i ]="";}
 		if ($i>$#iostatlist) {$iostatlist[ $i ]="";}
+		if ($i>$#xconslist) {$xconslist[ $i ]="";}
 
 		my $sarname=basename($sarlist[ $i ]);
 		my $vmstatname=basename($vmstatlist[$i]);
 		my $iostatname=basename($iostatlist[$i]);
+		my $xconsname=basename($xconslist[$i]);
+		if ($flag == 1)
+		{
 		print $fh Tr(
-			td( a( { -href => "$sarlist[$i]" }, "$sarname" ) ),
-			td( a( { -href => "$vmstatlist[$i]" }, "$vmstatname") ),
-			td( a( { -href => "$iostatlist[$i]" }, "$iostatname") ),
+			td("<INPUT TYPE=\"checkbox\" NAME=\"png\" VALUE=\"$sarname\"> <a href=\"$sarlist[$i]\"> $sarname</a>"),
+			td("<INPUT TYPE=\"checkbox\" NAME=\"png\" VALUE=\"$vmstatname\"> <a href=\"$vmstatlist[$i]\"> $vmstatname</a>"),
+			td("<INPUT TYPE=\"checkbox\" NAME=\"png\" VALUE=\"$iostatname\"> <a href=\"$iostatlist[$i]\"> $iostatname</a>"),
+			td("<INPUT TYPE=\"checkbox\" NAME=\"png\" VALUE=\"$xconsname\"> <a href=\"$xconslist[$i]\"> $xconsname</a>"),
 			), "\n";
+		}
+		else
+		{
+		print $fh Tr(
+                        td( a( { -href => "$sarlist[$i]" }, "$sarname" ) ),
+                        td( a( { -href => "$vmstatlist[$i]" }, "$vmstatname") ),
+       			td( a( { -href => "$iostatlist[$i]" }, "$iostatname") ),
+       			td( a( { -href => "$xconslist[$i]" }, "$xconsname") ),
+			), "\n";
+		}
 	}
 	print $fh end_table, "\n";
 }
+
+sub change_file_name {
+	my ($indir, $globname, $from, $to) = @_;
+	#generate a list of *.png files
+	my @filelist = glob("$indir/$globname");
+	print "filelist $#filelist", join ( '  ', @filelist );
+
+	for (my $i=0; $i<=$#filelist; $i++)
+	{
+		my $new_name=$filelist[$i];
+		$new_name=~s/$from/$to/;
+		system("mv", "$filelist[$i]", "$new_name");
+	}
+}
+
