@@ -1,25 +1,20 @@
-diff -Naru tpch-dbgen/Makefile dbgen/Makefile
---- tpch-dbgen/Makefile	Wed Dec 31 16:00:00 1969
-+++ dbgen/Makefile	Fri Nov 22 10:00:24 2002
-@@ -0,0 +1,128 @@
+diff -Naru tpch-dbgen/Makefile.in dbgen/Makefile.in
+--- tpch-dbgen/Makefile.in	Wed Dec 31 16:00:00 1969
++++ dbgen/Makefile.in	Tue Jun 10 14:14:36 2003
+@@ -0,0 +1,123 @@
 +# @(#)makefile.suite	2.1.8.1
-+################
-+## CHANGE NAME OF ANSI COMPILER HERE
-+################
-+CC      =  gcc
 +# Current values for DATABASE are: INFORMIX, DB2, TDAT (Teradata)
 +#                                  SQLSERVER, SYBASE
 +# Current values for MACHINE are:  ATT, DOS, HP, IBM, ICL, MVS, 
 +#                                  SGI, SUN, U2200, VMS
 +# Current values for WORKLOAD are:  TPCH, TPCR
-+DATABASE=SAPDB 
++DATABASE=@DATABASE_TO_USE@ 
 +MACHINE =HP 
 +WORKLOAD =TPCH
 +#
 +# add -EDTERABYTE if orderkey will execeed 32 bits (SF >= 300)
 +# and make the appropriate change in gen_schema() of runit.sh
-+#CFLAGS	= -O -DDBNAME=\"dss\" -D$(MACHINE) -D$(DATABASE) -D$(WORKLOAD)
-+CFLAGS	= -g -O -DDBNAME=\"dss\" -D$(DATABASE) -D$(WORKLOAD) -DSTDLIB_HAS_GETOPT -DEOL_HANDLING -DSEPARATOR=\',\'
++CFLAGS	= -g -O -DDBNAME=\"dss\" -D$(DATABASE) -D$(WORKLOAD) -DSTDLIB_HAS_GETOPT -DEOL_HANDLING
 +LDFLAGS = -O
 +# The OBJ,EXE and LIB macros will need to be changed for compilation under
 +#  Windows NT
@@ -131,8 +126,8 @@ diff -Naru tpch-dbgen/Makefile dbgen/Makefile
 +$(QSRC) $(ALLSRC): 
 +	get -r`cat .version` ./SCCS/s.$@
 diff -Naru tpch-dbgen/bm_utils.c dbgen/bm_utils.c
---- tpch-dbgen/bm_utils.c	Fri Nov 22 15:48:13 2002
-+++ dbgen/bm_utils.c	Tue Nov 12 10:29:39 2002
+--- tpch-dbgen/bm_utils.c	Tue Jun 10 14:41:34 2003
++++ dbgen/bm_utils.c	Tue Dec 17 13:50:20 2002
 @@ -118,7 +118,8 @@
  #pragma warning(default:4127)
  #endif 
@@ -187,8 +182,8 @@ diff -Naru tpch-dbgen/bm_utils.c dbgen/bm_utils.c
  }
  
 diff -Naru tpch-dbgen/driver.c dbgen/driver.c
---- tpch-dbgen/driver.c	Fri Nov 22 15:48:13 2002
-+++ dbgen/driver.c	Mon Oct 28 14:49:31 2002
+--- tpch-dbgen/driver.c	Tue Jun 10 14:41:34 2003
++++ dbgen/driver.c	Tue Dec 17 13:50:20 2002
 @@ -896,6 +896,7 @@
   * traverse the tables, invoking the appropriate data generation routine for any to be built
   */
@@ -206,8 +201,8 @@ diff -Naru tpch-dbgen/driver.c dbgen/driver.c
  		if (direct)
  			close_direct ();
 diff -Naru tpch-dbgen/print.c dbgen/print.c
---- tpch-dbgen/print.c	Fri Nov 22 15:48:13 2002
-+++ dbgen/print.c	Fri Nov  1 10:45:53 2002
+--- tpch-dbgen/print.c	Tue Jun 10 14:41:34 2003
++++ dbgen/print.c	Tue Dec 17 13:50:20 2002
 @@ -24,12 +24,22 @@
  {
  	char upath[128];
@@ -323,18 +318,28 @@ diff -Naru tpch-dbgen/print.c dbgen/print.c
  	if (sep)
  #endif /* EOL_HANDLING */
 diff -Naru tpch-dbgen/tpcd.h dbgen/tpcd.h
---- tpch-dbgen/tpcd.h	Fri Nov 22 15:48:13 2002
-+++ dbgen/tpcd.h	Mon Oct 14 10:37:19 2002
-@@ -33,6 +33,15 @@
+--- tpch-dbgen/tpcd.h	Tue Jun 10 14:41:34 2003
++++ dbgen/tpcd.h	Tue Jun 10 14:18:11 2003
+@@ -33,6 +33,25 @@
  /*
   * database portability defines
   */
-+#ifdef SAPDB
++#ifdef sapdb
 +#define GEN_QUERY_PLAN  ""
 +#define START_TRAN      ""
 +#define END_TRAN        "COMMIT;"
 +#define SET_OUTPUT      ""
 +#define SET_ROWCOUNT    "--#set rowcount %d\ngo\n\n"
++#define SET_DBASE       "CONNECT TO %s ;\n"
++#define SEPARATOR	'|'
++#endif
++
++#ifdef pgsql
++#define GEN_QUERY_PLAN  ""
++#define START_TRAN      ""
++#define END_TRAN        "COMMIT;"
++#define SET_OUTPUT      ""
++#define SET_ROWCOUNT    "LIMIT %d;"
 +#define SET_DBASE       "CONNECT TO %s ;\n"
 +#endif
 +
