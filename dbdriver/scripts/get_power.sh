@@ -8,7 +8,7 @@ fi
 perf_run_number=$1
 scale_factor=$2
 
-_o=`cat <<EOF | dbmcli -d DBT3 -u dbm,dbm 2>&1
+_o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
 param_getvalue DATE_TIME_FORMAT
 quit
 EOF`
