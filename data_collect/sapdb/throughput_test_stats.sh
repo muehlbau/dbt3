@@ -23,7 +23,12 @@ CPUS=`grep -c '^processor' /proc/cpuinfo`
 echo $CPUS
 
 #estimated power test time
-throughput_test_time=40
+if [ $num_stream -eq 8 ]
+then
+	throughput_test_time=17079
+else
+	throughput_test_time=5243
+fi
 #throughput_test_time=5379
 
 duration=0
@@ -92,7 +97,6 @@ mkdir -p $output_dir
 
 #clean time_statistics table
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from time_statistics"
-
 # restart the database
 echo "stopping the database"
 $sapdb_script_path/stop_db.sh
@@ -125,11 +129,12 @@ $datacollect_sapdb_path/db_stats.sh $SID $output_dir $count $interval &
 echo "run throughput test for scale factor $scale_factor perf_run_number 1"
 $dbdriver_sapdb_path/run_throughput_test.sh $scale_factor 1 $num_stream
 
+wait
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
 
 #get query time
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select * from time_statistics" 2>&1 > $output_dir/q_time.out
+dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select task_name, s_time, e_time, timediff(e_time,s_time) from time_statistics" >  $output_dir/q_time.out
 
 #calculate throutput power
 $dbdriver_sapdb_path/get_throughput.sh 1 $scale_factor $num_stream 2>&1 >$output_dir/calc_thuput.out

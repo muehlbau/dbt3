@@ -24,7 +24,12 @@ CPUS=`grep -c '^processor' /proc/cpuinfo`
 
 #estimated dbt3 run time
 #dbt3_test_time=21607
-dbt3_test_time=12089
+if [ $num_stream -eq 8 ]
+then
+	dbt3_test_time=10800
+else
+	dbt3_test_time=10800
+fi
 
 duration=0
 interval=0
@@ -82,7 +87,7 @@ do
 done
 
 #clean run dir
-rm $DBT3_INSTALL_PATH/run/*
+rm $run_path/*
 
 #make output directory
 echo "make output dir"
@@ -143,6 +148,7 @@ echo "`date`: dbt3 test end"
 let "diff_time_dbt3=$e_time_dbt3-$s_time_dbt3"
 echo "elapsed time for dbt3 test $diff_time_dbt3" 
 
+wait
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
 
