@@ -388,19 +388,19 @@ if ( ! -d "$indir/plot" ) {
 system( "( cd $indir/plot; ln -s ../iostat/load.iostat.out load.iostat.txt)" );
 system( "( cd $indir/plot; ln -s ../iostat/load.iostatx.out load.iostatx.txt)" );
 system( "( cd $indir/plot; ln -s ../vmstat/load.vmstat.out load.vmstat.txt)" );
-system( "( cd $indir/plot; ln -s ../sar/load.sar.out load.sar.data)" );
+system( "( cd $indir/plot; sar -f ../sar/load.sar.out -A > load.sar.txt)" );
 system( "( cd $indir/plot; ln -s ../prof/Load_Test.prof load_prof.txt)" );
 
 system( "( cd $indir/plot; ln -s ../iostat/power1.iostat.out power.iostat.txt)" );
 system( "( cd $indir/plot; ln -s ../iostat/power1.iostatx.out power.iostatx.txt)" );
 system( "( cd $indir/plot; ln -s ../vmstat/power1.vmstat.out power.vmstat.txt)" );
-system( "( cd $indir/plot; ln -s ../sar/power1.sar.out power.sar.data)" );
+system( "( cd $indir/plot; sar -f ../sar/power1.sar.out -A > power.sar.txt)" );
 system( "( cd $indir/plot; ln -s ../prof/Power_Test_1.prof power1_prof.txt)" );
 
 system( "( cd $indir/plot; ln -s ../iostat/throughput1.iostat.out thruput.iostat.txt)" );
 system( "( cd $indir/plot; ln -s ../iostat/throughput1.iostatx.out thruput.iostatx.txt)" );
 system( "( cd $indir/plot; ln -s ../vmstat/throughput1.vmstat.out thruput.vmstat.txt)" );
-system( "( cd $indir/plot; ln -s ../sar/throughput1.sar.out thruput.sar.data)" );
+system( "( cd $indir/plot; sar -f ../sar/throughput1.sar.out -A > thruput.sar.txt)" );
 system( "( cd $indir/plot; ln -s ../prof/Throughput_Test_1.prof thruput1_prof.txt)" );
 
 print $fh h2("Raw data");
@@ -545,4 +545,3 @@ sub change_file_name {
 		system("mv", "$filelist[$i]", "$new_name");
 	}
 }
-

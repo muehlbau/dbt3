@@ -31,8 +31,8 @@ let "COUNT=$COUNT+1"
 #echo "start db_stats.sh"
 #./db_stats.sh $SID $RESULTS_PATH $COUNT $INTERVAL &
 #
-if [ -f $RESULTS_PATH/power.sar.data ]; then
-	rm $RESULTS_PATH/power.sar.data
+if [ -f $RESULTS_PATH/power.sar.out ]; then
+	rm $RESULTS_PATH/power.sar.out
 fi
 
 echo "start sar"
@@ -46,9 +46,9 @@ rm .sar.tmp
 #sar
 echo "start sar version $sysstat"
 if [ $sysstat = '4.0.3' ]; then
-	sar -u -U ALL -d -B -r -q -W -b -o $RESULTS_PATH/power.sar.data $INTERVAL $COUNT &
+	sar -o $RESULTS_PATH/power.sar.out $INTERVAL 0 &
 else
-	sar -u -P ALL -d -B -r -q -W -b -o $RESULTS_PATH/power.sar.data $INTERVAL $COUNT &
+	sar -o $RESULTS_PATH/power.sar.out $INTERVAL 0 &
 fi
 	
 #ziostat

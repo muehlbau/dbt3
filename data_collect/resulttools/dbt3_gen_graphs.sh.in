@@ -193,32 +193,32 @@ if [ -f $input_dir/thruput.ziostat.txt ]; then
 	$SRCDIR/data_collect/resulttools/gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_util -t "thruput ziostat disk utility" -b "thruput.ziostat." -e ".dat" -c 10 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/load.sar.data ]; then
+if [ -f $input_dir/load.sar.txt ]; then
 	echo "parse load sar -b";
 	#parse sar io
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar_io -c "sar -b taken every 60 seconds" -op '-b'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.txt -out $output_dir/load.sar_io -c "sar -b taken every 60 seconds" -op '-b'
 
 	echo "parse load sar -r";
 	#parse sar memory
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.txt -out $output_dir/load.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
 
 	echo "parse load sar -u";
 	#parse sar total cpu
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.txt -out $output_dir/load.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
 
 	if [ $sysstat_version = '4.0.3' ]; then
 		echo "parse load sar -U";
 		#parse sar individual cpu
-		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
+		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.txt -out $output_dir/load.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
 	else
 		echo "parse load sar -P";
 		#parse sar individual cpu
-		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
+		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.txt -out $output_dir/load.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
 	fi
 
 	echo "parse load sar -W";
 	#parse sar swapping
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/load.sar.txt -out $output_dir/load.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
 	#generate data based on load sar .dat files
 	$SRCDIR/data_collect/resulttools/gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_user -t "load sar individual CPU pct_user" -b "load.sar." -e ".dat" -c 0 -hl "samples every 60 sec" -y 0:100
 	
@@ -242,33 +242,33 @@ if [ -f $input_dir/load.sar.data ]; then
 	$SRCDIR/data_collect/resulttools/gr_single_dir.pl -i "$output_dir/load.sar_memory.dat" -o $output_dir/load.sar_memory_pct -t "load sar memory percentage" -b "load.sar_memory" -e ".dat" -c 2,8 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/power.sar.data ]; then
+if [ -f $input_dir/power.sar.txt ]; then
 	echo "parse power sar -b";
 	#parse sar io
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar_io -c "sar -b taken every 60 seconds" -op '-b'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.txt -out $output_dir/power.sar_io -c "sar -b taken every 60 seconds" -op '-b'
 
 	echo "parse power sar -r";
 	#parse sar memory
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.txt -out $output_dir/power.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
 
 	echo "parse power sar -u";
 	#parse sar total cpu
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.txt -out $output_dir/power.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
 
 	if [ $sysstat_version = '4.1.2' ]
 	then
 		echo "parse power sar -P";
 		#parse sar individual cpu
-		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
+		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.txt -out $output_dir/power.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
 	else
 		echo "parse power sar -U";
 		#parse sar individual cpu
-		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
+		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.txt -out $output_dir/power.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
 	fi
 
 	echo "parse power sar -W";
 	#parse sar swapping
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/power.sar.txt -out $output_dir/power.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
 
 	#generate data based on power sar .dat files
 	$SRCDIR/data_collect/resulttools/gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_user -t "power sar individual CPU pct_user" -b "power.sar." -e ".dat" -c 0 -hl "samples every 60 sec" -y 0:100
@@ -293,33 +293,33 @@ if [ -f $input_dir/power.sar.data ]; then
 	$SRCDIR/data_collect/resulttools/gr_single_dir.pl -i "$output_dir/power.sar_memory.dat" -o $output_dir/power.sar_memory_pct -t "power sar memory percentage" -b "power.sar_memory" -e ".dat" -c 2,8 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/thruput.sar.data ]; then
+if [ -f $input_dir/thruput.sar.txt ]; then
 	echo "parse thruput sar -b";
 	#parse sar io
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_io -c "sar -b taken every 60 seconds" -op '-b'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.txt -out $output_dir/thruput.sar_io -c "sar -b taken every 60 seconds" -op '-b'
 
 	echo "parse thruput sar -r";
 	#parse sar memory
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.txt -out $output_dir/thruput.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
 
 	echo "parse thruput sar -u";
 	#parse sar total cpu
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.txt -out $output_dir/thruput.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
 
 	if [ $sysstat_version = '4.1.2' ]
 	then
 		echo "parse thruput sar -P";
 		#parse sar individual cpu
-		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
+		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.txt -out $output_dir/thruput.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
 	else
 		echo "parse thruput sar -U";
 		#parse sar individual cpu
-		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
+		$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.txt -out $output_dir/thruput.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
 	fi
 
 	echo "parse thruput sar -W";
 	#parse sar swapping
-	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
+	$SRCDIR/data_collect/resulttools/parse_sar.pl -i $input_dir/thruput.sar.txt -out $output_dir/thruput.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
 
 	#generate data based on thruput sar .dat files
 	$SRCDIR/data_collect/resulttools/gr_single_dir.pl -i "$output_dir/thruput.sar.cpu*.dat" -o $output_dir/thruput.sar_cpu_user -t "thruput sar individual CPU pct_user" -b "thruput.sar." -e ".dat" -c 0 -hl "samples every 60 sec"

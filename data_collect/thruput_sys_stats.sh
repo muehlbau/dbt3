@@ -31,8 +31,8 @@ let "COUNT=$COUNT+1"
 #echo "start db_stats.sh"
 #./db_stats.sh $SID $RESULTS_PATH $COUNT $INTERVAL &
 #
-if [ -f $RESULTS_PATH/thruput.sar.data ]; then
-	rm $RESULTS_PATH/thruput.sar.data
+if [ -f $RESULTS_PATH/thruput.sar.out ]; then
+	rm $RESULTS_PATH/thruput.sar.out
 fi
 
 echo "start sar"
@@ -40,24 +40,17 @@ export PATH=/usr/local/bin:$PATH
 
 #get sysstat version
 sar -V &> .sar.tmp
-sysstat=`cat .sar.tmp |grep version | awk '{print $3}'`
+sysstat=`cat .sar.tmp | grep version | awk '{print $3}'`
 rm .sar.tmp
 
 #sar
 echo "start sar version $sysstat"
 if [ $sysstat = '4.0.3' ]; then
-	sar -u -U ALL -d -B -r -q -W -b -o $RESULTS_PATH/thruput.sar.data $INTERVAL $COUNT &
+	sar -o $RESULTS_PATH/thruput.sar.out $INTERVAL 0 &
 else
-	sar -u -P ALL -d -B -r -q -W -b -o $RESULTS_PATH/thruput.sar.data $INTERVAL $COUNT &
+	sar -o $RESULTS_PATH/thruput.sar.out $INTERVAL 0 &
 fi
 	
-#ziostat
-if [ -f /usr/local/bin/ziostat ]; then
-        echo "start ziostat";
-        echo "ziostat -x $INTERVAL $COUNT" > $RESULTS_PATH/thruput.ziostat.txt
-        ziostat -x $INTERVAL $COUNT  >> $RESULTS_PATH/thruput.ziostat.txt &
-fi
-
 #iostat
 echo "start iostat"
 echo "iostat -d $INTERVAL $COUNT" > $RESULTS_PATH/thruput.iostat.txt
