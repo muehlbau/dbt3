@@ -37,6 +37,14 @@ fi
 
 echo "start sar"
 VERSION=`uname -r | awk -F "." '{print $2}'`
+if [ $VERSION -eq 5 ]
+then
+        # 2.5 kernel use sysstat version 4.1.2 in /usr/local/bin
+        export PATH=/usr/local/bin:/usr/bin:$PATH
+else
+        # 2.4 kernel use sysstat version 4.0.3 in /usr/bin
+        export PATH=/usr/bin:/usr/local/bin:$PATH
+fi
 
 #get sysstat version
 sar -V &> .sar.tmp
