@@ -12,4 +12,6 @@ DIR=`dirname $0`
 @PSQL@ -d $SID -c"CREATE TABLESPACE ts_region LOCATION '/mnt/region'"
 @PSQL@ -d $SID -c"CREATE TABLESPACE ts_supplier LOCATION '/mnt/supplier'"
 
+@PSQL@ -d $SID -c"CREATE TABLESPACE ts_index LOCATION '/mnt/index'"
+
 exit 0
