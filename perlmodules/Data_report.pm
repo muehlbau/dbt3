@@ -481,8 +481,7 @@ sub get_os_version
 
 # get iostat version info so that we know whick key file to look at
 sub get_iostat_version {
-	my ($exe_path) = @_;
-	my $str = `$exe_path/iostat -V 2>&1 | head -1 `;
+	my $str = `iostat -V 2>&1 | head -1 `;
 	chomp $str;
 	my @outline = split / /, $str;
 	return $outline[ 2 ];
@@ -490,8 +489,7 @@ sub get_iostat_version {
 
 # get sar version info so that we know whick key file to look at
 sub get_sar_version {
-	my ($exe_path) = @_;
-	my $str = `$exe_path/sar -V 2>&1 | head -1 `;
+	my $str = `sar -V 2>&1 | head -1 `;
 	chomp $str;
 	my @outline = split / /, $str;
 	return $outline[ 2 ];
