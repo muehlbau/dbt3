@@ -1,0 +1,2 @@
+pg_ctl start -l @TOPDIR@/run/db_logfile.txt -o "-B 15200 -c sort_mem=32168 -c stats_command_string=true -c stats_row_level=true -c stats_block_level=true" 
+sleep 10
