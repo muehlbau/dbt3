@@ -109,10 +109,8 @@ ${SHELL} $DBSCRIPTDIR/create_db.sh "$db_param" || exit 1
 	
 if [ $TABLESPACES -eq 1 ]; then
 	${SHELL} $DBSCRIPTDIR/create_tablespaces.sh || exit 1
-	${SHELL} $DBSCRIPTDIR/create_tables_ts.sh || exit 1
-else
-	${SHELL} $DBSCRIPTDIR/create_tables.sh || exit 1
 fi
+${SHELL} $DBSCRIPTDIR/create_tables.sh ${TABLESPACES} || exit 1
 
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
