@@ -6,18 +6,8 @@
 :o
 select
 	l_shipmode,
-	sum(case
-		when o_orderpriority = '1-URGENT'
-			or o_orderpriority = '2-HIGH'
-			then 1
-		else 0
-	end) as high_line_count,
-	sum(case
-		when o_orderpriority <> '1-URGENT'
-			and o_orderpriority <> '2-HIGH'
-			then 1
-		else 0
-	end) as low_line_count
+	sum(decode(o_orderpriority, '1-URGENT', 1, '2-HIGH',1, 0)) as high_line_count,
+	        sum(decode(o_orderpriority, '1-URGENT', 0, '2-HIGH',0, 1)) as low_line_count
 from
 	orders,
 	lineitem
@@ -26,8 +16,8 @@ where
 	and l_shipmode in (':1', ':2')
 	and l_commitdate < l_receiptdate
 	and l_shipdate < l_commitdate
-	and l_receiptdate >= date ':3'
-	and l_receiptdate < date ':3' + interval '1' year
+	and l_receiptdate >= ':3'
+	and l_receiptdate < adddate(':3', 365)
 group by
 	l_shipmode
 order by
