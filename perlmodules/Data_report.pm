@@ -38,7 +38,8 @@ the separator is spaces
 @EXPORT = qw(extract_columns extract_rows extract_columns_rows get_header 
 		extract_columns_rows_sar convert_time_format get_os_version
 		get_iostat_version get_sar_version get_vmstat_version
-		get_max_row_number get_max_col_value gen_html_table);
+		get_max_row_number get_max_col_value gen_html_table
+		get_sapdb_version);
 
 sub extract_columns
 {
@@ -579,6 +580,23 @@ sub gen_html_table
 	print $fout end_table;
 
 	close($fout);
+}
+
+sub get_sapdb_version
+{
+	my ($fp);
+	$fp = new FileHandle;
+	unless ( $fp->open( "dbmcli dbm_version 2>&1 |" ) ) 
+		{ die "cannot open command dbmcli $!"; }
+	while (<$fp>)
+	{
+		next if ( !/VERSION/ );
+		chop;
+		my @outline = split /=/;
+		close($fp);
+		return $outline[ 1 ];
+	}
+	die "did not find sapdb version information";
 }
 
 1;
