@@ -1,21 +1,21 @@
 # Makefile
 # 20 february 2002
 
-include ../common.mk
+CC = gcc
 
 INCLUDE_DIR=../include
-COMMON_DIR=../common
+CFLAGS = -g -I$(INCLUDE_DIR) -DDEBUG
 
 EXE = parse_query
 UTIL_PRGS = main.c get_statement.c
 UTIL_OBJS = $(UTIL_PRGS:.c=.so)
 
-OBJS = $(UTIL_OBJS) $(COMMON_OBJS)
-PRGS = $(UTIL_PRGS) $(COMMON_PRGS)
+OBJS = $(UTIL_OBJS)
+PRGS = $(UTIL_PRGS)
 
-all: $(EXE) gtime
+all: parse_query gtime
 
-$(EXE): $(OBJS)
+parse_query: $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
 gtime:	get_time.c
@@ -25,7 +25,7 @@ gtime:	get_time.c
 	$(CC) -c -shared -fpic $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f $(EXE) *.so *.o
+	rm -f parse_query gtime *.so *.o
 	
 explain:
 	@echo "$(OBJS)"
