@@ -16,18 +16,6 @@ COUNTER=0
 echo "the database statistics is taken at $SAMPLE_LENGTH interval and $ITERATIONS count" >> $OUTPUT_DIR/readme.txt
 echo >> $OUTPUT_DIR/readme.txt
 
-while [ 1 ]
-do
-	_o=`/opt/sapdb/depend/bin/dbmcli -d $1 -u dbm,dbm db_state 2>&1`
-	_test=`echo $_o | grep -i warm`
-	if [ "$_test" = "" ]; then
-		echo "wait for database $1 to be on-line"
-		sleep 5
-	else
-		break;
-	fi
-done
-
 # save the database parameters
 /opt/sapdb/depend/bin/dbmcli -d $1 -u dbm,dbm -uSQL dbt,dbt -c param_extgetall | sort > $OUTPUT_DIR/param.out
 #read RN < .run_number
