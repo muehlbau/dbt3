@@ -1,6 +1,9 @@
 #!/bin/sh
-
-# dbt3_gen_graphs.sh: parse the statistic output and generate graphs for dbt-3 runs
+#
+# dbt3_gen_graphs.sh
+#
+# parse the statistic output and generate graphs for dbt-3 runs
+#
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
 #
@@ -8,6 +11,8 @@
 #
 # Author: Jenny Zhang
 # Feb 2003
+
+set -x
 
 if [ $# -lt 2 ]; then
         echo "usage: $0 <input_dir> <output_dir>"
@@ -32,7 +37,7 @@ if [ -f $input_dir/load.vmstat.txt ]; then
 	./parse_vmstat.pl -i $input_dir/load.vmstat.txt -o $output_dir/load.vmstat -c "vmstat taken every 60 seconds"
 
 	#generate graphs based on build.vmstat.dat file
-	./gr_single_dir.pl -i $output_dir/load.vmstat.dat -o $output_dir/load.vmstat_cpu -t "build vmstat CPU" -b "load.vmstat." -e ".dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/load.vmstat.dat -o $output_dir/load.vmstat_cpu -t "build vmstat CPU" -b "load.vmstat." -e ".dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec" -y 0:100
 
 	./gr_single_dir.pl -i $output_dir/load.vmstat.dat -o $output_dir/load.vmstat_io -t "load vmstat IO" -b "load.vmstat." -e ".dat" -c 8,9 -v "Block/Sec" -hl "samples every 60 sec"
 
@@ -50,7 +55,7 @@ if [ -f $input_dir/power.vmstat.txt ]; then
 	#parse vmstat
 	./parse_vmstat.pl -i $input_dir/power.vmstat.txt -o $output_dir/power.vmstat -c "vmstat taken every 60 seconds"
 	#generate graphs based on run.vmstat.dat file
-	./gr_single_dir.pl -i $output_dir/power.vmstat.dat -o $output_dir/power.vmstat_cpu -t "run vmstat CPU" -b "power.vmstat." -e ".dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/power.vmstat.dat -o $output_dir/power.vmstat_cpu -t "run vmstat CPU" -b "power.vmstat." -e ".dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec" -y 0:100
 
 	./gr_single_dir.pl -i $output_dir/power.vmstat.dat -o $output_dir/power.vmstat_io -t "power vmstat IO" -b "power.vmstat." -e ".dat" -c 8,9 -v "Block/Sec" -hl "samples every 60 sec"
 
@@ -63,22 +68,22 @@ if [ -f $input_dir/power.vmstat.txt ]; then
 	./gr_single_dir.pl -i $output_dir/power.vmstat.dat -o $output_dir/power.vmstat_procs -t "power vmstat process" -b "power.vmstat." -e ".dat" -c 0,1 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/thuput.vmstat.txt ]; then
-	echo "parse thuput test vmstat";
+if [ -f $input_dir/thruput.vmstat.txt ]; then
+	echo "parse thruput test vmstat";
 	#parse vmstat
-	./parse_vmstat.pl -i $input_dir/thuput.vmstat.txt -o $output_dir/thuput.vmstat -c "vmstat taken every 60 seconds"
+	./parse_vmstat.pl -i $input_dir/thruput.vmstat.txt -o $output_dir/thruput.vmstat -c "vmstat taken every 60 seconds"
 	#generate graphs based on run.vmstat.dat file
-	./gr_single_dir.pl -i $output_dir/thuput.vmstat.dat -o $output_dir/thuput.vmstat_cpu -t "run vmstat CPU" -b "thuput.vmstat." -e ".dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/thruput.vmstat.dat -o $output_dir/thruput.vmstat_cpu -t "run vmstat CPU" -b "thruput.vmstat." -e ".dat" -c 12,13,14,15 -v "percetage" -hl "samples every 60 sec"
 
-	./gr_single_dir.pl -i $output_dir/thuput.vmstat.dat -o $output_dir/thuput.vmstat_io -t "thuput vmstat IO" -b "thuput.vmstat." -e ".dat" -c 8,9 -v "Block/Sec" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/thruput.vmstat.dat -o $output_dir/thruput.vmstat_io -t "thruput vmstat IO" -b "thruput.vmstat." -e ".dat" -c 8,9 -v "Block/Sec" -hl "samples every 60 sec"
 
-	./gr_single_dir.pl -i $output_dir/thuput.vmstat.dat -o $output_dir/thuput.vmstat_memory -t "thuput vmstat memory" -b "thuput.vmstat." -e ".dat" -c 2,3,4,5, -v "kblock" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/thruput.vmstat.dat -o $output_dir/thruput.vmstat_memory -t "thruput vmstat memory" -b "thruput.vmstat." -e ".dat" -c 2,3,4,5, -v "kblock" -hl "samples every 60 sec"
 
-	./gr_single_dir.pl -i $output_dir/thuput.vmstat.dat -o $output_dir/thuput.vmstat_swap -t "thuput vmstat swap" -b "run.vmstat." -e ".dat" -c 6,7 -v "kblock/sec" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/thruput.vmstat.dat -o $output_dir/thruput.vmstat_swap -t "thruput vmstat swap" -b "run.vmstat." -e ".dat" -c 6,7 -v "kblock/sec" -hl "samples every 60 sec"
 
-	./gr_single_dir.pl -i $output_dir/thuput.vmstat.dat -o $output_dir/thuput.vmstat_system -t "thuput vmstat system" -b "thuput.vmstat." -e ".dat" -c 10,11 -v "per sec" -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/thruput.vmstat.dat -o $output_dir/thruput.vmstat_system -t "thruput vmstat system" -b "thruput.vmstat." -e ".dat" -c 10,11 -v "per sec" -hl "samples every 60 sec"
 
-	./gr_single_dir.pl -i $output_dir/thuput.vmstat.dat -o $output_dir/thuput.vmstat_procs -t "thuput vmstat process" -b "thuput.vmstat." -e ".dat" -c 0,1 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i $output_dir/thruput.vmstat.dat -o $output_dir/thruput.vmstat_procs -t "thruput vmstat process" -b "thruput.vmstat." -e ".dat" -c 0,1 -hl "samples every 60 sec"
 fi
 	
 if [ -f $input_dir/load.iostat.txt ]; then
@@ -99,13 +104,13 @@ if [ -f $input_dir/power.iostat.txt ]; then
 	./gr_single_dir.pl -i "$output_dir/power.iostat.*.dat" -o $output_dir/power.iostat_tps -t "power iostat tps" -b "power.iostat." -e ".dat" -c 0 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/thuput.iostat.txt ]; then
-	echo "parse thuput iostat";
-	./parse_iostat.pl -i $input_dir/thuput.iostat.txt -d $output_dir/thuput.iostat -co "iostat -d taken every 60 seconds" -o '-d'
-	#generate graphs based on thuput iostat .dat file
-	./gr_single_dir.pl -i "$output_dir/thuput.iostat.*.dat" -o $output_dir/thuput.iostat_read_sec -t "thuput iostat read per second" -b "thuput.iostat." -e ".dat" -c 1 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.iostat.*.dat" -o $output_dir/thuput.iostat_write_sec -t "thuput iostat write per second" -b "thuput.iostat." -e ".dat" -c 2 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.iostat.*.dat" -o $output_dir/thuput.iostat_tps -t "thuput iostat tps" -b "thuput.iostat." -e ".dat" -c 0 -hl "samples every 60 sec"
+if [ -f $input_dir/thruput.iostat.txt ]; then
+	echo "parse thruput iostat";
+	./parse_iostat.pl -i $input_dir/thruput.iostat.txt -d $output_dir/thruput.iostat -co "iostat -d taken every 60 seconds" -o '-d'
+	#generate graphs based on thruput iostat .dat file
+	./gr_single_dir.pl -i "$output_dir/thruput.iostat.*.dat" -o $output_dir/thruput.iostat_read_sec -t "thruput iostat read per second" -b "thruput.iostat." -e ".dat" -c 1 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.iostat.*.dat" -o $output_dir/thruput.iostat_write_sec -t "thruput iostat write per second" -b "thruput.iostat." -e ".dat" -c 2 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.iostat.*.dat" -o $output_dir/thruput.iostat_tps -t "thruput iostat tps" -b "thruput.iostat." -e ".dat" -c 0 -hl "samples every 60 sec"
 fi
 
 if [ -f $input_dir/load.ziostat.txt ]; then
@@ -142,21 +147,21 @@ if [ -f $input_dir/power.ziostat.txt ]; then
 	./gr_single_dir.pl -i "$output_dir/power.ziostat.*.dat" -o $output_dir/power.ziostat_util -t "power ziostat disk utility" -b "power.ziostat." -e ".dat" -c 10 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/thuput.ziostat.txt ]; then
-	echo "parse thuput ziostat";
-	./parse_ziostat.pl -i $input_dir/thuput.ziostat.txt -d $output_dir/thuput.ziostat -co "ziostat -d taken every 60 seconds" -o '-x'
-	#generate graphs based on thuput iostat .dat file
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_read_merge -t "thuput ziostat read request merged per second" -b "thuput.ziostat." -e ".dat" -c 0 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_write_merge -t "thuput ziostat write request merged per second" -b "thuput.ziostat." -e ".dat" -c 1 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_read_request -t "thuput ziostat read request per second" -b "thuput.ziostat." -e ".dat" -c 2 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_write_request -t "thuput ziostat write request per second" -b "thuput.ziostat." -e ".dat" -c 3 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_kbyte_read -t "thuput ziostat kbyte read per second" -b "thuput.ziostat." -e ".dat" -c 4 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_kbyte_write -t "thuput ziostat kbyte write per second" -b "thuput.ziostat." -e ".dat" -c 5 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_avg_request_size -t "thuput ziostat average request size in kbyte" -b "thuput.ziostat." -e ".dat" -c 6 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_avg_queue_size -t "thuput ziostat average queued requests" -b "thuput.ziostat." -e ".dat" -c 7 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_wait_time -t "thuput ziostat average io wait time" -b "thuput.ziostat." -e ".dat" -c 8 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_svc_time -t "thuput ziostat average service time" -b "thuput.ziostat." -e ".dat" -c 9 -hl "samples every 60 sec"
-	./gr_single_dir.pl -i "$output_dir/thuput.ziostat.*.dat" -o $output_dir/thuput.ziostat_util -t "thuput ziostat disk utility" -b "thuput.ziostat." -e ".dat" -c 10 -hl "samples every 60 sec"
+if [ -f $input_dir/thruput.ziostat.txt ]; then
+	echo "parse thruput ziostat";
+	./parse_ziostat.pl -i $input_dir/thruput.ziostat.txt -d $output_dir/thruput.ziostat -co "ziostat -d taken every 60 seconds" -o '-x'
+	#generate graphs based on thruput iostat .dat file
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_read_merge -t "thruput ziostat read request merged per second" -b "thruput.ziostat." -e ".dat" -c 0 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_write_merge -t "thruput ziostat write request merged per second" -b "thruput.ziostat." -e ".dat" -c 1 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_read_request -t "thruput ziostat read request per second" -b "thruput.ziostat." -e ".dat" -c 2 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_write_request -t "thruput ziostat write request per second" -b "thruput.ziostat." -e ".dat" -c 3 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_kbyte_read -t "thruput ziostat kbyte read per second" -b "thruput.ziostat." -e ".dat" -c 4 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_kbyte_write -t "thruput ziostat kbyte write per second" -b "thruput.ziostat." -e ".dat" -c 5 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_avg_request_size -t "thruput ziostat average request size in kbyte" -b "thruput.ziostat." -e ".dat" -c 6 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_avg_queue_size -t "thruput ziostat average queued requests" -b "thruput.ziostat." -e ".dat" -c 7 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_wait_time -t "thruput ziostat average io wait time" -b "thruput.ziostat." -e ".dat" -c 8 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_svc_time -t "thruput ziostat average service time" -b "thruput.ziostat." -e ".dat" -c 9 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.ziostat.*.dat" -o $output_dir/thruput.ziostat_util -t "thruput ziostat disk utility" -b "thruput.ziostat." -e ".dat" -c 10 -hl "samples every 60 sec"
 fi
 
 if [ -f $input_dir/load.sar.data ]; then
@@ -186,22 +191,22 @@ if [ -f $input_dir/load.sar.data ]; then
 	#parse sar swapping
 	./parse_sar.pl -i $input_dir/load.sar.data -out $output_dir/load.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
 	#generate data based on load sar .dat files
-	./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_user -t "load sar individual CPU pct_user" -b "load.sar." -e ".dat" -c 0 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_user -t "load sar individual CPU pct_user" -b "load.sar." -e ".dat" -c 0 -hl "samples every 60 sec" -y 0:100
 	
-	./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_system -t "load sar individual CPU pct_system" -b "load.sar." -e ".dat" -c 2 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_system -t "load sar individual CPU pct_system" -b "load.sar." -e ".dat" -c 2 -hl "samples every 60 sec" -y 0:100
 	
 	if [ $VERSION -eq 5 ]
 	then
-		./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_iowait -t "load sar individual CPU pct_iowait" -b "load.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_iowait -t "load sar individual CPU pct_iowait" -b "load.sar." -e ".dat" -c 3 -hl "samples every 60 sec" -y 0:100
 	
-		./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_idle -t "load sar individual CPU pct_idle" -b "load.sar." -e ".dat" -c 4 -hl "samples every 60 sec"
-		./gr_single_dir.pl -i "$output_dir/load.sar_cpu_all.dat" -o $output_dir/load.sar_cpu_all -t "load sar CPU" -b "load.sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_idle -t "load sar individual CPU pct_idle" -b "load.sar." -e ".dat" -c 4 -hl "samples every 60 sec" -y 0:100
+		./gr_single_dir.pl -i "$output_dir/load.sar_cpu_all.dat" -o $output_dir/load.sar_cpu_all -t "load sar CPU" -b "load.sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec" -y 0:100
 	else
-		./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_idle -t "load sar individual CPU pct_idle" -b "load.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
-		./gr_single_dir.pl -i "$output_dir/load.sar_cpu_all.dat" -o $output_dir/load.sar_cpu_all -t "load sar CPU" -b "load.sar_cpu_all" -e ".dat" -c 0,1,2,3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/load.sar.cpu*.dat" -o $output_dir/load.sar_cpu_idle -t "load sar individual CPU pct_idle" -b "load.sar." -e ".dat" -c 3 -hl "samples every 60 sec" -y 0:100
+		./gr_single_dir.pl -i "$output_dir/load.sar_cpu_all.dat" -o $output_dir/load.sar_cpu_all -t "load sar CPU" -b "load.sar_cpu_all" -e ".dat" -c 0,1,2,3 -hl "samples every 60 sec" -y 0:100
 	fi
 	
-	./gr_single_dir.pl -i "$output_dir/load.sar_io.dat" -o $output_dir/load.sar_io -t "sar IO" -b "load.sar_io" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+	#./gr_single_dir.pl -i "$output_dir/load.sar_io.dat" -o $output_dir/load.sar_io -t "sar IO" -b "load.sar_io" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
 	
 	./gr_single_dir.pl -i "$output_dir/load.sar_memory.dat" -o $output_dir/load.sar_memory -t "load sar memory" -b "load.sar_memory" -e ".dat" -c 0,1,3,4,5,6,7 -hl "samples every 60 sec"
 	
@@ -237,19 +242,19 @@ if [ -f $input_dir/power.sar.data ]; then
 	./parse_sar.pl -i $input_dir/power.sar.data -out $output_dir/power.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
 
 	#generate data based on power sar .dat files
-	./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_user -t "power sar individual CPU pct_user" -b "power.sar." -e ".dat" -c 0 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_user -t "power sar individual CPU pct_user" -b "power.sar." -e ".dat" -c 0 -hl "samples every 60 sec" -y 0:100
 	
-	./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_system -t "power sar individual CPU pct_system" -b "power.sar." -e ".dat" -c 2 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_system -t "power sar individual CPU pct_system" -b "power.sar." -e ".dat" -c 2 -hl "samples every 60 sec" -y 0:100
 	
 	if [ $VERSION -eq 5 ]
 	then
-		./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_iowait -t "power sar individual CPU pct_iowait" -b "power.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_iowait -t "power sar individual CPU pct_iowait" -b "power.sar." -e ".dat" -c 3 -hl "samples every 60 sec" -y 0:100
 	
-		./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_idle -t "power sar individual CPU pct_idle" -b "power.sar." -e ".dat" -c 4 -hl "samples every 60 sec"
-		./gr_single_dir.pl -i "$output_dir/power.sar_cpu_all.dat" -o $output_dir/power.sar_cpu_all -t "power sar CPU" -b "power.sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_idle -t "power sar individual CPU pct_idle" -b "power.sar." -e ".dat" -c 4 -hl "samples every 60 sec" -y 0:100
+		./gr_single_dir.pl -i "$output_dir/power.sar_cpu_all.dat" -o $output_dir/power.sar_cpu_all -t "power sar CPU" -b "power.sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec" -y 0:100
 	else
-		./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_idle -t "power sar individual CPU pct_idle" -b "power.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
-		./gr_single_dir.pl -i "$output_dir/power.sar_cpu_all.dat" -o $output_dir/power.sar_cpu_all -t "power sar CPU" -b "power.sar_cpu_all" -e ".dat" -c 0,1,2,3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/power.sar.cpu*.dat" -o $output_dir/power.sar_cpu_idle -t "power sar individual CPU pct_idle" -b "power.sar." -e ".dat" -c 3 -hl "samples every 60 sec" -y 0:100
+		./gr_single_dir.pl -i "$output_dir/power.sar_cpu_all.dat" -o $output_dir/power.sar_cpu_all -t "power sar CPU" -b "power.sar_cpu_all" -e ".dat" -c 0,1,2,3 -hl "samples every 60 sec" -y 0:100
 	fi
 	
 	./gr_single_dir.pl -i "$output_dir/power.sar_io.dat" -o $output_dir/power.sar_io -t "sar IO" -b "power.sar_io" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
@@ -259,55 +264,55 @@ if [ -f $input_dir/power.sar.data ]; then
 	./gr_single_dir.pl -i "$output_dir/power.sar_memory.dat" -o $output_dir/power.sar_memory_pct -t "power sar memory percentage" -b "power.sar_memory" -e ".dat" -c 2,8 -hl "samples every 60 sec"
 fi
 
-if [ -f $input_dir/thuput.sar.data ]; then
-	echo "parse thuput sar -b";
+if [ -f $input_dir/thruput.sar.data ]; then
+	echo "parse thruput sar -b";
 	#parse sar io
-	./parse_sar.pl -i $input_dir/thuput.sar.data -out $output_dir/thuput.sar_io -c "sar -b taken every 60 seconds" -op '-b'
+	./parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_io -c "sar -b taken every 60 seconds" -op '-b'
 
-	echo "parse thuput sar -r";
+	echo "parse thruput sar -r";
 	#parse sar memory
-	./parse_sar.pl -i $input_dir/thuput.sar.data -out $output_dir/thuput.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
+	./parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_memory -c "sar -r taken every 60 seconds" -op '-r'
 
-	echo "parse thuput sar -u";
+	echo "parse thruput sar -u";
 	#parse sar total cpu
-	./parse_sar.pl -i $input_dir/thuput.sar.data -out $output_dir/thuput.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
+	./parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_cpu_all -c "sar -u taken every 60 seconds" -op '-u'
 
 	if [ $sysstat_version = '4.1.2' ]
 	then
-		echo "parse thuput sar -P";
+		echo "parse thruput sar -P";
 		#parse sar individual cpu
-		./parse_sar.pl -i $input_dir/thuput.sar.data -out $output_dir/thuput.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
+		./parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
 	else
-		echo "parse thuput sar -U";
+		echo "parse thruput sar -U";
 		#parse sar individual cpu
-		./parse_sar.pl -i $input_dir/thuput.sar.data -out $output_dir/thuput.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
+		./parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
 	fi
 
-	echo "parse thuput sar -W";
+	echo "parse thruput sar -W";
 	#parse sar swapping
-	./parse_sar.pl -i $input_dir/thuput.sar.data -out $output_dir/thuput.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
+	./parse_sar.pl -i $input_dir/thruput.sar.data -out $output_dir/thruput.sar_swap -c "sar -W taken every 60 seconds" -op '-W'
 
-	#generate data based on thuput sar .dat files
-	./gr_single_dir.pl -i "$output_dir/thuput.sar.cpu*.dat" -o $output_dir/thuput.sar_cpu_user -t "thuput sar individual CPU pct_user" -b "thuput.sar." -e ".dat" -c 0 -hl "samples every 60 sec"
+	#generate data based on thruput sar .dat files
+	./gr_single_dir.pl -i "$output_dir/thruput.sar.cpu*.dat" -o $output_dir/thruput.sar_cpu_user -t "thruput sar individual CPU pct_user" -b "thruput.sar." -e ".dat" -c 0 -hl "samples every 60 sec"
 	
-	./gr_single_dir.pl -i "$output_dir/thuput.sar.cpu*.dat" -o $output_dir/thuput.sar_cpu_system -t "thuput sar individual CPU pct_system" -b "thuput.sar." -e ".dat" -c 2 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.sar.cpu*.dat" -o $output_dir/thruput.sar_cpu_system -t "thruput sar individual CPU pct_system" -b "thruput.sar." -e ".dat" -c 2 -hl "samples every 60 sec"
 	
 	if [ $VERSION -eq 5 ]
 	then
-		./gr_single_dir.pl -i "$output_dir/thuput.sar.cpu*.dat" -o $output_dir/thuput.sar_cpu_iowait -t "thuput sar individual CPU pct_iowait" -b "thuput.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/thruput.sar.cpu*.dat" -o $output_dir/thruput.sar_cpu_iowait -t "thruput sar individual CPU pct_iowait" -b "thruput.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
 	
-		./gr_single_dir.pl -i "$output_dir/thuput.sar.cpu*.dat" -o $output_dir/thuput.sar_cpu_idle -t "thuput sar individual CPU pct_idle" -b "thuput.sar." -e ".dat" -c 4 -hl "samples every 60 sec"
-		./gr_single_dir.pl -i "$output_dir/thuput.sar_cpu_all.dat" -o $output_dir/thuput.sar_cpu_all -t "thuput sar CPU" -b "thuput.sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/thruput.sar.cpu*.dat" -o $output_dir/thruput.sar_cpu_idle -t "thruput sar individual CPU pct_idle" -b "thruput.sar." -e ".dat" -c 4 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/thruput.sar_cpu_all.dat" -o $output_dir/thruput.sar_cpu_all -t "thruput sar CPU" -b "thruput.sar_cpu_all" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
 	else
-		./gr_single_dir.pl -i "$output_dir/thuput.sar.cpu*.dat" -o $output_dir/thuput.sar_cpu_idle -t "thuput sar individual CPU pct_idle" -b "thuput.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
-		./gr_single_dir.pl -i "$output_dir/thuput.sar_cpu_all.dat" -o $output_dir/thuput.sar_cpu_all -t "thuput sar CPU" -b "thuput.sar_cpu_all" -e ".dat" -c 0,1,2,3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/thruput.sar.cpu*.dat" -o $output_dir/thruput.sar_cpu_idle -t "thruput sar individual CPU pct_idle" -b "thruput.sar." -e ".dat" -c 3 -hl "samples every 60 sec"
+		./gr_single_dir.pl -i "$output_dir/thruput.sar_cpu_all.dat" -o $output_dir/thruput.sar_cpu_all -t "thruput sar CPU" -b "thruput.sar_cpu_all" -e ".dat" -c 0,1,2,3 -hl "samples every 60 sec"
 	fi
 	
-	./gr_single_dir.pl -i "$output_dir/thuput.sar_io.dat" -o $output_dir/thuput.sar_io -t "sar IO" -b "thuput.sar_io" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.sar_io.dat" -o $output_dir/thruput.sar_io -t "sar IO" -b "thruput.sar_io" -e ".dat" -c 0,1,2,3,4 -hl "samples every 60 sec"
 	
-	./gr_single_dir.pl -i "$output_dir/thuput.sar_memory.dat" -o $output_dir/thuput.sar_memory -t "thuput.sar_memory" -b "sar_memory" -e ".dat" -c 0,1,3,4,5,6,7 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.sar_memory.dat" -o $output_dir/thruput.sar_memory -t "thruput.sar_memory" -b "sar_memory" -e ".dat" -c 0,1,3,4,5,6,7 -hl "samples every 60 sec"
 	
-	./gr_single_dir.pl -i "$output_dir/thuput.sar_memory.dat" -o $output_dir/thuput.sar_memory_pct -t "thuput sar memory percentage" -b "thuput.sar_memory" -e ".dat" -c 2,8 -hl "samples every 60 sec"
+	./gr_single_dir.pl -i "$output_dir/thruput.sar_memory.dat" -o $output_dir/thruput.sar_memory_pct -t "thruput sar memory percentage" -b "thruput.sar_memory" -e ".dat" -c 2,8 -hl "samples every 60 sec"
 fi
 
 #parse ips.csv output

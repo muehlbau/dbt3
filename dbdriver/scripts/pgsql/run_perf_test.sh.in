@@ -25,7 +25,7 @@ dbdriver_pgsql_path="@TOPDIR@/dbdriver/scripts/pgsql"
 echo "`date`:=======performance test $perf_run_num========"
 s_time=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}', current_timestamp, $s_time)"
-psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}', current_timestamp, $s_time)"
+psql -d $SID -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}', current_timestamp, $s_time)"
 
 #***run power test
 $dbdriver_pgsql_path/run_power_test.sh $scale_factor $perf_run_num
@@ -34,7 +34,7 @@ $dbdriver_pgsql_path/run_power_test.sh $scale_factor $perf_run_num
 $dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $perf_run_num $num_stream $explain_analyze
 
 echo "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
-psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
+psql -d $SID -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
 e_time=`$GTIME`
 echo "`date`: end performance test run ${perf_run_num} "
 let "diff_time=$e_time-$s_time"

@@ -1,0 +1,119 @@
+#!/bin/bash
+#
+# run_workload.sh.in
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2004 Mark Wong & Jenny Zhang
+#                    Open Source Development Lab, Inc.
+
+SRCDIR=@TOPDIR@
+DATABASE=@DATABASE_TO_USE@
+DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
+
+GTIME=$SRCDIR/dbdriver/utils/gtime
+
+EXPLAIN_ANALYZE=0
+SEED=0
+REDIR_LOG=0
+REDIR_TMP=0
+SCALE_FACTOR=1
+STREAMS=1
+USE_OPROFILE=0
+MAX=1
+while getopts "e:f:n:o:p:r:s:x:" opt; do
+	case $opt in
+		e)
+			# PostgreSQL only.
+			EXPLAIN_ANALYZE=$OPTARG
+			;;
+		f)
+			SCALE_FACTOR=$OPTARG
+			;;
+		n)
+			STREAMS=$OPTARG
+			;;
+		o)
+			USE_OPROFILE=$OPTARG
+			;;
+		p)
+			# PostgreSQL only.
+			PARAMETERS=$OPTARG
+			;;
+		r)
+			# PostgreSQL only.
+			REDIR_TMP=$OPTARG
+			;;
+		s)
+			SEED=$OPTARG
+			;;
+		x)
+			# PostgreSQL only.
+			REDIR_LOG=$OPTARG
+			;;
+	esac
+done
+
+# Determine a unique identifer for this test run.
+RUN_NUMBER=-1
+if test -f run_number; then
+	read RUN_NUMBER < run_number
+fi
+if [ $RUN_NUMBER -eq -1 ]; then
+	RUN_NUMBER=0;
+fi
+
+# Create output directories.
+OUTPUT_DIR=$SRCDIR/scripts/output/$RUN_NUMBER
+RUN_PATH=$OUTPUT_DIR/run
+mkdir -p $OUTPUT_DIR
+mkdir -p $RUN_PATH
+
+# Set the seed file.
+SEED_FILE=$RUN_PATH/seed
+if [ $SEED -eq 0 ]; then
+	bash $SRCDIR/scripts/init_seed.sh > $SEED_FILE
+else
+	echo $SEED > $SEED_FILE
+fi
+echo "seed: `cat $SEED_FILE`"
+
+# Load Test
+bash -x $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR
+
+i=1
+while [ $i -le $MAX ]
+do
+	# Start time of a Power and Throughput test.
+	s_time=`$GTIME`
+	bash $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
+
+	# Power Test
+	bash -x $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE
+
+	# Throughput Test
+	bash -x $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE
+
+	# The database should be shut down after the last test, so start it back
+	# up so we can update and retrieve test information in the database.
+	bash -x $DBSCRIPTDIR/start_db.sh "$PARAMETERS"
+
+	# End time of a Power and Throughput test.
+	bash $DBSCRIPTDIR/record_end.sh -n "PERF${i}"
+	e_time=`$GTIME`
+	let "diff_time=$e_time-$s_time"
+	echo "elapsed time for performance test ${i} $diff_time"
+
+	# Increment loop counter.
+	let "i=$i+1"
+done
+
+# Get system details.
+bash $DBSCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS $REDIR_TMP $REDIR_LOG "$PARAMETERS" $OUTPUT_DIR
+
+# Get query times.
+bash $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out
+
+# Calculate composite score.      
+perl $SRCDIR/scripts/get_composite.pl -p 1 -s $SCALE_FACTOR -n $STREAMS -o $OUTPUT_DIR/calc_composite.out

@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+# throughput_stream_wrapper.sh
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2004 Mark Wong & Jenny Zhang & Open Source Development Lab, Inc.
+
+SRCDIR=@TOPDIR@
+
+while getopts "e:f:n:r:t:" opt; do
+	case $opt in
+	e) explain_analyze=$OPTARG
+		;;
+	f) scale_factor=$OPTARG
+		;;
+	n) num_stream=$OPTARG
+		;;
+	r) RUNDIR=$OPTARG
+		;;
+	t) TAG=$OPTARG
+		;;
+	esac
+done
+
+DBSCRIPTDIR=$SRCDIR/scripts/pgsql
+
+GTIME="$SRCDIR/dbdriver/utils/gtime"
+
+# Start each stream.
+i=1
+while [ $i -le $num_stream ] 
+do
+	bash $DBSCRIPTDIR/run_throughput_stream.sh $scale_factor $TAG $i $explain_analyze $RUNDIR > $RUNDIR/thruput_qs$i 2>&1 &
+	
+	let "i=$i+1"
+done
+
+# Start the refresh stream.  The throughput tests runs a streams consecutively
+# per throughput streams, also consecutively.
+stream_num=1
+while [ $stream_num -le $num_stream ]
+do
+        echo "`date`:=======refresh stream $stream_num========"
+	s_time_stream=`$GTIME`
+	bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}"
+
+	echo "`date`: start throughput test refresh stream $stream_num rf1"
+	s_time_rf1=`$GTIME`
+	bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
+	bash $DBSCRIPTDIR/run_rf1.sh $scale_factor $RUNDIR > $RUNDIR/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1
+	bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
+	e_time_rf1=`$GTIME`
+	echo "`date`: end throughput test refresh stream $stream_num rf1"
+	let "diff_time_rf1=$e_time_rf1-$s_time_rf1"
+	echo "elapsed time for throughput test refresh stream $stream_num rf1 $diff_time_rf1"
+
+	echo "`date`: start throughput test refresh stream $stream_num rf2"
+	s_time_rf2=`$GTIME`
+	bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
+	bash $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $RUNDIR/thruput.perf${TAG}.stream${stream_num}.rf2.result 2>&1
+	bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
+	e_time_rf2=`$GTIME`
+	echo "`date`: end throughput test refresh stream $stream_num rf2"
+	let "diff_time_rf2=$e_time_rf2-$s_time_rf2"
+	echo "elapsed time for throughput test refresh stream $stream_num rf2 $diff_time_rf2"
+
+	bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}"
+	e_time_stream=`$GTIME`
+	let "diff_time_stream=$e_time_stream-$s_time_stream"
+	echo "elapsed time for throughput test refresh stream $stream_num $diff_time_stream"
+
+        let "stream_num=$stream_num+1"
+done
+
+wait

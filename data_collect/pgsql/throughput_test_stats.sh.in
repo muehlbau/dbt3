@@ -84,7 +84,7 @@ fi
 mkdir -p $output_dir
 
 #clean time_statistics table
-psql -d $SID -U $PGUSER -c "delete from time_statistics;"
+psql -d $SID -c "delete from time_statistics;"
 # restart the database
 echo "stopping the database"
 $pgsql_script_path/stop_db.sh
@@ -98,8 +98,8 @@ $datacollect_pgsql_path/get_config.sh $scale_factor $num_stream $output_dir
 cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
-#start thuput_sys_stats.sh
-$datacollect_path/thuput_sys_stats.sh $interval $duration $output_dir &
+#start thruput_sys_stats.sh
+$datacollect_path/thruput_sys_stats.sh $interval $duration $output_dir &
 
 #calculate count
 let "count=$duration/$interval"
@@ -111,7 +111,7 @@ fi
 #get one more count
 let "count=$count+1"
 #get database statistics
-$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "thuput" &
+$datacollect_pgsql_path/db_stats.sh $SID $output_dir $count $interval "thruput" &
 
 #execute the query
 echo "run throughput test for scale factor $scale_factor perf_run_number 1"
@@ -124,18 +124,18 @@ cat /proc/meminfo > $output_dir/meminfo1.out
 $datacollect_pgsql_path/q_time.sh $output_dir
 
 #calculate throutput power
-$dbdriver_pgsql_path/get_throughput.pl -p 1 -s $scale_factor -n $num_stream 2>&1 >$output_dir/calc_thuput.out
+$dbdriver_pgsql_path/get_throughput.pl -p 1 -s $scale_factor -n $num_stream 2>&1 >$output_dir/calc_thruput.out
 
-#copy thuput_qs* and refresh_stream* to output
-cp $run_path/thuput_qs* $output_dir/
-cp $run_path/thuput_qs*.result $output_dir/
+#copy thruput_qs* and refresh_stream* to output
+cp $run_path/thruput_qs* $output_dir/
+cp $run_path/thruput_qs*.result $output_dir/
 cp $run_path/tmp_throughput_query*.sql $output_dir/
 cp $run_path/refresh_stream* $output_dir/
 cp $run_path/*param* $output_dir/
 
-mv $datacollect_pgsql_path/thuput.out $output_dir/
+mv $datacollect_pgsql_path/thruput.out $output_dir/
 
-ps -ef | grep -v grep | grep thuput_sys_stats | awk '{ print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep thruput_sys_stats | awk '{ print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9

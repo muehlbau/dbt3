@@ -25,3 +25,5 @@ create index i_ps_partkey on partsupp (ps_partkey);
 create index i_ps_suppkey on partsupp (ps_suppkey);
 
 create index i_n_regionkey on nation (n_regionkey);
+
+create index i_l_commitdate on lineitem (l_commitdate);

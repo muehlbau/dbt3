@@ -1,1 +1,1 @@
-psql -d $SID -U $PGUSER -f @TOPDIR@/scripts/pgsql/create_indexes.sql
+psql -d $SID -f @TOPDIR@/scripts/pgsql/create_indexes.sql

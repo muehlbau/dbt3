@@ -28,7 +28,7 @@ if [ $# -eq 3 ]; then
 else
 	echo "running $SID with default seed"
 	echo "`date`: generate seed0" 
-	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+	@TOPDIR@/scripts/init_seed.sh > $seed_file
 fi
 
 GTIME="@TOPDIR@/dbdriver/utils/gtime"

@@ -31,68 +31,88 @@ AC_SUBST(TOPDIR)
 AC_SUBST(DATABASE_TO_USE)
 AC_SUBST(SEPARATOR_FOR_DB)
 
+AC_PATH_PROGS([SAR], [sar bsdsar], ,
+             [$PATH:/usr/local/bin:/usr/bin])
+if test -z "$SAR"
+then
+  AC_MSG_WARN([*** sar or bsdsar not found some scripts may not be usable])
+  SAR=/usr/bin/sar
+fi
+
+AC_PATH_PROGS([IOSTAT], [iostat], ,
+             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+if test -z "$IOSTAT"
+then
+  AC_MSG_WARN([*** iostat not found some scripts may not be usable])
+  IOSTAT=/usr/bin/iostat
+fi
+
+AC_PATH_PROGS([VMSTAT], [vmstat], ,
+             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+if test -z "$VMSTAT"
+then
+  AC_MSG_WARN([*** vmstat not found some scripts may not be usable])
+  VMSTAT=/usr/bin/vmstat
+fi
+
 AC_OUTPUT([
-make.common 
-Makefile 
-dbdriver/utils/Makefile 
-datagen/dbgen/Makefile 
-data_collect/pgsql/dbt3_stats.sh
-data_collect/pgsql/load_test_stats.sh
-data_collect/pgsql/perf_test_stats.sh
-data_collect/pgsql/power_test_stats.sh
-data_collect/pgsql/single_query_stats.sh
-data_collect/pgsql/throughput_query_stats.sh
-data_collect/pgsql/throughput_test_stats.sh
-data_collect/sapdb/dbt3_stats.sh
-data_collect/sapdb/power_test_stats.sh
-data_collect/sapdb/single_query_stats.sh
-data_collect/sapdb/throughput_query_stats.sh
-data_collect/sapdb/throughput_test_stats.sh
-dbdriver/scripts/get_composite.pl
-dbdriver/scripts/pgsql/explain_single_query.sh
-dbdriver/scripts/pgsql/explain_power_query.sh
-dbdriver/scripts/pgsql/run_dbt3.sh
-dbdriver/scripts/pgsql/run_load_test.sh
-dbdriver/scripts/pgsql/run_perf_test.sh
-dbdriver/scripts/pgsql/run_power_query.sh
-dbdriver/scripts/pgsql/run_power_test.sh
-dbdriver/scripts/pgsql/run_refresh_stream.sh
-dbdriver/scripts/pgsql/run_rf1.sh
-dbdriver/scripts/pgsql/run_rf2.sh
-dbdriver/scripts/pgsql/run_single_query.sh
-dbdriver/scripts/pgsql/run_throughput_query.sh
-dbdriver/scripts/pgsql/run_throughput_test.sh
-dbdriver/scripts/sapdb/explain_single_query.sh
-dbdriver/scripts/sapdb/explain_power_query.sh
-dbdriver/scripts/sapdb/run_dbt3.sh
-dbdriver/scripts/sapdb/run_load_test.sh
-dbdriver/scripts/sapdb/run_single_query.sh
-dbdriver/scripts/sapdb/run_perf_test.sh
-dbdriver/scripts/sapdb/run_power_query.sh
-dbdriver/scripts/sapdb/run_power_test.sh
-dbdriver/scripts/sapdb/run_refresh_stream.sh
-dbdriver/scripts/sapdb/run_rf1.sh
-dbdriver/scripts/sapdb/run_rf2.sh
-dbdriver/scripts/sapdb/run_throughput_query.sh
-dbdriver/scripts/sapdb/run_throughput_test.sh
-scripts/pgsql/build_db.sh
-scripts/pgsql/create_db.sh
-scripts/pgsql/create_indexes.sh
-scripts/pgsql/create_tables.sh
-scripts/pgsql/drop_tables.sh
-scripts/pgsql/grant.sh
-scripts/pgsql/load_db.sh
-scripts/pgsql/set_db_env.sh
-scripts/pgsql/set_run_env.sh
-scripts/pgsql/start_db.sh
-scripts/sapdb/backup_db.sh
-scripts/sapdb/build_db.sh
-scripts/sapdb/create_db.sh
-scripts/sapdb/create_indexes.sh
-scripts/sapdb/create_tables.sh
-scripts/sapdb/drop_tables.sh
-scripts/sapdb/load_db.sh
-scripts/sapdb/restore_db.sh
-scripts/sapdb/set_run_env.sh
-scripts/sapdb/update_statistics.sh
+Makefile \
+datagen/dbgen/Makefile \
+data_collect/sapdb/dbt3_stats.sh \
+data_collect/sapdb/power_test_stats.sh \
+data_collect/sapdb/single_query_stats.sh \
+data_collect/sapdb/throughput_query_stats.sh \
+data_collect/sapdb/throughput_test_stats.sh \
+scripts/get_composite.pl \
+scripts/pgsql/get_query_plan.sh \
+dbdriver/scripts/pgsql/run_load_test.sh \
+dbdriver/scripts/pgsql/run_perf_test.sh \
+scripts/pgsql/run_power_query.sh \
+scripts/pgsql/run_rf1.sh \
+scripts/pgsql/run_rf2.sh \
+dbdriver/scripts/pgsql/run_single_query.sh \
+scripts/pgsql/run_throughput_stream.sh \
+dbdriver/scripts/sapdb/explain_single_query.sh \
+dbdriver/scripts/sapdb/explain_power_query.sh \
+dbdriver/scripts/sapdb/run_dbt3.sh \
+dbdriver/scripts/sapdb/run_load_test.sh \
+dbdriver/scripts/sapdb/run_single_query.sh \
+dbdriver/scripts/sapdb/run_perf_test.sh \
+dbdriver/scripts/sapdb/run_power_query.sh \
+dbdriver/scripts/sapdb/run_power_test.sh \
+dbdriver/scripts/sapdb/run_refresh_stream.sh \
+dbdriver/scripts/sapdb/run_rf1.sh \
+dbdriver/scripts/sapdb/run_rf2.sh \
+dbdriver/scripts/sapdb/run_throughput_query.sh \
+dbdriver/scripts/sapdb/run_throughput_test.sh \
+scripts/pgsql/create_db.sh \
+scripts/pgsql/create_indexes.sh \
+scripts/pgsql/create_tables.sh \
+scripts/pgsql/drop_tables.sh \
+scripts/pgsql/grant.sh \
+scripts/pgsql/load_db.sh \
+scripts/pgsql/set_db_env.sh \
+scripts/pgsql/set_run_env.sh \
+scripts/pgsql/start_db.sh \
+scripts/sapdb/backup_db.sh \
+scripts/sapdb/build_db.sh \
+scripts/sapdb/create_db.sh \
+scripts/sapdb/create_indexes.sh \
+scripts/sapdb/create_tables.sh \
+scripts/sapdb/drop_tables.sh \
+scripts/sapdb/load_db.sh \
+scripts/sapdb/restore_db.sh \
+scripts/sapdb/set_run_env.sh \
+scripts/sapdb/update_statistics.sh \
+make.common \
+dbdriver/utils/Makefile \
+scripts/run_workload.sh \
+scripts/start_sysstats.sh \
+scripts/stop_sysstats.sh \
+scripts/pgsql/load_test.sh \
+scripts/pgsql/power_test.sh \
+scripts/pgsql/throughput_test.sh \
+scripts/pgsql/throughput_stream_wrapper.sh \
+scripts/pgsql/record_end.sh \
+scripts/pgsql/record_start.sh \
 ])

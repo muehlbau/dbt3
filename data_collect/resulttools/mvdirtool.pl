@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: mvdirtool.pl 1200 2005-03-04 02:08:40Z fimath $ $Author: fimath $ $Date
+# $Id: mvdirtool.pl 1201 2005-03-04 02:17:13Z fimath $ $Author: fimath $ $Date
 
 use strict;
 use English;

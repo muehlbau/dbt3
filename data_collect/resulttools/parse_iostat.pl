@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_iostat.pl 1199 2005-03-04 01:50:01Z fimath $ $Author: fimath $ $Date
+# $Id: parse_iostat.pl 1201 2005-03-04 02:17:13Z fimath $ $Author: fimath $ $Date
 
 use strict;
 use English;
@@ -197,6 +197,11 @@ else
 {
 	die "No infile $!";
 }
+# So some character replacement in case we're getting the '/'s in the
+# device name instead of '!'s.
+system "mv $infile $infile" . "tmp";
+system "cat $infile" . "tmp | sed -e 's/\\//!/' > $infile";
+system "rm $infile" . "tmp";
 
 if ( $option ) { $options{ 'option' } = $option; }
 elsif ( $options{ 'option' } ) {

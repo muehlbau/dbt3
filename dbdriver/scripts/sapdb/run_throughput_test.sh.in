@@ -36,7 +36,7 @@ i=1
 while [ $i -le $num_stream ] 
 do
 	echo "start throughput query of stream $i"
-	$dbdriver_sapdb_path/run_throughput_query.sh $scale_factor $perf_run_number $i> $run_dir/thuput_qs$i 2>&1 &
+	$dbdriver_sapdb_path/run_throughput_query.sh $scale_factor $perf_run_number $i> $run_dir/thruput_qs$i 2>&1 &
 	let "i=$i+1"
 done
 

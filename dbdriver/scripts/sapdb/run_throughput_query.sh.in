@@ -30,7 +30,7 @@ parsequery_dir="@TOPDIR@/dbdriver/utils/"
 if [ ! -f $seed_file ];
 then
         echo "creating seed file $seed_file, you can change the seed by modifying this file"
-	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+	@TOPDIR@/scripts/init_seed.sh > $seed_file
 fi
 
 seed=`cat $seed_file`
@@ -49,7 +49,7 @@ echo "`date`: start throughput queries for stream $stream_num "
 s_time=`$GTIME`
 echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}', timestamp, $s_time)"
 dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}', timestamp, $s_time)"
-dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER -i $tmp_query_file -o $run_dir/thuput_qs${stream_num}.result
+dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER -i $tmp_query_file -o $run_dir/thruput_qs${stream_num}.result
 echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}' and int_time=$s_time"
 dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}' and int_time=$s_time"
 e_time=`$GTIME`

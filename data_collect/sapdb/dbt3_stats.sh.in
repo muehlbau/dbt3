@@ -67,7 +67,7 @@ if [ $seed -eq 0 ]; then
 	echo "running $SID with default seed"
 	echo "`date`: generate seed0" 
 	echo "seed file is $seed_file";
-	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+	@TOPDIR@/scripts/init_seed.sh > $seed_file
 else
 	echo "running $SID with seed $seed"
 	echo "seed file is $seed_file";
@@ -208,10 +208,10 @@ $dbdriver_script_path/get_composite.pl -p 1 -s $scale_factor -n $num_stream -o $
 #copy dbt3.out
 mv $datacollect_sapdb_path/dbt3.out $output_dir/dbt3.out
 
-#copy thuput_qs* and refresh_stream* to output
+#copy thruput_qs* and refresh_stream* to output
 cp $run_path/power_query.result $output_dir/
-cp $run_path/thuput_qs* $output_dir/
-cp $run_path/thuput_qs*.result $output_dir/
+cp $run_path/thruput_qs* $output_dir/
+cp $run_path/thruput_qs*.result $output_dir/
 cp $run_path/tmp_throughput_query*.sql $output_dir/
 cp $run_path/power_query $output_dir/
 cp $run_path/refresh_stream* $output_dir/

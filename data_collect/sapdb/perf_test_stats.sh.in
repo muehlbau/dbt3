@@ -182,10 +182,10 @@ $dbdriver_script_path/get_composite.pl -p 1 -s $scale_factor -n $num_stream -o $
 #copy perf.out
 mv $datacollect_sapdb_path/perf.out $output_dir/perf.out
 
-#copy thuput_qs*, power.result and refresh_stream* to output
+#copy thruput_qs*, power.result and refresh_stream* to output
 cp $run_path/power_query.result $output_dir/
-cp $run_path/thuput_qs* $output_dir/
-cp $run_path/thuput_qs*.result $output_dir/
+cp $run_path/thruput_qs* $output_dir/
+cp $run_path/thruput_qs*.result $output_dir/
 cp $run_path/refresh_stream* $output_dir/
 cp $run_path/refresh_stream* $output_dir/
 cp $run_path/*param* $output_dir/

@@ -30,7 +30,7 @@ parsequery_sapdb_dir="@TOPDIR@/dbdriver/utils"
 if [ ! -f $seed_file ];
 then
         echo "creating seed file $seed_file, you can change the seed by modifying this file"
-	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+	@TOPDIR@/scripts/init_seed.sh > $seed_file
 fi
 
 #generate the queries for power test

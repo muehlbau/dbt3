@@ -141,11 +141,11 @@ print $fh table({-border=>undef},
 		td(["", "$configs{'log_dev_space'}", ""])
 	])), "\n";
 
-my ($composite, $power, $thuput);
+my ($composite, $power, $thruput);
 
 $composite=0;
 $power=0;
-$thuput=0;
+$thruput=0;
 #get run results
 if ( -e "$indir/calc_composite.out" )
 {
@@ -157,11 +157,11 @@ if ( -e "$indir/calc_composite.out" )
 		
 		my ( $var, $value ) = split /=/;
 		if ( /power/ ) { $power = $value; }
-		elsif ( /throughput/ ) { $thuput = $value; }
+		elsif ( /throughput/ ) { $thruput = $value; }
 		elsif ( /composite/) { $composite = $value; }
 	}
 	close($fcomposite);
-	print "power $power, thuput $thuput, composite $composite\n";
+	print "power $power, thruput $thruput, composite $composite\n";
 }	
 elsif ( -e "$indir/calc_power.out" )
 {
@@ -175,33 +175,33 @@ elsif ( -e "$indir/calc_power.out" )
 	}
 	close($fpower);
 }	
-elsif ( -e "$indir/calc_thuput.out" )
+elsif ( -e "$indir/calc_thruput.out" )
 {
-	my $fthuput = new FileHandle;
-	unless ( $fthuput->open( "< $indir/calc_thuput.out" ) )   { die "No thuput file $!"; }
-	while (<$fthuput>)
+	my $fthruput = new FileHandle;
+	unless ( $fthruput->open( "< $indir/calc_thruput.out" ) )   { die "No thruput file $!"; }
+	while (<$fthruput>)
 	{
 		chop;
 		my ( $var, $value ) = split /=/;
-		$thuput=$value;
+		$thruput=$value;
 	}
-	close($fthuput);
+	close($fthruput);
 }	
 
 print $fh h2("DBT-3 Metrics: ");
 print $fh start_table({-border=>undef});
 #print $fh caption('DBT-3 Metrics'); 
 #if it is a complete dbt3 run
-if ($composite != 0 && $power !=0 && $thuput != 0) 
+if ($composite != 0 && $power !=0 && $thruput != 0) 
 {
 	print $fh Tr({-valign=>"TOP"},
 	[
 		th([a( {-href=>"$relative_indir/dbt3_explain.html#Composite"}, "Composite"), a( {-href=>"$relative_indir/dbt3_explain.html#Power"}, "Query Processing Power"), a( {-href=>"$relative_indir/dbt3_explain.html#Throughput"}, "Throughput Numerical Quantity")]), 
-		td(["$composite", "$power", "$thuput"])
+		td(["$composite", "$power", "$thruput"])
 	]);
 }
 #if it is a power run
-elsif ($composite==0 && $power!=0 && $thuput==0)
+elsif ($composite==0 && $power!=0 && $thruput==0)
 {
 	print $fh Tr({-valign=>"TOP"},
 	[
@@ -210,12 +210,12 @@ elsif ($composite==0 && $power!=0 && $thuput==0)
 	]);
 }
 #if it is a throughput run
-elsif ($composite==0 && $power==0 && $thuput!=0)
+elsif ($composite==0 && $power==0 && $thruput!=0)
 {
 	print $fh Tr({-valign=>"TOP"},
 	[
 		th(["Throughput"]), 
-		td(["$thuput"])
+		td(["$thruput"])
 	]);
 }
 print $fh end_table, "\n";
@@ -226,7 +226,7 @@ print $fh start_table( { -border => undef });
 print $fh caption("Task Execution Time");
 print $fh Tr(th[(a( {-href=>"$relative_indir/dbt3_explain.html#DBT-3"},"Task"),"Start Time", "End Time", "Elapsed Time")]);
 #if it is a complete dbt3 run
-if ($composite != 0 && $power !=0 && $thuput != 0) 
+if ($composite != 0 && $power !=0 && $thruput != 0) 
 {
 	#get load time from dbt3.out
 	my $fdbt3 = new FileHandle;
@@ -300,7 +300,7 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 	$fqtime->close;
 }
 #if it is a power run
-elsif ($composite==0 && $power!=0 && $thuput==0)
+elsif ($composite==0 && $power!=0 && $thruput==0)
 {
 	my $fqtime = new FileHandle;
 	unless ( $fqtime->open( "< $indir/q_time.out" ) )   { die "No q_time file $!"; }
@@ -321,7 +321,7 @@ elsif ($composite==0 && $power!=0 && $thuput==0)
 	$fqtime->close;
 }
 #if it is a throughput run or others
-#elsif ($composite==0 && $power==0 && $thuput!=0)
+#elsif ($composite==0 && $power==0 && $thruput!=0)
 else
 {
 	my $fqtime = new FileHandle;
@@ -374,16 +374,16 @@ print $fh h2("Run log data");
 my @runlog;
 
 #if it is a power run
-if ($power != 0 && $composite == 0 && $thuput==0) {@runlog=("power.out", "q_time.out", "calc_power.out");} 
+if ($power != 0 && $composite == 0 && $thruput==0) {@runlog=("power.out", "q_time.out", "calc_power.out");} 
 else 
 {
 	if ($composite != 0) 
 	{
 		@runlog=("dbt3.out", "q_time.out", "calc_composite.out");
 	}
-	elsif ($thuput != 0) 
+	elsif ($thruput != 0) 
 	{
-		@runlog=("thuput.out", "q_time.out", "calc_thuput.out");
+		@runlog=("thruput.out", "q_time.out", "calc_thruput.out");
 	} 
 	else {@runlog=("q_time.out");}
 
@@ -392,7 +392,7 @@ else
 	$log_index = $#runlog+1;
 	for ( my $i=1; $i<=$num_stream; $i++, $log_index++)
 	{
-		$runlog[$log_index] = "thuput_qs$i";
+		$runlog[$log_index] = "thruput_qs$i";
 	}
 	for ( my $i=1; $i<=$num_stream; $i++, $log_index++)
 	{

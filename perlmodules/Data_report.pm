@@ -438,13 +438,6 @@ sub extract_columns_rows_sar
 	}
 	close(SARIN);
 	close($foutput);
-
-	# if there is no data, remove this file
-	if ( $sum == 0 )
-	{
-		print "data is all zero\n";
-		unlink( $outfile );
-	}
 }
 
 sub convert_time_format

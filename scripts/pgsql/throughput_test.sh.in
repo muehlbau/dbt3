@@ -1,0 +1,100 @@
+#!/bin/sh
+#
+# throughput_test.sh
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
+#
+# History: June-17-2003 Created by Jenny Zhang
+#
+# 2004 July 16 : Reworked by Mark Wong
+# 2004 September 28 : Turn this into a wrapper script because we don't know
+#                     how long the test will execute so we collect stats
+#                     until the test is done.  Because of the way things are
+#                     run in the background and we wait for processs to
+#                     complete, we only want to wait for the processes that
+#                     are executing the queries.
+
+SRCDIR=@TOPDIR@
+
+USE_OPROFILE=0
+
+while getopts "e:f:n:o:p:t:y:" opt; do
+	case $opt in
+	e) explain_analyze=$OPTARG
+		;;
+	f) scale_factor=$OPTARG
+		;;
+	o) OUTPUT_DIR=$OPTARG
+		;;
+	p) db_param=$OPTARG
+		;;
+	n) num_stream=$OPTARG
+		;;
+	t) TAG=$OPTARG
+		;;
+	y) USE_OPROFILE=$OPTARG
+		;;
+	esac
+done
+
+RUNDIR="$OUTPUT_DIR/run"
+DBSCRIPTDIR=$SRCDIR/scripts/pgsql
+seed_file="$RUNDIR/seed"
+parsequery_dir="$SRCDIR/dbdriver/utils"
+
+GTIME="$SRCDIR/dbdriver/utils/gtime"
+DBSTATS="$DBSCRIPTDIR/db_stats.sh"
+QGEN="$SRCDIR/datagen/dbgen/qgen"
+
+echo "`date`:=======throughput test $TAG========"
+
+# Clear the read profile counters.
+if [ -f /proc/profile ]; then
+	clearprof
+fi
+
+# Clear the oprofile counters.
+if [ $USE_OPROFILE -eq 1 ]; then
+	clearoprof
+fi
+
+bash -x $DBSCRIPTDIR/stop_db.sh
+bash -x $DBSCRIPTDIR/start_db.sh "$db_param"
+
+s_time=`$GTIME`
+bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT"
+
+# Start collecting system statistics. 
+bash $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p throughput${TAG}
+
+# Start collecting database statistics.
+bash $DBSTATS $SID $OUTPUT_DIR "throughput${TAG}" &
+
+# Start the streams.
+bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream -e $explain_analyze -r $RUNDIR
+
+# Stop collecting system statistics.
+bash $SRCDIR/scripts/stop_sysstats.sh
+killall $DBSTATS
+
+bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT"
+e_time=`$GTIME`
+echo "`date`: end throughput test run "
+let "diff_time=$e_time-$s_time"
+echo "elapsed time for throughput test $diff_time"
+
+# Stop the database after the test.
+bash -x $DBSCRIPTDIR/stop_db.sh
+
+if [ -f /proc/profile ]; then
+	profname="Throughput Test $TAG"
+	getprof
+fi
+
+if [ $USE_OPROFILE -eq 1 ]; then
+	profname="Throughput Test $TAG"
+	getoprof
+fi

@@ -12,3 +12,4 @@ done
 rm -rf /db_tmp/*
 rm -rf $dbdir/pgsql_tmp
 ln -s /db_tmp $dbdir/pgsql_tmp
+chmod 777 $dbdir/pgsql_tmp

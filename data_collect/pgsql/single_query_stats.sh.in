@@ -81,7 +81,7 @@ cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
 # clean time_statistics
-psql -d $SID -U $PGUSER -c "delete from time_statistics;"
+psql -d $SID -c "delete from time_statistics;"
 
 #start sys_stats.sh
 $datacollect_path/sys_stats.sh $interval $duration $output_dir &

@@ -102,11 +102,11 @@ if ( $writeme ) {
 }
 
 # get execution time for the throughput test
-my ($thuput_time);
-$thuput_time = `dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute select timediff(e_time,s_time) from time_statistics where task_name='PERF$perf_run_number.THRUPUT'"|grep -v OK | grep -v END`;
-$thuput_time =~ s/'//g;
-chop($thuput_time);
-$throughput_time=convert_to_seconds($thuput_time);
+my ($thruput_time);
+$thruput_time = `dbmcli -d $SID -u dbm,dbm -uSQL $DBUSER,$DBUSER "sql_execute select timediff(e_time,s_time) from time_statistics where task_name='PERF$perf_run_number.THRUPUT'"|grep -v OK | grep -v END`;
+$thruput_time =~ s/'//g;
+chop($thruput_time);
+$throughput_time=convert_to_seconds($thruput_time);
 
 $throughput = 22 * 3600 * $num_of_streams * $scale_factor / $throughput_time;
 printf "throughput = %.2f\n", $throughput;

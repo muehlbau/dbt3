@@ -1,6 +1,5 @@
 #!/bin/sh
-set -x
-
+#
 # perf_test_stats.sh: run performance test and collect database and system 
 # statistics
 # It is the same as dbdriver/script/run_perf_test.sh except statistics 
@@ -12,6 +11,8 @@ set -x
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
 # History: June-19-2003 Created by Jenny Zhang
+
+set -x
 
 if [ $# -lt 3 ]; then
         echo "usage: dbt3_stats.sh <scale_factor> <num_stream> <output_dir> [-s seed -d duration -i interval -e explain_analyze]"
@@ -70,7 +71,7 @@ if [ $seed -eq 0 ]; then
 	echo "running performance test with default seed"
 	echo "`date`: generate seed0" 
 	echo "seed file is $seed_file";
-	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+	@TOPDIR@/scripts/init_seed.sh > $seed_file
 else
 	echo "running $SID with seed $seed"
 	echo "seed file is $seed_file";
@@ -124,7 +125,7 @@ do
 	echo "`date`:=======performance test $i========"
 	s_time=`$GTIME`
 	echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', current_timestamp, $s_time)"
-	psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', current_timestamp, $s_time)"
+	psql -d $SID -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${i}', current_timestamp, $s_time)"
 
 	#***run power test
 	#start sys_stats.sh
@@ -154,8 +155,8 @@ do
 
 	#***run throughput test
 	#start sys_stats.sh
-	echo "start thuput_sys_stats.sh"
-	$datacollect_path/thuput_sys_stats.sh $interval $duration $output_dir &
+	echo "start thruput_sys_stats.sh"
+	$datacollect_path/thruput_sys_stats.sh $interval $duration $output_dir &
 
         if [ -f /proc/profile ]; then
                 clearprof
@@ -164,7 +165,7 @@ do
                 perf_run_number $i $num_stream streams"
 	$dbdriver_pgsql_path/run_throughput_test.sh $scale_factor $i $num_stream $explain_analyze
 	echo "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
-	psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
+	psql -d $SID -c "update time_statistics set e_time=current_timestamp where task_name='PERF${i}' and int_time=$s_time"
 	e_time=`$GTIME`
 	echo "`date`: end performance test run ${i} "
 	let "diff_time=$e_time-$s_time"
@@ -175,7 +176,7 @@ do
         fi
 
         #kill the system statistic collector
-	ps -ef | grep -v grep | grep thuput_sys_stats | awk '{ print $2}' | xargs kill -9
+	ps -ef | grep -v grep | grep thruput_sys_stats | awk '{ print $2}' | xargs kill -9
 	ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
 	#kill ziostat first
 	ps -ef | grep -v grep | grep ziostat | awk '{print $2}' | xargs kill -9
@@ -205,10 +206,10 @@ $dbdriver_script_path/get_composite.pl -p 1 -s $scale_factor -n $num_stream -o $
 #copy perf.out
 mv $datacollect_pgsql_path/perf.out $output_dir/perf.out
 
-#copy thuput_qs*, power.result and refresh_stream* to output
+#copy thruput_qs*, power.result and refresh_stream* to output
 cp $run_path/power_query.result $output_dir/
-cp $run_path/thuput_qs* $output_dir/
-cp $run_path/thuput_qs*.result $output_dir/
+cp $run_path/thruput_qs* $output_dir/
+cp $run_path/thruput_qs*.result $output_dir/
 cp $run_path/refresh_stream* $output_dir/
 cp $run_path/refresh_stream* $output_dir/
 cp $run_path/*param* $output_dir/
