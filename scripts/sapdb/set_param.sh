@@ -39,9 +39,6 @@ if [ $1 -eq 1 ]; then
 	param_put DATE_TIME_FORMAT ISO
 	param_checkall
 	param_commitsession
-	db_stop
-	db_start
-	db_warm
 	quit
 	EOF`
 fi

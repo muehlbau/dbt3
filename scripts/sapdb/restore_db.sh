@@ -17,9 +17,7 @@ if ! [ "$_test" = "" ]; then
         exit 1
 fi
 echo "start restoring db"
-$DBT3_INSTALL_PATH/scripts/sapdb/define_medium.sh
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
-db_cold
 util_connect dbm,dbm
 util_execute INIT CONFIG
 recover_start data
@@ -35,3 +33,8 @@ fi
 
 echo "set database parameters"
 $DBT3_INSTALL_PATH/scripts/sapdb/set_param.sh 1
+_o=`cat <<EOF | /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
+db_stop
+db_warm
+quit
+EOF`
