@@ -1,29 +1,28 @@
 #!/bin/sh
 
-if [ $# -ne 4 ]; then
-        echo "Usage: ./run_perf_test.sh <scale_factor> <perf_run_number> <dbt3_dir> <num_stream>"
+if [ $# -ne 3 ]; then
+        echo "Usage: ./run_perf_test.sh <scale_factor> <perf_run_number> <num_stream>"
         exit
 fi
 
 scale_factor=$1
 perf_run_num=$2
-dbt3_dir=$3
-num_stream=$4
-GTIME="${dbt3_dir}/dbdriver/utils/gtime"
+num_stream=$3
+GTIME="${DBT3_INSTALL_PATH}/dbdriver/utils/gtime"
 
 echo "`date`:=======performance test $perf_run_num========"
 s_time=`$GTIME`
-echo "sql_execute insert into time_statistic (task_name, s_time) values ('PERF${perf_run_num}', timestamp)"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistic (task_name, s_time) values ('PERF${perf_run_num}', timestamp)"
+echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}', timestamp, $s_time)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}', timestamp, $s_time)"
 
 #***run power test
-./run_power_test.sh $scale_factor $perf_run_num $dbt3_dir
+./run_power_test.sh $scale_factor $perf_run_num
 
 #***run throughput test
-./run_throughput_test.sh $scale_factor $perf_run_num $dbt3_dir $num_stream
+./run_throughput_test.sh $scale_factor $perf_run_num $num_stream
 
-echo "sql_execute update time_statistic set e_time=timestamp where task_name='PERF${perf_run_num}'"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistic set e_time=timestamp where task_name='PERF${perf_run_num}'"
+echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
 e_time=`$GTIME`
 echo "`date`: end performance test run ${perf_run_num} "
 let "diff_time=$e_time-$s_time"
