@@ -1,0 +1,1 @@
+vacuumdb -z $SID
