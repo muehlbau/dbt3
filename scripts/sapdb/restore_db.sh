@@ -16,6 +16,7 @@ if ! [ "$_test" = "" ]; then
         exit 1
 fi
 echo "start restoring db"
+./define_medium.sh
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
 db_cold
 util_connect dbm,dbm
