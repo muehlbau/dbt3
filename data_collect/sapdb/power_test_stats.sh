@@ -81,6 +81,7 @@ dbdriver_script_path=$DBT3_INSTALL_PATH/dbdriver/scripts
 dbdriver_sapdb_path=$DBT3_INSTALL_PATH/dbdriver/scripts/sapdb
 datacollect_path=$DBT3_INSTALL_PATH/data_collect
 datacollect_sapdb_path=$DBT3_INSTALL_PATH/data_collect/sapdb
+run_path=$DBT3_INSTALL_PATH/run
 
 #make output directory
 #output_dir=power
@@ -88,7 +89,6 @@ mkdir -p $output_dir
 
 #clean time_statistics table
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from time_statistics"
-
 # restart the database
 echo "stopping the database"
 $sapdb_script_path/stop_db.sh
@@ -103,7 +103,7 @@ sleep 2
 $datacollect_path/get_config.sh $scale_factor 1 $output_dir
 
 #start sys_stats.sh
-$datacollect_path/sys_stats.sh $interval $duration $CPUS $output_dir &
+$datacollect_path/sys_stats.sh $interval $duration $output_dir &
 
 #calculate count
 let "count=$duration/$interval"

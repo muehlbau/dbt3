@@ -113,7 +113,7 @@ cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
 #start sys_stats.sh
-$datacollect_path/sys_stats.sh $interval $duration $CPUS $output_dir &
+$datacollect_path/sys_stats.sh $interval $duration $output_dir &
 
 #calculate count
 let "count=$duration/$interval"
