@@ -16,4 +16,4 @@ export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
 export DBT3_BACKUP=/dbt3_backup/dbt3.bak
 export PATH=/usr/local/pgsql/bin:$PATH
 export PGDATA=/dbt3/pgsql
-export PGUSER=dbt
+export PGUSER=pgsql
