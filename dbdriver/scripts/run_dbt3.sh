@@ -9,6 +9,8 @@ scale_factor=$1
 num_stream=$2
 run_dir="$DBT3_INSTALL_PATH/run"
 seed_file="$run_dir/seed"
+dbdriver_path="$DBT3_INSTALL_PATH/dbdriver/scripts"
+db_path="$DBT3_INSTALL_PATH/scripts/sapdb"
 
 if [ $# -eq 3 ]; then
 	echo "running $SID with seed $3"
@@ -26,21 +28,21 @@ s_time_dbt3=`$GTIME`
 
 #***load test
 echo "`date`: start load test" 
-cd $DBT3_INSTALL_PATH/scripts/sapdb
+#cd $DBT3_INSTALL_PATH/scripts/sapdb
 #get the start time
 s_time=`$GTIME`
-./build_db.sh
+$db_path/build_db.sh
 e_time=`$GTIME`
 echo "`date`: load test end" 
 let "diff_time_load=$e_time-$s_time"
 echo "elapsed time for load test $diff_time_load" 
 
-cd $DBT3_INSTALL_PATH/dbdriver/scripts
+#cd $DBT3_INSTALL_PATH/dbdriver/scripts
 i=1
 while [ $i -le 2 ]
 do
         echo "start performance test $i"
-	./run_perf_test.sh $scale_factor $i $num_stream
+	$dbdriver_path/run_perf_test.sh $scale_factor $i $num_stream
         let "i=$i+1"
 done
 

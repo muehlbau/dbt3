@@ -11,6 +11,7 @@ num_stream=$3
 qgen_dir="$DBT3_INSTALL_PATH/datagen/dbgen"
 run_dir="$DBT3_INSTALL_PATH/run"
 seed_file="$run_dir/seed"
+dbdriver_path="$DBT3_INSTALL_PATH/dbdriver/scripts"
 
 GTIME="${DBT3_INSTALL_PATH}/dbdriver/utils/gtime"
 
@@ -25,17 +26,16 @@ i=1
 while [ $i -le $num_stream ] 
 do
 	echo "start throughput query of stream $i"
-	./run_throughput_query.sh $scale_factor $perf_run_number $i> $run_dir/thuput_qs$i 2>&1 &
+	$dbdriver_path/run_throughput_query.sh $scale_factor $perf_run_number $i> $run_dir/thuput_qs$i 2>&1 &
 	let "i=$i+1"
 done
 
 #start the refresh stream
-cd $DBT3_INSTALL_PATH/dbdriver/scripts
 i=1
 while [ $i -le $num_stream ]
 do
         echo "start throughput refresh stream stream $i"
-	./run_refresh_stream.sh $scale_factor $i $perf_run_number > ${run_dir}/refresh_stream$i 2>&1
+	$dbdriver_path/run_refresh_stream.sh $scale_factor $i $perf_run_number > ${run_dir}/refresh_stream$i 2>&1
         let "i=$i+1"
 done
 

@@ -9,6 +9,7 @@ scale_factor=$1
 stream_num=$2
 perf_run_num=$3
 GTIME="$DBT3_INSTALL_PATH/dbdriver/utils/gtime"
+dbdriver_path="$DBT3_INSTALL_PATH/dbdriver/scripts"
 
 echo "`date`:=======refresh stream $stream_num========"
 
@@ -20,7 +21,7 @@ echo "`date`: start throughput test refresh stream $stream_num rf1"
 s_time=`$GTIME`
 echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF1', timestamp, $s_time)"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF1', timestamp, $s_time)"
-./run_rf1.sh $scale_factor 
+$dbdriver_path/run_rf1.sh $scale_factor 
 echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF1' and int_time=$s_time"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF1' and int_time=$s_time"
 e_time=`$GTIME`
@@ -32,7 +33,7 @@ echo "`date`: start throughput test refresh stream $i rf2"
 s_time=`$GTIME`
 echo "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF2', timestamp, $s_time)"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF2', timestamp, $s_time)"
-./run_rf2.sh 
+$dbdriver_path/run_rf2.sh 
 echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF2' and int_time=$s_time"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}.THRUPUT.RFST${stream_num}.RF2' and int_time=$s_time"
 e_time=`$GTIME`

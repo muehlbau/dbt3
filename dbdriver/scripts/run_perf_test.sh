@@ -9,6 +9,7 @@ scale_factor=$1
 perf_run_num=$2
 num_stream=$3
 GTIME="${DBT3_INSTALL_PATH}/dbdriver/utils/gtime"
+dbdriver_path="$DBT3_INSTALL_PATH/dbdriver/scripts"
 
 echo "`date`:=======performance test $perf_run_num========"
 s_time=`$GTIME`
@@ -16,10 +17,10 @@ echo "sql_execute insert into time_statistics (task_name, s_time, int_time) valu
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}', timestamp, $s_time)"
 
 #***run power test
-./run_power_test.sh $scale_factor $perf_run_num
+$dbdriver_path/run_power_test.sh $scale_factor $perf_run_num
 
 #***run throughput test
-./run_throughput_test.sh $scale_factor $perf_run_num $num_stream
+$dbdriver_path/run_throughput_test.sh $scale_factor $perf_run_num $num_stream
 
 echo "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute update time_statistics set e_time=timestamp where task_name='PERF${perf_run_num}' and int_time=$s_time"
