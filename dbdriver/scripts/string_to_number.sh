@@ -1,3 +1,12 @@
+#
+# string_to_number.sh
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003 Open Source Development Lab, Inc.
+#
+#
 #!/bin/sh
 #convert string time to number of seconds
 #if DATE_TIME_FORMAT is set to internal, timediff() returns a value in 
