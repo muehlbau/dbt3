@@ -63,8 +63,6 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	//fprintf(query_output, "sql_execute set format ISO\n\n");
-	//fprintf(query_output, "sql_execute delete * from time_statistics\n\n");
 
 	while ( (rc=get_statement(query_input)) != END_OF_FILE)
 	{
@@ -72,20 +70,25 @@ int main(int argc, char *argv[])
 		if (rc == END_OF_STMT && first_stmt == TRUE)
 		{
 			if (run_type == POWER)
-				fprintf(query_output, "%s insert into time_statistics (task_name, s_time) values ('PERF%d.POWER.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, sql_statement.query_id);
+				fprintf(query_output, SQL_TIME_P_INSERT, SQL_EXEC, perf_run_number, sql_statement.query_id);
 			else if (run_type == THROUGHPUT)
-				fprintf(query_output, "%s insert into time_statistics (task_name, s_time) values ('PERF%d.THRUPUT.QS%d.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+				fprintf(query_output, SQL_TIME_T_INSERT, SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+			fprintf(query_output, "%s\n", SQL_COMMIT);
 			first_stmt = FALSE;
 		}
 		if (rc == END_OF_STMT)
+		{
 			fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
+			fprintf(query_output, "%s\n", SQL_COMMIT);
+		}
 		if (rc == END_OF_BLOCK)
 		{
 			first_stmt = TRUE;
 			if (run_type == POWER)
-				fprintf(query_output, "%s update time_statistics set e_time=timestamp where task_name='PERF%d.POWER.Q%d'\n\n", SQL_EXEC, perf_run_number, sql_statement.query_id);
+				fprintf(query_output, SQL_TIME_P_UPDATE, SQL_EXEC, perf_run_number, sql_statement.query_id);
 			else if (run_type == THROUGHPUT)
-				fprintf(query_output, "%s update time_statistics set e_time=timestamp where task_name='PERF%d.THRUPUT.QS%d.Q%d'\n\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+			fprintf(query_output, SQL_TIME_T_UPDATE, SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+			fprintf(query_output, "%s\n", SQL_COMMIT);
 		}
 	}
 	
