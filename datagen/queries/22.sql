@@ -28,14 +28,7 @@ from
 					and substr(c_phone, 1, 2) in
 						(':1', ':2', ':3', ':4', ':5', ':6', ':7')
 			)
-			and not exists (
-				select
-					*
-				from
-					orders
-				where
-					o_custkey = c_custkey
-			)
+			and  c_custkey not in (select o_custkey from orders)
 	)
 group by
 	cntrycode
