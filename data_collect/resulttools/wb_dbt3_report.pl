@@ -250,7 +250,7 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 		my $fcomposite = new FileHandle;
 		unless ( $fcomposite->open( ">> $indir/calc_composite.out" ) ) 
 			{ die "No composite file $!"; }
-		print $fcomposite "load = $diffload";
+		print $fcomposite "load = $diffload\n";
 		close($fcomposite);
 	}
 		
@@ -342,7 +342,7 @@ if (! -d "$indir/plot")
 }
 
 #generate gnuplot files
-system("./dbt3_gen_graphs_2.5.sh", "$indir", "$indir/plot");
+system("./dbt3_gen_graphs.sh", "$indir", "$indir/plot");
 
 system("cp", "$indir/iostat.txt", "$indir/plot/iostat.txt");
 system("cp", "$indir/vmstat.out", "$indir/plot/vmstat.txt");
