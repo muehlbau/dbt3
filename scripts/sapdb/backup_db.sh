@@ -17,13 +17,11 @@ if ! [ "$_test" = "" ]; then
         exit 1
 fi
 
-echo "stard backup ..."
+echo "start backup ..."
+$DBT3_INSTALL_PATH/scripts/sapdb/define_medium.sh
 _o=`cat <<EOF | /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
 db_stop
 db_start
-medium_put data /dbt3_backup/datasave FILE DATA 0 8 YES
-medium_put incr /dbt3_backup/incremental FILE PAGES 0 8 YES
-medium_put auto /dbt3_backup/autosave FILE AUTO
 util_connect dbm,dbm
 backup_start data migration
 backup_start incr migration
@@ -39,8 +37,3 @@ echo "backup done"
 
 echo "set database parameters"
 $DBT3_INSTALL_PATH/scripts/sapdb/set_param.sh 1
-_o=`cat <<EOF | /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
-db_stop
-db_warm
-quit
-EOF`
