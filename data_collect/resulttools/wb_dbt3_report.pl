@@ -22,8 +22,8 @@ generates dbt3 result page
 
  -indir <result data directory>
  -outfile <filename - defaults to STDOUT >
- -file <filename> 
- -write <filename> 
+ -file <config filename to read from> 
+ -write <config filename to write to> 
 
 =cut
 
@@ -45,29 +45,50 @@ my ( $iline, $fh );
 if ($hlp) { pod2usage(1); }
 
 if ( $configfile ) {
-    unless ( $fcf->open( "< $configfile" ) ) {
-        die "Missing config file $!";
-    }
-    while ( $cline = $fcf->getline ) {
-        next if ( $cline =~ /^#/ );
-        chomp $cline;
-        my ( $var, $value ) = split /=/, $cline;
-        $options{ $var } = $value;
-    }
-    $fcf->close;
+	unless ( $fcf->open( "< $configfile" ) ) {
+		die "Missing config file $!";
+	}
+	while ( $cline = $fcf->getline ) {
+		next if ( $cline =~ /^#/ );
+		chomp $cline;
+	my ( $var, $value ) = split /=/, $cline;
+		$options{ $var } = $value;
+	}
+	$fcf->close;
 }
 
 if ( $indir ) { $options{ 'indir' } = $indir; }
-elsif ( !$options{ 'indir' } ) {
-    die "No input dir $!";
+elsif ( $options{ 'indir' } ) {
+	$indir =  $options{ 'indir' };
+}
+else
+{
+	die "No input dir $!";
 }
 
 if ( $outfile ) {
-    $options{ 'outfile' } = $outfile;
-    $fh = new FileHandle;
-    unless ( $fh->open( "> $outfile" ) ) { die "can't open output file $!"; }
-} elsif ( !$options{ 'outfile' } ) {
-    $fh = *STDOUT;
+	$options{ 'outfile' } = $outfile;
+	$fh = new FileHandle;
+	unless ( $fh->open( "> $outfile" ) ) { die "can't open output file $!"; }
+} 
+elsif ( $options{ 'outfile' } ) {
+	$outfile=$options{ 'outfile' };
+	$fh = new FileHandle;
+	unless ($fh->open("> $outfile")) { die "can't open output file $!"; }
+}
+else
+{
+	$fh = *STDOUT;
+}
+
+if ( $writeme ) {
+	my $ncf = new FileHandle;
+	unless ( $ncf->open( "> $writeme" ) ) { die "can't open file $!"; }
+	my $name;
+	foreach $name ( keys( %options ) ) {
+	    print $ncf $name, "=", $options{ $name }, "\n";
+	}
+	$ncf->close;
 }
 
 #read configuration from config.txt file
@@ -91,44 +112,19 @@ while (<$fconfig>)
 $fconfig->close;
 
 print $fh h1("DBT3 Test Result");
-print $fh b("Test Kit Version: 1.0 ");
-print $fh h2("Run Parameters: ");
-print $fh body("Database Scale Factor: $configs{'scale_factor'}");
-print $fh br;
-print $fh body("Number of Streams: $configs{'num_stream'}");
-print $fh h2("Software Version: ");
-print $fh body("Linux Kernel: $configs{'kernel'}");
-print $fh br;
-print $fh body("SAP DB: $configs{'sapdb'}");
-print $fh br;
-print $fh body("sysstat:");
-print $fh br;
-print $fh body("procps: $configs{'procps'}");
-print $fh h2("Hardware Configuration: ");
-print $fh body("$configs{'CPUS'} CPUS @ $configs{'MHz'} MHz");
-print $fh br;
-print $fh body("CPU model $configs{'model'}");
-print $fh br;
-print $fh body("$configs{'memory'} Memory");
-print $fh br;
-for (my $i=1; $i<=$num_data; $i++)
-{
-	my $name='DATADEV_000'.$i;
-	print $fh body("$name: $configs{$name}");
-	print $fh br;
-}
-for (my $i=1; $i<=$num_sys; $i++)
-{
-	my $name='SYSDEV_00'.$i;
-	print $fh body("$name: $configs{$name}");
-	print $fh br;
-}
-for (my $i=1; $i<=$num_log; $i++)
-{
-	my $name='ARCHIVE_LOG_00'.$i;
-	print $fh body("$name: $configs{$name}");
-	print $fh br;
-}
+print $fh h2("Configurations: ");
+#generate configuration table
+print $fh table({-border=>undef}, caption('DBT3 Configurations'),
+	Tr({-valign=>"TOP"},
+	[
+		th(["Software Version", "Hardware Configuration", "Run Parameters"]),
+		td(["Linux Kernel: $configs{'kernel'}", "$configs{'CPUS'} CPUS @ $configs{'MHz'} MHz", "Database Scale Factor: $configs{'scale_factor'}"]),
+		td(["SAP DB: $configs{'sapdb'}", "CPU model $configs{'model'}", "Number of stream for throughput run: $configs{'num_stream'}"]),
+		td(["sysstat", "$configs{'memory'} Memory", ""]),
+		td(["procps: $configs{'procps'}", "$configs{'data_dev_space'}", ""]),
+		td(["Test Kit Version 1.0", "$configs{'sys_dev_space'}", ""]),
+		td(["", "$configs{'log_dev_space'}", ""])
+	])), "\n";
 
 my ($composite, $power, $thuput);
 
@@ -177,33 +173,42 @@ elsif ( -e "$indir/calc_thuput.out" )
 }	
 
 print $fh h2("DBT3 Metrics: ");
-print $fh start_table( { -border => undef }, caption("DBT3 Metrics") ),
-  "\n";
+print $fh start_table({-border=>undef});
+print $fh caption('DBT3 Metrics'); 
 #if it is a complete dbt3 run
 if ($composite != 0 && $power !=0 && $thuput != 0) 
 {
-	print $fh Tr(th("Composite"),th("Power"), th("Throughput")), "\n";
-	print $fh Tr(td($composite), td($power), td($thuput)), "\n";
+	print $fh Tr({-valign=>"TOP"},
+	[
+		th(["Composite(queries per hour)", "Query Processing Power(queries per hour)", "Throughput Numerical Quantity(queries per hour)"]), 
+		td(["$composite", "$power", "$thuput"])
+	]);
 }
 #if it is a power run
 elsif ($composite==0 && $power!=0 && $thuput==0)
 {
-	print $fh Tr(th("Power")), "\n";
-	print $fh Tr(td($power)), "\n";
+	print $fh Tr({-valign=>"TOP"},
+	[
+		th(["Power"]), 
+		td(["$power"])
+	]);
 }
 #if it is a throughput run
 elsif ($composite==0 && $power==0 && $thuput!=0)
 {
-	print $fh Tr(th("Throughput")), "\n";
-	print $fh Tr(td($thuput)), "\n";
+	print $fh Tr({-valign=>"TOP"},
+	[
+		th(["Throughput"]), 
+		td(["$thuput"])
+	]);
 }
-print $fh end_table;
-
+print $fh end_table, "\n";
 #print start_end time for each query
 
 print $fh br;
-print $fh start_table( { -border => undef }, caption("task time") ), "\n";
-print $fh Tr(th("Task"),th("Start Time"), th("End Time"), th("Elapsed Time")), "\n";
+print $fh start_table( { -border => undef });
+print $fh caption("Task Execution Time");
+print $fh Tr(th[("Task","Start Time", "End Time", "Elapsed Time")]);
 #if it is a complete dbt3 run
 if ($composite != 0 && $power !=0 && $thuput != 0) 
 {
@@ -232,7 +237,7 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 		}
 	}
 	$fdbt3->close;
-	print $fh Tr(td("LOAD"), td($sload), td($eload), td($diffload)), "\n";
+	print $fh Tr(td[("LOAD", $sload, $eload, $diffload)]);
 	
 	my $fqtime = new FileHandle;
 	unless ( $fqtime->open( "< $indir/q_time.out" ) )   { die "No q_time file $!"; }
@@ -245,7 +250,7 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 			|| /^'PERF1\.THRUPUT\.QS.'/)
 		{
 			my ( $taskname, $stime, $etime, $difftime ) = split /;/, $_;
-			print $fh Tr(td("$taskname"), td($stime), td($etime), td($difftime)), "\n";
+			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
 		}
 	}
 	$fqtime->close;
@@ -262,7 +267,7 @@ elsif ($composite==0 && $power!=0 && $thuput==0)
 			/^'PERF1\.POWER\.QS/)
 		{
 			my ( $taskname, $stime, $etime, $difftime ) = split /;/, $_;
-			print $fh Tr(td("$taskname"), td($stime), td($etime), td($difftime)), "\n";
+			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
 		}
 	}
 	$fqtime->close;
@@ -278,12 +283,12 @@ elsif ($composite==0 && $power==0 && $thuput!=0)
 		if ( /^'PERF1\.THRUPUT'/ || /^'PERF1\.THRUPUT\.RFST.'/ || /^'PERF1\.THRUPUT\.QS.'/ )
 		{
 			my ( $taskname, $stime, $etime, $difftime ) = split /;/, $_;
-			print $fh Tr(td("$taskname"), td($stime), td($etime), td($difftime)), "\n";
+			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
 		}
 	}
 	$fqtime->close;
 }
-print $fh end_table;
+print $fh end_table, "\n";
 
 #generate gnuplot files
 #change dbt3.sar.config file
@@ -320,7 +325,7 @@ system("./dbt3_gen_graphs_2.5.sh", "$indir", "$indir/plot");
 
 
 #here is where we write the table
-print $fh h2("GNUPLOT files generated from system monitors \(sysstat and procps\)");
+print $fh h2("gnuplot files generated from system monitors \(sysstat and procps\)");
 table_of_glob("$indir/plot", "*.png");
 
 system("cp", "$indir/io.txt", "$indir/plot/iostat.txt");
@@ -353,8 +358,8 @@ sub table_of_glob {
 	my @filelist = glob("$indir/$globname");
 	print "filelist $#filelist", join ( '  ', @filelist );
 
-	print $fh start_table( { -border => undef }, caption("SYSSTAT") ), "\n";
-	print $fh Tr(th("sar"), th("vmstat"), th("iostat")), "\n";
+	print $fh start_table( { -border => undef });
+	print $fh Tr(th[("sar", "vmstat", "iostat")]);
 
 	my (@sarlist, @iostatlist, @vmstatlist, $sar_index, $iostat_index, $vmstat_index);
 	$sar_index=0;
@@ -365,19 +370,16 @@ sub table_of_glob {
 		if (/sar/)
 		{
 			$sarlist[$sar_index]=$_;
-			print "$sarlist[$sar_index]\n";
 			$sar_index++;
 		}
 		elsif (/vmstat/)
 		{
 			$vmstatlist[$vmstat_index]=$_;
-			print "$vmstatlist[$vmstat_index]\n";
 			$vmstat_index++;
 		}
 		elsif (/iostat/)
 		{
 			$iostatlist[$iostat_index]=$_;
-			print "$iostatlist[$iostat_index]\n";
 			$iostat_index++;
 		}
 	}
@@ -385,7 +387,6 @@ sub table_of_glob {
 	my $max_row=$#sarlist;
 	if ($max_row < $#vmstatlist) { $max_row=$#vmstatlist; }
 	if ($max_row < $#iostatlist) { $max_row=$#iostatlist; }
-	print "sarlist $#sarlist, vmstatlist $#vmstatlist, iostatlist $#iostatlist\n";
 	
 	for ( my $i = 0; $i <= $max_row; $i++ ) 
 	{
@@ -393,11 +394,14 @@ sub table_of_glob {
 		if ($i>$#vmstatlist) {$vmstatlist[ $i ]="";}
 		if ($i>$#iostatlist) {$iostatlist[ $i ]="";}
 
+		my $sarname=basename($sarlist[ $i ]);
+		my $vmstatname=basename($vmstatlist[$i]);
+		my $iostatname=basename($iostatlist[$i]);
 		print $fh Tr(
-			td( a( { -href => "$sarlist[$i]" }, $sarlist[ $i ] ) ),
-			td( a( { -href => "$vmstatlist[$i]" }, $vmstatlist[$i]) ),
-			td( a( { -href => "$iostatlist[$i]" }, $iostatlist[$i]) ),
+			td( a( { -href => "$sarlist[$i]" }, "$sarname" ) ),
+			td( a( { -href => "$vmstatlist[$i]" }, "$vmstatname") ),
+			td( a( { -href => "$iostatlist[$i]" }, "$iostatname") ),
 			), "\n";
 	}
-	print $fh end_table;
+	print $fh end_table, "\n";
 }
