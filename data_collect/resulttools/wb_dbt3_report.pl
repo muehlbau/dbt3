@@ -111,16 +111,16 @@ while (<$fconfig>)
 }
 $fconfig->close;
 
-print $fh h1("DBT3 Test Result");
+print $fh h1("DBT-3 Test Result");
 print $fh h2("Configurations: ");
 #generate configuration table
-print $fh table({-border=>undef}, caption('DBT3 Configurations'),
+print $fh table({-border=>undef},
 	Tr({-valign=>"TOP"},
 	[
 		th(["Software Version", "Hardware Configuration", "Run Parameters"]),
 		td(["Linux Kernel: $configs{'kernel'}", "$configs{'CPUS'} CPUS @ $configs{'MHz'} MHz", "Database Scale Factor: $configs{'scale_factor'}"]),
-		td(["SAP DB: $configs{'sapdb'}", "CPU model $configs{'model'}", "Number of stream for throughput run: $configs{'num_stream'}"]),
-		td(["sysstat", "$configs{'memory'} Memory", ""]),
+		td(["SAP DB: $configs{'sapdb'}", "CPU model $configs{'model'}", "Number of streams for throughput run: $configs{'num_stream'}"]),
+		td(["sysstat:  $configs{'sysstat'}", "$configs{'memory'} Memory", ""]),
 		td(["procps: $configs{'procps'}", "$configs{'data_dev_space'}", ""]),
 		td(["Test Kit Version 1.0", "$configs{'sys_dev_space'}", ""]),
 		td(["", "$configs{'log_dev_space'}", ""])
@@ -172,15 +172,15 @@ elsif ( -e "$indir/calc_thuput.out" )
 	}
 }	
 
-print $fh h2("DBT3 Metrics: ");
+print $fh h2("DBT-3 Metrics: ");
 print $fh start_table({-border=>undef});
-print $fh caption('DBT3 Metrics'); 
+#print $fh caption('DBT-3 Metrics'); 
 #if it is a complete dbt3 run
 if ($composite != 0 && $power !=0 && $thuput != 0) 
 {
 	print $fh Tr({-valign=>"TOP"},
 	[
-		th(["Composite(queries per hour)", "Query Processing Power(queries per hour)", "Throughput Numerical Quantity(queries per hour)"]), 
+		th(["Composite<sup>1</sup>", "Query Processing Power<sup>2</sup>", "Throughput Numerical Quantity<sup>3</sup>"]), 
 		td(["$composite", "$power", "$thuput"])
 	]);
 }
@@ -208,7 +208,7 @@ print $fh end_table, "\n";
 print $fh br;
 print $fh start_table( { -border => undef });
 print $fh caption("Task Execution Time");
-print $fh Tr(th[("Task","Start Time", "End Time", "Elapsed Time")]);
+print $fh Tr(th[("Task<sup>4-10</sup>","Start Time", "End Time", "Elapsed Time")]);
 #if it is a complete dbt3 run
 if ($composite != 0 && $power !=0 && $thuput != 0) 
 {
@@ -233,11 +233,26 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 		elsif (/elapsed/) 
 		{
 			s/[a-z ]*//g;
-			$diffload="$_"." seconds"; 
+			$diffload=$_; 
 		}
 	}
 	$fdbt3->close;
-	print $fh Tr(td[("LOAD", $sload, $eload, $diffload)]);
+	#convert load test time from seconds to hh:mm:ss format
+	print "diffload $diffload\n";
+	my ($h, $m, $s, $tmp_index);
+	$h=$diffload/3600;
+	#find the maximum integer that is less than $h
+	for ($tmp_index=1; $tmp_index<$h; $tmp_index++) {};
+	$h=$tmp_index-1;
+	$diffload=$diffload-$h*3600;
+	$m=$diffload/60;
+	#find the maximum integer that is less than $h
+	for ($tmp_index=1; $tmp_index<$m; $tmp_index++) {};
+	$m=$tmp_index-1;
+	$s=$diffload-$m*60;
+#	print $fh Tr(td[("LOAD", $sload, $eload, "$h:$m:$s")]);
+	print $fh "<tr><td>LOAD</td><td>$sload</td><td>$eload</td>";
+	printf $fh "<td>%02d:%02d:%02d</td></tr>", $h, $m, $s;
 	
 	my $fqtime = new FileHandle;
 	unless ( $fqtime->open( "< $indir/q_time.out" ) )   { die "No q_time file $!"; }
@@ -249,7 +264,11 @@ if ($composite != 0 && $power !=0 && $thuput != 0)
 			/^'PERF1\.THRUPUT\.RFST.'/ || /^'PERF1\.THRUPUT\.QS.'/
 			|| /^'PERF1\.THRUPUT\.QS.'/)
 		{
-			my ( $taskname, $stime, $etime, $difftime ) = split /;/, $_;
+			my ( $taskname, $stime, $etime, $difftime ) = split /';'/, $_;
+			$taskname=~s/'//g;
+			$difftime=~s/'//g;
+			$stime=~s/.[0-9]+$//g;
+			$etime=~s/.[0-9]+$//g;
 			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
 		}
 	}
@@ -266,7 +285,11 @@ elsif ($composite==0 && $power!=0 && $thuput==0)
 		if (/^'PERF1\.POWER'/ || /^'PERF1\.POWER\.RF.'/ ||  
 			/^'PERF1\.POWER\.QS/)
 		{
-			my ( $taskname, $stime, $etime, $difftime ) = split /;/, $_;
+			my ( $taskname, $stime, $etime, $difftime ) = split /';'/, $_;
+			$taskname=~s/'//g;
+			$difftime=~s/'//g;
+			$stime=~s/.[0-9]+$//g;
+			$etime=~s/.[0-9]+$//g;
 			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
 		}
 	}
@@ -282,7 +305,11 @@ elsif ($composite==0 && $power==0 && $thuput!=0)
 		chop $_;
 		if ( /^'PERF1\.THRUPUT'/ || /^'PERF1\.THRUPUT\.RFST.'/ || /^'PERF1\.THRUPUT\.QS.'/ )
 		{
-			my ( $taskname, $stime, $etime, $difftime ) = split /;/, $_;
+			my ( $taskname, $stime, $etime, $difftime ) = split /';'/, $_;
+			$taskname=~s/'//g;
+			$difftime=~s/'//g;
+			$stime=~s/.[0-9]+$//g;
+			$etime=~s/.[0-9]+$//g;
 			print $fh Tr(td[($taskname, $stime, $etime, $difftime)]);
 		}
 	}
@@ -323,15 +350,13 @@ if (! -d "$indir/plot")
 #generate gnuplot files
 system("./dbt3_gen_graphs_2.5.sh", "$indir", "$indir/plot");
 
-
-#here is where we write the table
-print $fh h2("gnuplot files generated from system monitors \(sysstat and procps\)");
-table_of_glob("$indir/plot", "*.png");
-
 system("cp", "$indir/io.txt", "$indir/plot/iostat.txt");
 system("cp", "$indir/vmstat.out", "$indir/plot/vmstat.txt");
-print $fh h2("Raw data generated from system monitors \(sysstat and procps\)");
+print $fh h2("Raw data generated from system monitors");
 table_of_glob("$indir/plot", "*.txt");
+
+print $fh h2("gnuplot charts generated from system monitors");
+table_of_glob("$indir/plot", "*.png");
 
 print $fh h2("Run log data");
 my @runlog;
@@ -350,6 +375,21 @@ print $fh start_ul;
 print $fh li(a( { -href=>"$indir/meminfo0.out"}, "meminfo before run")), "\n";
 print $fh li(a( { -href=>"$indir/meminfo1.out"}, "meminfo after run")), "\n";
 print $fh end_ul;
+
+print $fh br, "Note:";
+print $fh "<OL>";
+print $fh li ("The results of the power test are used to compute DBT-3 Query Processing Power at the chosen database size.  The units of power\@size is 'queries per hour'.");
+print $fh li("The results of the throughput test are used to compute DBT-3 Througput at the chosen database size.  The units of throughput\@size is 'queries per hour'.");
+print $fh li("The numerical quantities DBT-3 Power and Throughtput are combined to form the DBT-3 composite-query-per-hour performance metrics.  The units of throughput\@size is 'queries per hour'.");
+print $fh li ("Sub-tasks are identified by \'.\'.  For example, 'PERF1.POWER' means 'the power test is part of the performance test1'; 'PERF1.POWER.RF1' means 'the refresh function1 is part of the power test, which is part of the performance test1.'");
+print $fh li("LOAD: Load test which loads the database");
+print $fh li("PERF: Performance test which consists of one power test and one throughput test");
+print $fh li("POWER: Power test which consists of refresh function 1, 1 query stream, and refresh function 2");
+print $fh li("QS: Query stream which consists of twenty-two queries"); 
+print $fh li("THRUPUT: Throughput test which consists of two refresh streams and two query streams");
+print $fh li("RFST: Refresh stream which consists of fresh function 1 and refresh function 2");
+print $fh li("The shorter the elapsed time for each task, the better the DBT-3 performance metrics");
+print $fh "</OL>";
 
 #write table of files 
 sub table_of_glob {
