@@ -82,6 +82,9 @@ dbdriver_path=$DBT3_INSTALL_PATH/dbdriver/scripts
 #output_dir=power
 mkdir -p $output_dir
 
+#clean time_statistics table
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from time_statistics"
+
 # restart the database
 echo "stopping the database"
 $sapdb_script_path/stop_db.sh
@@ -92,8 +95,23 @@ $sapdb_script_path/start_db.sh
 cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
+#get run configuration
+./get_config $scale_factor $num_stream $output_dir
+
 #start sys_stats.sh
 ./sys_stats.sh $interval $duration $CPUS $output_dir &
+
+#calculate count
+let "count=$duration/$interval"
+if [ $count -eq 0 ]
+then
+        count=1
+fi
+
+#get one more count
+let "count=$count+1"
+#get database statistics
+./db_stats.sh $SID $output_dir $count $interval &
 
 #execute the query
 echo "run power test for scale factor $scale_factor perf_run_number 1"
@@ -106,7 +124,7 @@ cat /proc/meminfo > $output_dir/meminfo1.out
 mv ./run.sar.data $output_dir
 
 #get query time
-dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select * from time_statistics" 2>&1 > $output_dir/q_time.out
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select task_name, s_time, e_time, timediff(e_time,s_time) from time_statistics" 2>&1 > $output_dir/q_time.out
  
 #calculate query power
 $dbdriver_path/get_power.sh 1 $scale_factor 2>&1 > $output_dir/calc_power.out
