@@ -8,6 +8,6 @@ quit
 EOF`
 _test=`echo $_o | grep OK`
 if [ "$_test" = "" ]; then
-        echo "backup failed: $_o"
+        echo "define backup medium failed: $_o"
         exit 1
 fi
