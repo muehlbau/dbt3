@@ -40,32 +40,32 @@ fi
 	./create_tables.sh
 	echo
 	
-	echo "start to load db"
 	date
-	
-	echo "load db"
+	echo "start loading db"
 	./load_db.sh
-	echo
+	date
+	echo "loading db done"
 	
 	echo "starting to create indexes"
 	date
 	
-	echo "creating indexes"
+	date
+	echo "start creating indexes"
 	./create_indexes.sh
-	echo
-	
-	echo "starting to create keys"
 	date
+	echo "creating indexes done"
 	
-	echo "creating keys"
-#	./create_keys.sh
-	echo
 	
-	echo "starting to backup database"
 	date
+	echo "start updating optimizer statistics"
+	./update_statistics.sh
+	date
+	echo "updating optimizer statistics done"
 	
-	echo "backup"
+	date
+	echo "start backup database"
 	./backup_db.sh
-	echo
+	date
+	echo "backup done"
 	
 	date
