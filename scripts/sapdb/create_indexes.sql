@@ -10,6 +10,8 @@ sql_execute create index i_l_receiptdate on lineitem (l_receiptdate asc)
 sql_execute commit
 sql_execute create index i_l_orderkey on lineitem (l_orderkey asc)
 sql_execute commit
+sql_execute create index i_l_orderkey_quantity on lineitem (l_orderkey asc, l_quantity asc)
+sql_execute commit
 sql_execute create index i_c_nationkey on customer (c_nationkey asc)
 sql_execute commit
 sql_execute create index i_o_orderdate on orders (o_orderdate asc)
