@@ -1,0 +1,6 @@
+# make.common.in
+
+INCLUDE_DIR=@TOPDIR@/dbdriver/utils/include
+
+CC = @CC@
+CFLAGS = -g -Wall -I$(INCLUDE_DIR) @CFLAGS@ -D_FILE_OFFSET_BITS=64
