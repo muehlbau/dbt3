@@ -1,0 +1,16 @@
+# Makefile
+# 20 february 2002
+
+include @TOPDIR@/make.common
+
+all: parse_query gtime
+
+parse_query: 
+	cd sapdb; $(MAKE)
+
+gtime:	get_time.c
+	$(CC) -o gtime get_time.c
+
+clean:
+	cd sapdb; $(MAKE) clean
+	rm -f gtime *.o
