@@ -4,14 +4,13 @@
 # Current values for MACHINE are:  ATT, DOS, HP, IBM, ICL, MVS, 
 #                                  SGI, SUN, U2200, VMS
 # Current values for WORKLOAD are:  TPCH, TPCR
-DATABASE=SAPDB 
+DATABASE=@DATABASE_TO_USE@ 
 MACHINE =HP 
 WORKLOAD =TPCH
 #
 # add -EDTERABYTE if orderkey will execeed 32 bits (SF >= 300)
 # and make the appropriate change in gen_schema() of runit.sh
-#CFLAGS	= -O -DDBNAME=\"dss\" -D$(MACHINE) -D$(DATABASE) -D$(WORKLOAD)
-CFLAGS	= -g -O -DDBNAME=\"dss\" -D$(DATABASE) -D$(WORKLOAD) -DSTDLIB_HAS_GETOPT -DEOL_HANDLING -DSEPARATOR=\',\'
+CFLAGS	= -g -O -DDBNAME=\"dss\" -D$(DATABASE) -D$(WORKLOAD) -DSTDLIB_HAS_GETOPT -DEOL_HANDLING
 LDFLAGS = -O
 # The OBJ,EXE and LIB macros will need to be changed for compilation under
 #  Windows NT
