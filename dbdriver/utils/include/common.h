@@ -12,6 +12,7 @@
 #define POWER 5
 #define THROUGHPUT 6
 #define SINGLE 7
+#define EXPLAIN 8
 
 struct sql_statement_t
 {
