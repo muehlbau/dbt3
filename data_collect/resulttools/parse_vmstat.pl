@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_vmstat.pl 899 2003-04-05 00:27:07Z jztpcw $ $Author: jztpcw $ $Date
+# $Id: parse_vmstat.pl 911 2003-04-09 22:33:33Z jztpcw $ $Author: jztpcw $ $Date
 
 use strict;
 use English;
@@ -14,14 +14,6 @@ use lib "$DBT3_PERL_MODULE";
 use Data_report;
 
 use constant DEBUG => 0;
-
-# get iostat version info so that we know whick key file to look at
-sub get_vmstat_v {
-	my $str = `vmstat -V 2>&1 `;
-	chomp $str;
-	my @outline = split / /, $str;
-	return $outline[ 2 ];
-}
 
 # get number of columsn
 sub get_num_columns {
@@ -158,7 +150,7 @@ if ( $writeme ) {
 	$ncf->close;
 }
 
-my $version = get_vmstat_v();
+my $version = get_vmstat_version();
 my $keyfile = "vmstat.$version.key";
 my $header_type = 'ap';
 # if the key file exists for this version
