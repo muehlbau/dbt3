@@ -80,7 +80,7 @@ $dbdriver_pgsql_path/run_load_test.sh $scale_factor
 cat /proc/meminfo > $output_dir/meminfo1.out
 
 #get build_db.out
-mv $run_path/build_db.log $out_dir/build_db.out.txt
+mv $run_path/build_db.log $output_dir/build_db.out.txt
 
 ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
 ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
