@@ -10,6 +10,9 @@
 # History:
 # June-4-2003: Jenny Zhang
 
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
 # dont start script as root!
 id=`id | sed s/\(.*// | sed s/uid=//`
 
@@ -20,10 +23,6 @@ fi
 
 db_param=$1
 
-# Restart the database server with any given parameters.
-bash @TOPDIR@/scripts/pgsql/stop_db.sh
-bash @TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
-
 # since we are on STP, we can delete the database dir
 if [ -d $PGDATA ]; then
 	echo "======================================="
@@ -33,15 +32,15 @@ if [ -d $PGDATA ]; then
 
 	# Don't need to initdb, blindly try to drop the dbt3 database in case
 	# is exists.
-	bash @TOPDIR@/scripts/pgsql/drop_db.sh
+	${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
+	${SHELL} @TOPDIR@/scripts/pgsql/drop_db.sh
 else
-	# create directory where to put the database files
-	mkdir -p $PGDATA
-
 	# initialize database cluster
 	echo "initializing database cluster..."
-	@INITDB@ -D $PGDATA > /dev/null 2>&1
+	@INITDB@ -D $PGDATA || exit 1
 fi
+
+${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
 
 echo "Creating database $SID..."
 _o=`@CREATEDB@ $SID 2>&1`
