@@ -1,19 +1,19 @@
 #!/bin/sh
 
-if [ $# -ne 2 ]; then
-        echo "Usage: ./run_rf1.sh <scale_factor> <dbt3_dir>"
+if [ $# -ne 1 ]; then
+        echo "Usage: ./run_rf1.sh <scale_factor>"
         exit
 fi
 
 scale_factor=$1
-GTIME="$2/dbdriver/utils/gtime"
-curr_set_file_rf1="$2/run/curr_set_num_rf1"
-lock_file_rf1="$2/run/rf1.lock"
-min_set_file="$2/run/min_set_num"
-max_set_file="$2/run/max_set_num"
-DBGEN="$2/datagen/dbgen/dbgen"
+GTIME="$DBT3_INSTALL_PATH/dbdriver/utils/gtime"
+curr_set_file_rf1="$DBT3_INSTALL_PATH/run/curr_set_num_rf1"
+lock_file_rf1="$DBT3_INSTALL_PATH/run/rf1.lock"
+min_set_file="$DBT3_INSTALL_PATH/run/min_set_num"
+max_set_file="$DBT3_INSTALL_PATH/run/max_set_num"
+DBGEN="$DBT3_INSTALL_PATH/datagen/dbgen/dbgen"
 
-#if curr_set_file does not exist, we generate 10 update sets
+#if curr_set_file does not exist, we generate 12 update sets
 #create a semaphore file so that only one process can access $curr_set_file_rf1 
 lockfile -s 0 $lock_file_rf1
 if [ ! -f $curr_set_file_rf1 ];
@@ -41,8 +41,8 @@ then
 	let "max_set=$max_set+12"
 	echo "generating update set $min_set - $max_set"
 	$DBGEN -s $scale_factor -U $max_set
-       echo "$min_set" > ${min_set_file}
-       echo "$max_set" > ${max_set_file}
+	echo "$min_set" > ${min_set_file}
+	echo "$max_set" > ${max_set_file}
 fi
 rm -f $lock_file_rf1
 
@@ -84,35 +84,35 @@ echo "o_comment 9" >> tmp_orders$set_num.sql
 echo "infile '/tmp/orders.tbl.u$set_num' date 'yyyy-mm-dd'" >> tmp_orders$set_num.sql
 
 echo "sql_execute drop table tmp_lineitem$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_lineitem$set_num"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_lineitem$set_num"
 
 echo "sql_execute create table tmp_lineitem$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_lineitem$set_num (l_orderkey fixed(10), l_partkey fixed(10), l_suppkey fixed(10), l_linenumber fixed(10), l_quantity fixed(12,2), l_extendedprice fixed(12,2), l_discount fixed(12,2), l_tax fixed(12,2), l_returnflag char(1), l_linestatus char(1), l_shipdate date, l_commitdate date, l_receiptdate date, l_shipinstruct char(25), l_shipmode char(10), l_comment varchar(44))"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_lineitem$set_num (l_orderkey fixed(10), l_partkey fixed(10), l_suppkey fixed(10), l_linenumber fixed(10), l_quantity fixed(12,2), l_extendedprice fixed(12,2), l_discount fixed(12,2), l_tax fixed(12,2), l_returnflag char(1), l_linestatus char(1), l_shipdate date, l_commitdate date, l_receiptdate date, l_shipinstruct char(25), l_shipmode char(10), l_comment varchar(44))"
 
 echo "load table tmp_lineitem$set_num"
-/opt/sapdb/depend/bin/repmcli -u dbt,dbt -d DBT3 -b tmp_lineitem$set_num.sql
+/opt/sapdb/depend/bin/repmcli -u dbt,dbt -d $SID -b tmp_lineitem$set_num.sql
 
 echo "sql_execute insert into lineitem (select * from tmp_lineitem$set_num)"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into lineitem (select * from tmp_lineitem$set_num)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into lineitem (select * from tmp_lineitem$set_num)"
 
 echo "sql_execute drop table tmp_orders$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orders$set_num"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orders$set_num"
 
 echo "sql_execute create table tmp_orders$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_orders$set_num (o_orderkey fixed(10), o_custkey fixed(10), o_orderstatus char(1), o_totalprice fixed(12,2), o_orderdate date, o_orderpriority char(15), o_clerk char(15), o_shippriority fixed(10), o_comment varchar(79))"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_orders$set_num (o_orderkey fixed(10), o_custkey fixed(10), o_orderstatus char(1), o_totalprice fixed(12,2), o_orderdate date, o_orderpriority char(15), o_clerk char(15), o_shippriority fixed(10), o_comment varchar(79))"
 
 echo "load table tmp_orders$set_num"
-/opt/sapdb/depend/bin/repmcli -u dbt,dbt -d DBT3 -b tmp_orders$set_num.sql
+/opt/sapdb/depend/bin/repmcli -u dbt,dbt -d $SID -b tmp_orders$set_num.sql
 
 echo "sql_execute insert into orders (select * from tmp_orders$set_num)"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into orders (select * from tmp_orders$set_num)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute insert into orders (select * from tmp_orders$set_num)"
 
 # clean up
 echo "sql_execute drop table tmp_lineitem$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_lineitem$set_num"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_lineitem$set_num"
 
 echo "sql_execute drop table tmp_orders$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orders$set_num"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orders$set_num"
 rm tmp_lineitem$set_num.sql
 rm tmp_orders$set_num.sql
 

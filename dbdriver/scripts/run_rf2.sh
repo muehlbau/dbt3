@@ -1,15 +1,10 @@
 #!/bin/sh
 
-if [ $# -ne 1 ]; then
-        echo "Usage: ./run_rf2.sh <dbt3_dir>"
-        exit
-fi
-
-GTIME="$1/dbdriver/utils/gtime"
-curr_set_file_rf1="$1/run/curr_set_num_rf1"
-curr_set_file_rf2="$1/run/curr_set_num_rf2"
-lock_file_rf1="$1/run/rf1.lock"
-lock_file_rf2="$1/run/rf2.lock"
+GTIME="$DBT3_INSTALL_PATH/dbdriver/utils/gtime"
+curr_set_file_rf1="$DBT3_INSTALL_PATH/run/curr_set_num_rf1"
+curr_set_file_rf2="$DBT3_INSTALL_PATH/run/curr_set_num_rf2"
+lock_file_rf1="$DBT3_INSTALL_PATH/run/rf1.lock"
+lock_file_rf2="$DBT3_INSTALL_PATH/run/rf2.lock"
 
 #if set_num_file_rf1 does not exist, exit since rf1 has to run before rf2
 lockfile -s 0 $lock_file_rf1
@@ -51,25 +46,25 @@ echo "orderkey 1" >> tmp_orderkey$set_num.sql
 echo "infile '/tmp/delete.$set_num'" >> tmp_orderkey$set_num.sql
 
 echo "sql_execute drop table tmp_orderkey$set_num"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
 
 echo "sql_execute create table tmp_orderkey$set_num (orderkey fixed(10))"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_orderkey$set_num (orderkey fixed(10))"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute create table tmp_orderkey$set_num (orderkey fixed(10))"
 
 echo "load tmp_orderkey$set_num"
-/opt/sapdb/depend/bin/repmcli -u dbt,dbt -d DBT3 -b tmp_orderkey$set_num.sql
+/opt/sapdb/depend/bin/repmcli -u dbt,dbt -d $SID -b tmp_orderkey$set_num.sql
 
 echo "sql_execute delete from lineitem where l_orderkey in (select * from tmp_orderkey$set_num)"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from lineitem where l_orderkey in (select * from tmp_orderkey$set_num)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from lineitem where l_orderkey in (select * from tmp_orderkey$set_num)"
 
 echo "sql_execute delete from orders where o_orderkey in (select * from tmp_orderkey$set_num)"
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from orders where o_orderkey in (select * from tmp_orderkey$set_num)"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute delete from orders where o_orderkey in (select * from tmp_orderkey$set_num)"
 
 #clean up
 echo "sql_execute drop table tmp_orderkey$set_num"
 rm -f tmp_orderkey$set_num.sql
 
-dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute drop table tmp_orderkey$set_num"
 rm tmp_orderkey$set_num.sql
 e_time=`$GTIME`
 echo "`date`: end rf2 "
