@@ -105,7 +105,7 @@ bash $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p throughput${TAG}
 bash $DBSTATS $SID $OUTPUT_DIR "throughput${TAG}" &
 
 # Start the streams.
-bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream -e $explain_analyze -r $RUNDIR
+bash $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream -e $explain_analyze -o $OUTPUT_DIR || exit 1
 
 # Stop collecting system statistics.
 bash $SRCDIR/scripts/stop_sysstats.sh
@@ -130,3 +130,5 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	profname="Throughput_Test_$TAG"
 	getoprof
 fi
+
+exit 0

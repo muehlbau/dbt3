@@ -145,7 +145,6 @@ scripts/pgsql/drop_db.sh \
 scripts/pgsql/drop_tables.sh \
 scripts/pgsql/grant.sh \
 scripts/pgsql/load_db.sh \
-scripts/pgsql/set_db_env.sh \
 scripts/pgsql/pgsql_profile \
 scripts/pgsql/start_db.sh \
 scripts/pgsql/stop_db.sh \

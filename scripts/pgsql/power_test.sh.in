@@ -47,13 +47,13 @@ getoprof () {
 	sudo opstack > $OUTPUT_DIR/oprofile/${profname}/call-graph.txt
 }
 
-explain_analyze=0
+EXPLAIN_ANALYZE=0
 USE_OPROFILE=0
 
 # process the command line parameters
 while getopts "ef:p:o:t:y:" opt; do
 	case $opt in
-		e) explain_analyze=1
+		e) EXPLAIN_ANALYZE=1
 			;;
 		f) SCALE_FACTOR=$OPTARG
 			;;
@@ -65,7 +65,7 @@ while getopts "ef:p:o:t:y:" opt; do
 			;;
 		y) USE_OPROFILE=$OPTARG
 			;;
-		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e explain_analyze -p <db_params> -t <tag> -y USE_OPROFILE]"
+		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e EXPLAIN_ANALYZE -p <db_params> -t <tag> -y USE_OPROFILE]"
 			exit ;;
 		esac
 done
@@ -122,24 +122,27 @@ fi
 s_time_power=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER"
 
+# Save refresh stream and query results to $OUTPUT_DIR/results.
+mkdir -p $OUTPUT_DIR/results
+
 # Refresh Stream 1
 echo "`date`: Power Test : Starting Refresh Stream 1" 
 s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF1"
-bash $DBSCRIPTDIR/run_rf1.sh $SCALE_FACTOR $RUNDIR > $RUNDIR/power.perf${TAG}.rf1.result 2>&1
+bash $DBSCRIPTDIR/run_rf1.sh $SCALE_FACTOR $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf1.result 2>&1
 bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF1"
 e_time=`$GTIME`
 echo "`date`: Power Test : Refresh Stream 1 completed." 
 let "diff_time=$e_time-$s_time"
 
 # Execute the queries.
-bash $DBSCRIPTDIR/run_power_query.sh $SCALE_FACTOR $TAG $explain_analyze $RUNDIR
+bash $DBSCRIPTDIR/run_power_query.sh $SCALE_FACTOR $TAG $EXPLAIN_ANALYZE $OUTPUT_DIR || exit 1
 
 # Refresh Stream 2
 echo "`date`: Power Test : Starting Refresh Stream 2" 
 s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF2"
-bash $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $RUNDIR/power.perf${TAG}.rf2.result 2>&1
+bash $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf2.result 2>&1
 bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF2"
 e_time=`$GTIME`
 echo "`date`: Power Test : Refresh Stream 2 completed." 
@@ -168,3 +171,5 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	profname="Power_Test_$TAG"
 	getoprof
 fi
+
+exit 0

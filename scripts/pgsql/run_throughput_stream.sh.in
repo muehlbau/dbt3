@@ -13,14 +13,15 @@ SRCDIR=@TOPDIR@
 
 if [ $# -ne 5 ]; then
         echo "Usage: $0 <scale_factor> <perf_run_num> <stream_num> <0/1 - explain analyze off/on> <run dir>"
-        exit
+        exit 1
 fi
 
 scale_factor=$1
 perf_run_num=$2
 stream_num=$3
 explain_analyze=$4
-RUNDIR=$5
+OUTPUT_DIR=$5
+RUNDIR=$OUTPUT_DIR/run
 
 GTIME="$SRCDIR/dbdriver/utils/gtime"
 QGEN="$SRCDIR/datagen/dbgen/qgen"
@@ -74,9 +75,11 @@ s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
-@PSQL@ $SID -f $tmp_query_file -a >> $RUNDIR/thruput_qs${stream_num}.result 2>&1
+@PSQL@ $SID -f $tmp_query_file -a >> $OUTPUT_DIR/results/thruput_qs${stream_num}.result 2>&1 || exit 1
 bash $DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"
 echo "elapsed time for queries $diff_time"
+
+exit 0

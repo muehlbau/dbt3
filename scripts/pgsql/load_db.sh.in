@@ -39,3 +39,5 @@ echo -n "Loading table nation... "
 date
 echo -n "Loading table region... "
 @PSQL@ -d $SID -c "COPY region FROM '$DSS_PATH/region.tbl' USING DELIMITERS '|';" || exit 1
+
+exit 0

@@ -145,15 +145,15 @@ then
 fi
 
 date
-bash $SRCDIR/scripts/pgsql/load_db.sh
+bash $SRCDIR/scripts/pgsql/load_db.sh || exit 1
 date
 	
 date
-bash $SRCDIR/scripts/pgsql/create_indexes.sh
+bash $SRCDIR/scripts/pgsql/create_indexes.sh || exit 1
 date
 	
 date
-bash $SRCDIR/scripts/pgsql/update_statistics.sh
+bash $SRCDIR/scripts/pgsql/update_statistics.sh || exit 1
 date
 
 bash $DBSCRIPTDIR/record_end.sh -n "LOAD"
@@ -175,3 +175,5 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	profname='Load_Test'
 	getoprof
 fi
+
+exit 0

@@ -9,7 +9,7 @@
 
 SRCDIR=@TOPDIR@
 
-while getopts "e:f:n:r:t:" opt; do
+while getopts "e:f:n:o:r:t:" opt; do
 	case $opt in
 	e) explain_analyze=$OPTARG
 		;;
@@ -17,7 +17,8 @@ while getopts "e:f:n:r:t:" opt; do
 		;;
 	n) num_stream=$OPTARG
 		;;
-	r) RUNDIR=$OPTARG
+	o) OUTPUT_DIR=$OPTARG
+	   RUNDIR=$OUTPUT_DIR/run
 		;;
 	t) TAG=$OPTARG
 		;;
@@ -32,7 +33,7 @@ GTIME="$SRCDIR/dbdriver/utils/gtime"
 i=1
 while [ $i -le $num_stream ] 
 do
-	bash $DBSCRIPTDIR/run_throughput_stream.sh $scale_factor $TAG $i $explain_analyze $RUNDIR > $RUNDIR/thruput_qs$i 2>&1 &
+	bash $DBSCRIPTDIR/run_throughput_stream.sh $scale_factor $TAG $i $explain_analyze $OUTPUT_DIR > $RUNDIR/thruput_qs$i 2>&1 || exit 1 &
 	
 	let "i=$i+1"
 done
@@ -48,7 +49,7 @@ do
 	echo "`date`: Throughput Stream $stream_num : Starting Refresh Stream 1..."
 	s_time_rf1=`$GTIME`
 	bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
-	bash $DBSCRIPTDIR/run_rf1.sh $scale_factor $RUNDIR > $RUNDIR/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1
+	bash $DBSCRIPTDIR/run_rf1.sh $scale_factor $RUNDIR > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1 || exit 1
 	bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
 	e_time_rf1=`$GTIME`
 	echo "`date`: Throughput Stream $stream_num : Refresh Stream 1 completed."
@@ -58,7 +59,7 @@ do
 	echo "`date`: Throughput Stream $stream_num : Starting Refresh Stream 2..."
 	s_time_rf2=`$GTIME`
 	bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
-	bash $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $RUNDIR/thruput.perf${TAG}.stream${stream_num}.rf2.result 2>&1
+	bash $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf2.result 2>&1 || exit 1
 	bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
 	e_time_rf2=`$GTIME`
 	echo "`date`: Throughput Stream $stream_num : Refresh Stream 2 completed."
@@ -73,3 +74,5 @@ do
 done
 
 wait
+
+exit 0
