@@ -18,13 +18,10 @@ int main(int argc, char *argv[])
 	int stream_number;
 	int run_type;
 
-	/* flag indicating if the current is the first statement in this block*/
-	int first_stmt;
-	
-	first_stmt=TRUE;
 	if (argc < 4)
 	{
 		printf("usage: \n%s <query_input_file> <query_output_file> <S>\n", argv[0]);
+		printf("usage: \n%s <query_input_file> <query_output_file> <E>\n", argv[0]);
 		printf("%s <query_input_file> <query_output_file> <P> <perf_run_number> \n", argv[0]);
 		printf("%s <query_input_file> <query_output_file> <T> <perf_run_number> <throughput_query_stream_number>\n", argv[0]);
 		exit(1);
@@ -39,6 +36,8 @@ int main(int argc, char *argv[])
 	}
 	else if (strcmp(argv[3], "S")==0 || strcmp(argv[3], "s") == 0)
 		run_type = SINGLE;
+	else if (strcmp(argv[3], "E")==0 || strcmp(argv[3], "e") == 0)
+		run_type = EXPLAIN;
 	else if (strcmp(argv[3], "T")==0 || strcmp(argv[3], "t") == 0)
 	{
 		run_type = THROUGHPUT;
@@ -47,7 +46,7 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		printf("run type: P -- power test  T -- throughput test  S -- single query\n");
+		printf("run type: P -- power test  T -- throughput test  S -- single query E -- explain \n");
 		exit(1);
 	}
 	
@@ -64,7 +63,8 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-	fprintf(query_output, "%s\n", SQL_ISOLATION);
+	if (run_type == POWER || run_type == THROUGHPUT)
+		fprintf(query_output, "%s\n", SQL_ISOLATION);
 
 	while ( (rc=get_statement(query_input)) != END_OF_FILE)
 	{
@@ -75,11 +75,25 @@ int main(int argc, char *argv[])
 				fprintf(query_output, SQL_TIME_P_INSERT, SQL_EXEC, perf_run_number, sql_statement.query_id);
 			else if (run_type == THROUGHPUT)
 				fprintf(query_output, SQL_TIME_T_INSERT, SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
-			first_stmt = FALSE;
-		}
+			fprintf(query_output, "%s\n", SQL_COMMIT);
+                }
 		if (rc == END_OF_STMT)
 		{
-			fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
+			if ( run_type == EXPLAIN )
+			{
+				/* do not get execution plan for Q15 */
+				if (sql_statement.query_id != 15)
+				{
+					fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
+#ifdef sapdb
+					fprintf(query_output, "%s %s", SQL_EXEC, SQL_EXE_PLAN);
+				}
+#endif
+			}
+			else
+			{
+					fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
+			}
 		}
 		if (rc == END_OF_BLOCK)
 		{
@@ -87,10 +101,10 @@ int main(int argc, char *argv[])
 				fprintf(query_output, SQL_TIME_P_UPDATE, SQL_EXEC, perf_run_number, sql_statement.query_id);
 			else if (run_type == THROUGHPUT)
 				fprintf(query_output, SQL_TIME_T_UPDATE, SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+			fprintf(query_output, "%s\n", SQL_COMMIT);
 		}
 	}
 	
-
 	fclose(query_input);
 	fclose(query_output);
 	return 1;

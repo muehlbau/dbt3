@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "db.h"
 
 extern struct sql_statement_t sql_statement;
 
@@ -37,38 +38,48 @@ int get_statement(FILE *query_input)
 				sql_statement.query_id = atoi(pos_begin);
 			}
 		}
-		/* if this is a 'set row' line, store the row count */
-		else if (strncmp(line, "set rowcount", 12) == 0)
-		{
-			pos_begin=line+13;
-			sql_statement.rowcount=atoi(pos_begin);
-		}
-		/* if it is "go", then this is the end of this block */
-		else if (strcmp(line,"go\n") == 0)
-			return END_OF_BLOCK;
-		/* otherwise, it is sql statement */
 		else
 		{
-			if ( (pos_begin=strchr(line, ';')) != NULL)
+			/* if this is a 'set row' line, store the row count */
+			if (strncmp(line, "set rowcount", 12) == 0)
 			{
+				pos_begin=line+13;
+				sql_statement.rowcount=atoi(pos_begin);
+			}
+			/* if it is START_TRAN, 
+			   then this is the beginning of this block */
+			if (strcmp(line, START_TRAN) == 0) 
+			{ 
+				return BEGIN_OF_BLOCK;
+			}
+			/* if it is END_TRAN, 
+			   then this is the end of this block */
+			if (strcmp(line, END_TRAN) == 0)
+			{
+				return END_OF_BLOCK;
+			}
+			/* otherwise, it is sql statement */
+				if ( (pos_begin=strchr(line, ';')) != NULL)
+				{
 #ifdef sapdb
-				/* if it is the end of the statement, add \n */
-				*pos_begin='\n';
-				statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
+					/* if it is the end of the statement, 
+						add \n */
+					*pos_begin='\n';
+					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
 #endif
 #ifdef pgsql
-				/* pgsql requires ';' */
-				statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
-				statement_index += sprintf(sql_statement.statement+statement_index, "%c", '\n');
+					/* pgsql requires ';' */
+					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
+					statement_index += sprintf(sql_statement.statement+statement_index, "%c", '\n');
 #endif
-				return END_OF_STMT;
-			}
-			/* get rid of \n */
-			else if ( (pos_begin=strchr(line, '\n')) != NULL)
-			{
-				*pos_begin=' ';
-				statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
-			}
+					return END_OF_STMT;
+				}
+				/* get rid of \n */
+				else if ( (pos_begin=strchr(line, '\n')) != NULL)
+				{
+					*pos_begin=' ';
+					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
+				}
 		}
 	}
 	return END_OF_FILE;
