@@ -26,7 +26,16 @@ CPUS=`grep -c '^processor' /proc/cpuinfo`
 #dbt3_test_time=21607
 if [ $num_stream -eq 8 ]
 then
-	dbt3_test_time=10800
+	dbt3_test_time=18700
+elif [ $num_stream -eq 2 ]
+then
+	dbt3_test_time=9770
+elif [ $num_stream -eq 4 ]
+then
+	dbt3_test_time=10640
+elif [ $num_stream -eq 6 ]
+then
+	dbt3_test_time=12177
 else
 	dbt3_test_time=10800
 fi
@@ -156,7 +165,7 @@ cat /proc/meminfo > $output_dir/meminfo1.out
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select task_name, s_time, e_time, timediff(e_time,s_time) from time_statistics" 2>&1 > $output_dir/q_time.out
 
 #calculate composite power
-$dbdriver_script_path/get_composite.sh 1 $scale_factor $num_stream 2>&1 > $output_dir/calc_composite.out
+$dbdriver_script_path/get_composite.pl -p 1 -s 1 -n $num_stream -o $output_dir/calc_composite.out 
 
 #copy dbt3.out
 mv $datacollect_sapdb_path/dbt3.out $output_dir/dbt3.out
