@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Promotion Effect Query (Q14)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	100.00 * sum(
 		decode(substr(p_type, 1, 5), 'PROMO',
@@ -16,4 +17,4 @@ where
 	l_partkey = p_partkey
 	and l_shipdate >= ':1'
 	and l_shipdate < adddate(':1', 30);
-:n -1
+:e

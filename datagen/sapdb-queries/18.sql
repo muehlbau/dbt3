@@ -6,6 +6,7 @@ create table TEMP.l_orderkey_sumquantity(
 	l_orderkey fixed(10),
 	sumquantity fixed(12,2));
 
+:b
 insert into TEMP.l_orderkey_sumquantity (
 	select l_orderkey, sum(l_quantity) 
 	from lineitem group by l_orderkey);
@@ -42,4 +43,4 @@ group by
 order by
 	o_totalprice desc,
 	o_orderdate;
-:n 100
+:e

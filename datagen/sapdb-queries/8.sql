@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R National Market Share Query (Q8)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	o_year,
 	sum(decode (nation, 'FRANCE', volume, 0))
@@ -39,4 +40,4 @@ group by
 	o_year
 order by
 	o_year;
-:n -1
+:e

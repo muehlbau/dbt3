@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Suppliers Who Kept Orders Waiting Query (Q21)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	s_name,
 	count(*) as numwait
@@ -43,4 +44,4 @@ group by
 order by
 	numwait desc,
 	s_name;
-:n 100
+:e

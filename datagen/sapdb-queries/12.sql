@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Shipping Modes and Order Priority Query (Q12)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	l_shipmode,
 	sum(decode(o_orderpriority, '1-URGENT', 1, '2-HIGH',1, 0)) as high_line_count,
@@ -22,4 +23,4 @@ group by
 	l_shipmode
 order by
 	l_shipmode;
-:n -1
+:e

@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Order Priority Checking Query (Q4)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	o_orderpriority,
 	count(*) as order_count
@@ -25,4 +26,4 @@ group by
 	o_orderpriority
 order by
 	o_orderpriority;
-:n -1
+:e

@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Discounted Revenue Query (Q19)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	sum(l_extendedprice* (1 - l_discount)) as revenue
 from
@@ -36,4 +37,4 @@ where
 		and p_size between 1 and 15
 	  )
 	);
-:n -1
+:e

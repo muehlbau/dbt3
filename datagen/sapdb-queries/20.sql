@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Potential Part Promotion Query (Q20)
 -- Function Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	s_name,
 	s_address
@@ -36,4 +37,4 @@ where
 	and n_name = ':3'
 order by
 	s_name;
-:n -1
+:e

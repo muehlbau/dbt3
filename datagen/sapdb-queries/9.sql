@@ -2,8 +2,9 @@
 -- TPC-H/TPC-R Product Type Profit Measure Query (Q9)
 -- Functional Query Definition
 -- Approved February 1998
-:x
 :o
+:b
+:x
 select
 	nation,
 	o_year,
@@ -36,4 +37,4 @@ group by
 order by
 	nation,
 	o_year desc;
-:n -1
+:e
