@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_iostat.pl 898 2003-04-05 00:25:23Z jztpcw $ $Author: jztpcw $ $Date
+# $Id: parse_iostat.pl 910 2003-04-09 22:31:45Z jztpcw $ $Author: jztpcw $ $Date
 
 use strict;
 use English;
@@ -274,7 +274,7 @@ if ( -f $keyfile )
 	my @heads = eval{ get_header( $keyfile, "$option", "hr" ) };
         if ($@)
         {
-                die "error get_diskheads: $@";
+                die "error get_header: $@";
         }
 	$num_columns = $#heads + 1;
 	# get rid of 'Device'
@@ -286,7 +286,7 @@ if ( -f $keyfile )
 }
 else
 {
-	print "a file file is recommended\n";
+	print "a file $keyfile is recommended\n";
 	#get number of columns in the file
 	$num_columns = get_num_columns($infile);
 }
