@@ -31,7 +31,7 @@ if [ ! -f "$INFILE" ]; then
 fi
 
 # Blindly create the output directory.
-make -p $OUTDIR
+mkdir -p $OUTDIR
 
 # This is based off vmstat with a header like:
 
