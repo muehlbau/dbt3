@@ -92,9 +92,6 @@ echo "get meminfo0"
 cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
-#get run config
-$datacollect_path/get_config.sh $scale_factor $num_stream $output_dir
-
 #start sys_stats.sh
 echo "start sys_stats.sh"
 $datacollect_path/sys_stats.sh $interval $duration $output_dir &
@@ -117,6 +114,8 @@ echo "`date +'%Y-%m-%d %H:%M:%S'` load test end"
 let "diff_time_load=$e_time-$s_time"
 echo "elapsed time for load test $diff_time_load" 
 
+#get run config
+$datacollect_path/get_config.sh $scale_factor $num_stream $output_dir
 
 #calculate count 
 let "count=($duration-$diff_time_load)/$interval"
@@ -155,7 +154,7 @@ cat /proc/meminfo > $output_dir/meminfo1.out
 dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select task_name, s_time, e_time, timediff(e_time,s_time) from time_statistics" 2>&1 > $output_dir/q_time.out
 
 #calculate composite power
-$dbdriver_script_path/get_composite.pl -p 1 -s 1 -n $num_stream -o $output_dir/calc_composite.out
+$dbdriver_script_path/get_composite.pl -p 1 -s $scale_factor -n $num_stream -o $output_dir/calc_composite.out
 
 #copy dbt3.out
 mv $datacollect_sapdb_path/dbt3.out $output_dir/dbt3.out
