@@ -1,0 +1,90 @@
+#!/bin/sh
+
+# load_test_stats.sh: run power test and collect database and system statistics
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003 Open Source Development Lab, Inc.
+#
+# History: July-11-2003 Created by Jenny Zhang
+
+if [ $# -lt 2 ]; then
+        echo "usage: load_test_stats.sh <scale_factor> <output_dir> [-d duration -i interval]"
+        exit
+fi
+
+scale_factor=$1
+output_dir=$2
+
+duration=0
+interval=0
+shift 2
+# process the command line parameters
+while getopts ":d:i:" opt; do
+	case $opt in
+		d) duration=$OPTARG
+				;;
+		i) interval=$OPTARG
+				;;
+		?) echo "Usage: $0 <scale_factor> [-d duration -i interval]"
+			exit ;;
+		esac
+done
+
+#if not specified, then use default value
+if [ $interval -eq 0 ] 
+then 
+	interval=60
+fi
+
+if [ $duration -eq 0 ] 
+then 
+	duration=3600
+fi
+
+#if interval is larger than duration, then reduce interval by half
+while [ $interval -gt $duration ]
+do
+	let "interval = $interval/2"
+done
+
+sapdb_script_path=@TOPDIR@/scripts/sapdb
+dbdriver_script_path=@TOPDIR@/dbdriver/scripts
+dbdriver_sapdb_path=@TOPDIR@/dbdriver/scripts/sapdb
+datacollect_path=@TOPDIR@/data_collect
+datacollect_sapdb_path=@TOPDIR@/data_collect/sapdb
+run_path=@TOPDIR@/run
+
+#set run environment
+. @TOPDIR@/scripts/set_run_env.sh
+
+#make output directory
+mkdir -p $output_dir
+
+#get meminfo
+cat /proc/meminfo > $output_dir/meminfo0.out
+sleep 2
+
+#get run configuration
+$datacollect_sapdb_path/get_config.sh $scale_factor 1 $output_dir
+
+#start sys_stats.sh
+$datacollect_path/sys_stats.sh $interval $duration $output_dir &
+
+#call the load script
+echo "run load test for scale factor $scale_factor"
+$dbdriver_sapdb_path/run_load_test.sh $scale_factor
+
+#get meminfo
+cat /proc/meminfo > $output_dir/meminfo1.out
+
+#get query time
+$datacollect_sapdb_path/q_time.sh $output_dir
+ 
+mv $datacollect_sapdb_path/load.out $output_dir/load.out
+
+ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep iostat | awk '{print $2}' | xargs kill -9
+ps -ef | grep -v grep | grep vmstat | awk '{print $2}' | xargs kill -9
+pgrep db_stats.sh | xargs kill -9
