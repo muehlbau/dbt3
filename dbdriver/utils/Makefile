@@ -31,13 +31,11 @@ explain:
 	@echo "$(OBJS)"
 
 $(EXE): \
-	../common.mk \
 	Makefile \
 	$(OBJS) \
 	$(INCLUDE_DIR)/get_statement.h 
 
 $(OBJS): \
-	../common.mk \
 	Makefile \
 	$(INCLUDE_DIR)/get_statement.h \
 	$(PRGS)
