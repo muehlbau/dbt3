@@ -95,7 +95,6 @@ sleep 2
 
 #get run config
 $datacollect_path/get_config.sh $scale_factor $num_stream $output_dir
-exit
 
 #start sys_stats.sh
 echo "start sys_stats.sh"
