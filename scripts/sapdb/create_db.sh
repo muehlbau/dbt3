@@ -118,17 +118,4 @@ if [ "$_test" = "" ]; then
         exit 1
 fi
 
-echo "set backup parameters..."
-_o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
-backup_media_put data /$DBT3_DIR/$SID/datasave FILE DATA 0 8 YES
-backup_media_put auto /$DBT3_DIR/$SID/autosave FILE AUTO
-quit
-EOF`
-_test=`echo $_o | grep OK`
-if [ "$_test" = "" ]; then
-        echo "set backup parameters failed: $_o"
-        exit 1
-fi
-
-
 exit 0
