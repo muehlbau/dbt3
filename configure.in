@@ -118,7 +118,6 @@ if test "$DATABASE_TO_USE" == "pgsql"; then
     scripts/pgsql/create_db.sh \
     scripts/pgsql/create_indexes.sh \
     scripts/pgsql/create_tables.sh \
-    scripts/pgsql/create_tables_ts.sh \
     scripts/pgsql/create_tablespaces.sh \
     scripts/pgsql/db_stats.sh \
     scripts/pgsql/drop_db.sh \
@@ -178,7 +177,6 @@ scripts/dbt3_profile \
 scripts/get_composite.pl \
 scripts/get_config.sh \
 scripts/gen_data.sh \
-scripts/gen_graphs.sh \
 scripts/gen_html.sh \
 scripts/run_workload.sh \
 scripts/start_sysstats.sh \
