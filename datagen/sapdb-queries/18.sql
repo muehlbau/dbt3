@@ -2,6 +2,13 @@
 -- TPC-H/TPC-R Large Volume Customer Query (Q18)
 -- Function Query Definition
 -- Approved February 1998
+create table TEMP.l_orderkey_sumquantity(
+	l_orderkey fixed(10),
+	sumquantity fixed(12,2));
+
+insert into TEMP.l_orderkey_sumquantity (
+	select l_orderkey, sum(l_quantity) 
+	from lineitem group by l_orderkey);
 :x
 :o
 select
@@ -20,10 +27,9 @@ where
 		select
 			l_orderkey
 		from
-			lineitem
-		group by
-			l_orderkey having
-				sum(l_quantity) > :1
+			TEMP.l_orderkey_sumquantity
+		where
+			sumquantity > :1
 	)
 	and c_custkey = o_custkey
 	and o_orderkey = l_orderkey
