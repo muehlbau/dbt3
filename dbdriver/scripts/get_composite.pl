@@ -138,7 +138,7 @@ while ( <$fcomp> )
 	}
 }
 close($fcomp);
-#system("rm", "composite.out");
+system("rm", "composite.out");
 
 print "calculate composite\n";
 #calculate the query per hour * SF
