@@ -1,5 +1,5 @@
-#!/bin/sh
-# load_db.sh
+#!/bin/bash
+# load_db.sh.in
 #
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
@@ -10,41 +10,40 @@
 
 date
 echo -n "loading table supplier..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/supplier.sql
+@PSQL@ -d $SID -c "COPY supplier FROM '$DSS_PATH/supplier.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table part..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/part.sql
+@PSQL@ -d $SID -c "COPY part FROM '$DSS_PATH/part.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table partsupp..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/partsupp.sql
+@PSQL@ -d $SID -c "COPY partsupp FROM '$DSS_PATH/partsupp.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table customer..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/customer.sql
+@PSQL@ -d $SID -c "COPY customer FROM '$DSS_PATH/customer.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table orders..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/orders.sql
+@PSQL@ -d $SID -c "COPY orders FROM '$DSS_PATH/orders.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table lineitem..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/lineitem.sql
+@PSQL@ -d $SID -c "COPY lineitem FROM '$DSS_PATH/lineitem.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table nation..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/nation.sql
+@PSQL@ -d $SID -c "COPY nation FROM '$DSS_PATH/nation.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
 
 date
 echo -n "loading table region..."
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/region.sql
+@PSQL@ -d $SID -c "COPY region FROM '$DSS_PATH/region.tbl' USING DELIMITERS '|';" || exit 1
 echo "done."
-
