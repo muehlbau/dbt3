@@ -47,7 +47,7 @@ dbdriver_script_path=$DBT3_INSTALL_PATH/dbdriver/scripts
 dbdriver_sapdb_path=$DBT3_INSTALL_PATH/dbdriver/scripts/sapdb
 run_path=$DBT3_INSTALL_PATH/run
 seed_file=$DBT3_INSTALL_PATH/run/seed
-builddb_path=$DBT3_INSTALL_PATH/builddb
+sapdb_script_path=$DBT3_INSTALL_PATH/scripts/sapdb
 datacollect_path=$DBT3_INSTALL_PATH/data_collect
 datacollect_sapdb_path=$DBT3_INSTALL_PATH/data_collect/sapdb
 GTIME="${DBT3_INSTALL_PATH}/dbdriver/utils/gtime"
@@ -108,7 +108,7 @@ s_time_dbt3=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` start load test" 
 #get the start time
 s_time=`$GTIME`
-$builddb_path/build_db.pl -f build_db.conf
+$sapdb_script_path/build_db.sh
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` load test end" 
 let "diff_time_load=$e_time-$s_time"
