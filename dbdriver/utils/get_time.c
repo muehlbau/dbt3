@@ -3,7 +3,7 @@
 
 #include <sys/time.h>
 
-main()
+int main()
 {
 	struct timeval tp;
 	
