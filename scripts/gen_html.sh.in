@@ -38,7 +38,7 @@ gen_results()
 	echo "</head>" >> ${SUBDIR}/index.html
 	echo "<body>" >> ${SUBDIR}/index.html
 
-	echo "<img src=\"plots/vmstat_cpu.png\" />" >> ${SUBDIR}/index.html
+	echo "<img src=\"plots/cpu.png\" />" >> ${SUBDIR}/index.html
 
 	echo "<h2>System Statistics</h2>" >> ${SUBDIR}/index.html
 	echo "<a href=\"sar.txt\">sar</a><br />" >> ${SUBDIR}/index.html
@@ -69,7 +69,7 @@ gen_results()
 	echo "</body>" >> ${SUBDIR}/index.html
 	echo "</html>" >> ${SUBDIR}/index.html
 
-	${SHELL} $SRCDIR/scripts/gen_graphs.sh ${SUBDIR} ${SUBDIR}/plots > ${SUBDIR}/gen_graphs.out 2>&1
+	${SHELL} $SRCDIR/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots -x "Minutes" > /dev/null 2>&1
 }
 
 echo "<html>"
