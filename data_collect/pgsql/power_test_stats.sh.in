@@ -10,28 +10,30 @@
 # History: June-16-2003 Created by Jenny Zhang
 
 if [ $# -lt 2 ]; then
-        echo "usage: power_test_stats.sh <scale_factor> <output_dir> [-d duration -i interval]"
+        echo "usage: power_test_stats.sh <scale_factor> <output_dir> [-s seed -d duration -i interval]"
         exit
 fi
 
 scale_factor=$1
 output_dir=$2
-CPUS=`grep -c '^processor' /proc/cpuinfo`
 
 #estimated power test time
-power_test_time=180
+power_test_time=1800
 
 duration=0
 interval=0
+seed=0
 shift 2
 # process the command line parameters
 while getopts ":d:i:" opt; do
 	case $opt in
+		s) seed=$OPTARG
+				;;
 		d) duration=$OPTARG
 				;;
 		i) interval=$OPTARG
 				;;
-		?) echo "Usage: $0 <scale_factor> [-d duration -i interval]"
+		?) echo "Usage: $0 <scale_factor> [-s seed -d duration -i interval]"
 			exit ;;
 		esac
 done
@@ -53,22 +55,33 @@ do
 	let "interval = $interval/2"
 done
 
-pgsql_script_path=/home/pgsql/dbt3/scripts/sapdb
-dbdriver_script_path=/home/pgsql/dbt3/dbdriver/scripts
-dbdriver_pgsql_path=/home/pgsql/dbt3/dbdriver/scripts/pgsql
-datacollect_path=/home/pgsql/dbt3/data_collect
-datacollect_pgsql_path=/home/pgsql/dbt3/data_collect/pgsql
-run_path=/home/pgsql/dbt3/run
+pgsql_script_path=@TOPDIR@/scripts/pgsql
+dbdriver_script_path=@TOPDIR@/dbdriver/scripts
+dbdriver_pgsql_path=@TOPDIR@/dbdriver/scripts/pgsql
+datacollect_path=@TOPDIR@/data_collect
+datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
+run_path=@TOPDIR@/run
 
 #set run environment
-. @TOPDIR@/scripts/set_run_env.sh
+. @TOPDIR@/scripts/pgsql/set_run_env.sh
+
+if [ $seed -eq 0 ]; then
+	echo "running $SID with default seed"
+	echo "`date`: generate seed0"
+	echo "seed file is $seed_file";
+	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
+else
+        echo "running power test with seed $seed"
+        echo "seed file is $seed_file";
+        echo "$seed" > $seed_file
+fi
 
 #make output directory
 #output_dir=power
 mkdir -p $output_dir
 
 #clean time_statistics table
-psql -d $SID -U dbt -c "delete from time_statistics;"
+psql -d $SID -U $PGUSER -c "delete from time_statistics;"
 
 # restart the database
 echo "stopping the database"
@@ -81,7 +94,7 @@ cat /proc/meminfo > $output_dir/meminfo0.out
 sleep 2
 
 #get run configuration
-$datacollect_path/get_config.sh $scale_factor 1 $output_dir
+$datacollect_pgsql_path/get_config.sh $scale_factor 1 $output_dir
 
 #start sys_stats.sh
 $datacollect_path/sys_stats.sh $interval $duration $output_dir &
@@ -106,12 +119,15 @@ $dbdriver_pgsql_path/run_power_test.sh $scale_factor 1
 cat /proc/meminfo > $output_dir/meminfo1.out
 
 #get query time
-./q_time.sh $output_dir
+$datacollect_pgsql_path/q_time.sh $output_dir
  
 #calculate query power
 $dbdriver_pgsql_path/get_power.pl -p 1 -s $scale_factor 2>&1 > $output_dir/calc_power.out
 
 #copy power.out
+cp $run_path/power_query.result $output_dir/power_query.result
+cp $run_path/power_query $output_dir/
+cp $run_path/*param* $output_dir/
 mv $datacollect_pgsql_path/power.out $output_dir/power.out
 
 ps -ef | grep -v grep | grep sar | awk '{print $2}' | xargs kill -9
