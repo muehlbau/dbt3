@@ -46,6 +46,7 @@ getoprof () {
 	sudo opcontrol --dump
 	sudo opreport -l -o $OUTPUT_DIR/oprofile/oprofile.txt
 	sudo opcontrol --stop
+	sudo opcontrol --shutdown
 	cp -pR /var/lib/oprofile/samples/current $OUTPUT_DIR/oprofile/
 	sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/assembly.txt 2>&1
 	sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/annotate
@@ -120,11 +121,11 @@ ${SHELL} $DBSCRIPTDIR/record_start.sh -n "LOAD"
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 
 date
-${SHELL} ${DBSCRIPTDIR}/load_db.sh ${TABLESPACES}|| exit 1
+${SHELL} ${DBSCRIPTDIR}/load_db.sh ${TABLESPACES} || exit 1
 date
 	
 date
-${SHELL} $DBSCRIPTDIR/create_indexes.sh || exit 1
+${SHELL} $DBSCRIPTDIR/create_indexes.sh ${TABLESPACES} || exit 1
 date
 	
 date
