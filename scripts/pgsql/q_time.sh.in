@@ -27,4 +27,4 @@ while getopts "ho:" opt; do
 done
 
 
-/usr/local/pgsql/bin/psql -d $SID -q -c "${SQL}" $ARGS
+@PSQL@ -d $SID -q -c "${SQL}" $ARGS
