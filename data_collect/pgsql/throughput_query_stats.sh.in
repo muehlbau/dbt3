@@ -21,7 +21,7 @@ scale_factor=$1
 num_stream=$2
 output_dir=$3
 
-#estimated power test time
+#estimated test time
 
 throughput_test_time=6000
 
@@ -65,6 +65,7 @@ dbdriver_pgsql_path=@TOPDIR@/dbdriver/scripts/pgsql
 datacollect_path=@TOPDIR@/data_collect
 datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
 run_path=@TOPDIR@/run
+seed_file=$run_path/seed
 
 #set run environment
 . @TOPDIR@/scripts/pgsql/set_run_env.sh
@@ -75,7 +76,7 @@ if [ $seed -eq 0 ]; then
 	echo "seed file is $seed_file";
 	@TOPDIR@/dbdriver/scripts/init_seed.sh > $seed_file
 else
-        echo "running power test with seed $seed"
+        echo "running test with seed $seed"
         echo "seed file is $seed_file";
         echo "$seed" > $seed_file
 fi
