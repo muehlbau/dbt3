@@ -12,7 +12,8 @@ SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
-. dbt3_profile
+DIR=`dirname $0`
+. ${DIR}/dbt3_profile
 
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
