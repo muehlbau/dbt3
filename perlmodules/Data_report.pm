@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# Chop_files.pm
+# Data_report.pm
 #
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
@@ -39,7 +39,7 @@ the separator is spaces
 		extract_columns_rows_sar convert_time_format get_os_version
 		get_iostat_version get_sar_version get_vmstat_version
 		get_max_row_number get_max_col_value gen_html_table
-		get_sapdb_version);
+		get_sapdb_version convert_to_seconds);
 
 sub extract_columns
 {
@@ -597,4 +597,21 @@ sub get_sapdb_version
 	die "did not find sapdb version information";
 }
 
+sub convert_to_seconds
+{
+	my ($input_time, $output_time) = @_;
+	
+	# get execution time for the throughput test
+	my @time_fields;
+	@time_fields=split /:/, $input_time;
+	# chop the miliseconds
+	$time_fields[$#time_fields] =~ s/\..*//;
+	$output_time = 0;
+
+	$output_time = 60*60*$time_fields[0];
+	$output_time += 60*$time_fields[1];
+	$output_time += $time_fields[2];
+
+	return $output_time;
+}
 1;
