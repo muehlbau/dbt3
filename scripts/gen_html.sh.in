@@ -1,0 +1,94 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "usage: gen_html.sh <results directory>"
+fi
+
+DIR=$1
+DBDIR=@DATABASE_TO_USE@
+
+OS=`uname -s -r`
+CPU=`uname -p`
+
+DBPARAM=`grep db_param ${DIR}/config.txt | awk '{print $2}'`
+SF=`grep scale_factor ${DIR}/config.txt | awk '{print $2}'`
+STREAMS=`grep num_stream ${DIR}/config.txt | awk '{print $2}'`
+
+COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{print $3}'`
+POWER=`grep power ${DIR}/calc_composite.out | awk '{print $3}'`
+THROUGHPUT=`grep throughput ${DIR}/calc_composite.out | awk '{print $3}'`
+
+echo "<html>"
+echo "<head>"
+echo "<title>Database Test 3 Results</title>"
+echo "</head>"
+echo "<body>"
+echo "<h1>Database Test 3 Results</h1>"
+
+echo "<table border=\"1\">"
+echo "<tr>"
+echo "<th>Software Version</th><th>Hardware Configuration</th><th>Run Parameters</th>"
+echo "</tr>"
+echo "<tr>"
+echo "<td>Operating System: ${OS}</td><td>Processor: ${CPU}</td><td>Scale Factor: ${SF}</td>"
+echo "</tr>"
+echo "<tr>"
+echo "<td></td><td></td><td>Streams: ${STREAMS}</td>"
+echo "</tr>"
+echo "<tr>"
+echo "<td></td><td></td><td>Database Parameters: ${DBPARAM}</td>"
+echo "</tr>"
+echo "</table>"
+
+echo "<h2>Metrics</h2>"
+echo "<table border=\"1\">"
+echo "<th>Composite</th><th>Query Processing Power</th><th>Throughput Numerical Quantity</th>"
+echo "<tr>"
+echo "<td>${COMPOSITE}</td><td>${POWER}</td><td>${THROUGHPUT}</td>"
+echo "</tr>"
+echo "</table>"
+
+echo "<h2>Query Times</h2>"
+echo "<img src=\"q_time.png\" />"
+echo "<p>"
+echo "<a href=\"q_time.out\">Text Version</a>"
+echo "</p>"
+
+echo "<h2>System Statistics</h2>"
+echo "<table border=\"1\">"
+echo "<tr>"
+echo "<th>Load Test</th><th>Power Test</th><th>Throughput Test</th>"
+echo "</tr>"
+echo "<tr>"
+echo "<td><a href=\"plot/load.sar.txt\">sar</a></td><td><a href=\"plot/power.sar.txt\">sar</a></td><td><a href=\"plot/thruput.sar.txt\">sar</a></td>"
+echo "</tr>"
+echo "<tr>"
+echo "<td><a href=\"plot/load.vmstat.txt\">vmstat</a></td><td><a href=\"plot/power.vmstat.txt\">vmstat</a></td><td><a href=\"plot/thruput.vmstat.txt\">vmstat</a></td>"
+echo "</tr>"
+echo "<tr>"
+echo "<td><a href=\"plot/load.iostatx.txt\">iostatx</a></td><td><a href=\"plot/power.iostatx.txt\">iostatx</a></td><td><a href=\"plot/thruput.iostatx.txt\">iostatx</a></td>"
+echo "</tr>"
+echo "</table>"
+
+echo "<h2>Kernel and Application Profiles</h2>"
+echo "<table border=\"1\">"
+echo "<tr>"
+echo "<th>Load Test</th><th>Power Test</th><th>Throughput Test</th>"
+echo "</tr>"
+if [ -d ${DIR}/prof ]; then
+	echo "<tr>"
+	echo "<td><a href=\"prof/Load_Test.prof\">readprofile</a></td><td><a href=\"prof/Power_Test_1.prof\">readprofile</a></td><td><a href=\"prof/Throughput_Test_1.prof\">readprofile</a></td>"
+	echo "</tr>"
+fi
+if [ -d ${DIR}/oprofile ]; then
+	echo "<tr>"
+	echo "<td><a href=\"oprofile/Load_Test/oprofile.txt\">oprofile</a></td><td><a href=\"oprofile/Power_Test_1/oprofile.txt\">oprofile</a></td><td><a href=\"oprofile/Throughput_Test_1/Throughput_Test_1/oprofile.txt\">oprofile</a></td>"
+	echo "</tr>"
+	echo "<tr>"
+	echo "<td><a href=\"oprofile/Load_Test/assembly.txt\">annotated assembly</a></td><td><a href=\"oprofile/Power_Test_1/assembly.txt\">annotated assembly</a></td><td><a href=\"oprofile/Throughput_Test_1/Throughput_Test_1/assembly.txt\">annotated assembly</a></td>"
+	echo "</tr>"
+fi
+echo "</table>"
+
+echo "</body>"
+echo "</html>"

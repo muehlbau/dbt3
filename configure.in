@@ -116,6 +116,7 @@ data_collect/sapdb/single_query_stats.sh \
 data_collect/sapdb/throughput_query_stats.sh \
 data_collect/sapdb/throughput_test_stats.sh \
 scripts/get_composite.pl \
+scripts/gen_html.sh \
 scripts/pgsql/get_query_plan.sh \
 dbdriver/scripts/pgsql/run_load_test.sh \
 dbdriver/scripts/pgsql/run_perf_test.sh \
@@ -146,6 +147,7 @@ scripts/pgsql/drop_tables.sh \
 scripts/pgsql/grant.sh \
 scripts/pgsql/load_db.sh \
 scripts/pgsql/pgsql_profile \
+scripts/pgsql/q_time.sh \
 scripts/pgsql/start_db.sh \
 scripts/pgsql/stop_db.sh \
 scripts/pgsql/update_statistics.sh \
