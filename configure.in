@@ -133,7 +133,6 @@ if test "$DATABASE_TO_USE" == "pgsql"; then
     scripts/pgsql/power_test.sh \
     scripts/pgsql/throughput_test.sh \
     scripts/pgsql/throughput_stream_wrapper.sh \
-    scripts/pgsql/truncate_tables.sh \
     scripts/pgsql/record_end.sh \
     scripts/pgsql/record_start.sh"
 elif test "$DATABASE_TO_USE" == "sapdb"; then
