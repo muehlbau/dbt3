@@ -16,16 +16,8 @@ if [ "$id" = "0" ]; then
 	exit 1
 fi 
 
-export PATH=/opt/sapdb/indep_prog/bin:$PATH
-#set -x
-
-# name of the database
-SID=DBT3
-DBT3_DIR="dbt3"
-
-# start remote communication server
-echo "start communication server..."
-x_server start >/dev/null 2>&1
+# dir where the database system files are
+SYS_DIR="/dbt3"
 
 # stop and drop probably existing demo database
 echo "stop and drop existing $SID..."
@@ -41,29 +33,17 @@ if [ "$_test" = "" ]; then
 	exit 1
 fi
 
-# create directory where to put the database files
-mkdir -p /$DBT3_DIR/$SID
+# create directory where to put the system files
+mkdir -p $SYS_DIR/$SID
 
 # setup database parameters
 echo "set parameters for $SID..."
+./set_param.sh
+# devsapce definition
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
-param_rmfile
-param_startsession
-param_init
-param_put LOG_MODE DEMO
-param_put DATA_CACHE 5000
-param_put MAXDATADEVSPACES 10
-param_put MAXDATAPAGES 40960000
-param_put MAXUSERTASKS 10
-param_put MAXCPU 2
-param_put _IDXFILE_LIST_SIZE 8192
-param_put _PACKET_SIZE 131072
-param_put DATE_TIME_FORMAT ISO
-param_checkall
-param_commitsession
-param_adddevspace 1 SYS  /$DBT3_DIR/$SID/DBT3_SYS_001   F
-param_adddevspace 1 DATA /$DBT3_DIR/$SID/DBT3_DATA_001 F 524228
-param_adddevspace 1 LOG  /$DBT3_DIR/$SID/DBT3_LOG_001  F 8192
+param_adddevspace 1 SYS  $SYS_DIR/$SID/DBT3_SYS_001   F
+param_adddevspace 1 DATA $SYS_DIR/$SID/DBT3_DATA_001 F 524228
+param_adddevspace 1 LOG  $SYS_DIR/$SID/DBT3_LOG_001  F 8192
 quit
 EOF`
 _test=`echo $_o | grep OK`
@@ -71,7 +51,6 @@ if [ "$_test" = "" ]; then
         echo "set parameters failed: $_o"
         exit 1
 fi
-
 
 # startup database
 echo "start $SID..."
