@@ -36,7 +36,7 @@ i=1
 while [ $i -le $num_stream ]
 do
         echo "start throughput refresh stream stream $i"
-	./run_refresh_stream.sh $scale_factor $i $perf_run_number $dbt3_dir > ${run_dir}/refresh_stream$i 2>&1 &
+	./run_refresh_stream.sh $scale_factor $i $perf_run_number $dbt3_dir > ${run_dir}/refresh_stream$i
         let "i=$i+1"
 done
 
