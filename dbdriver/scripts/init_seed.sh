@@ -4,4 +4,4 @@
 #the initial seed is the time stamp of the end of the database load time
 #expressed in the format mmddhhmms.
 
-date +%m%d%H%M%S
+date +%-m%d%H%M%S
