@@ -63,6 +63,7 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
+	fprintf(query_output, "%s\n", SQL_ISOLATION);
 
 	while ( (rc=get_statement(query_input)) != END_OF_FILE)
 	{
