@@ -60,6 +60,9 @@ datacollect_path=/home/pgsql/dbt3/data_collect
 datacollect_pgsql_path=/home/pgsql/dbt3/data_collect/pgsql
 run_path=/home/pgsql/dbt3/run
 
+#set run environment
+. @TOPDIR@/scripts/set_run_env.sh
+
 #make output directory
 #output_dir=power
 mkdir -p $output_dir

@@ -64,6 +64,9 @@ datacollect_path=@TOPDIR@/data_collect
 datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
 run_path=@TOPDIR@/run
 
+#set run environment
+. @TOPDIR@/scripts/set_run_env.sh
+
 #make output directory
 #output_dir=throughput
 mkdir -p $output_dir

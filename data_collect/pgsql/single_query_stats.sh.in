@@ -56,6 +56,9 @@ dbdriver_pgsql_path=@TOPDIR@/dbdriver/scripts/pgsql
 datacollect_path=@TOPDIR@/data_collect
 datacollect_pgsql_path=@TOPDIR@/data_collect/pgsql
 
+#set run environment
+. @TOPDIR@/scripts/set_run_env.sh
+
 #make output directory
 output_dir=q$query_num
 mkdir -p $output_dir
