@@ -36,8 +36,3 @@ echo "backup done"
 
 echo "set database parameters"
 ./set_param.sh 1
-_o=`cat <<EOF | /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
-db_stop
-db_warm
-quit
-EOF`
