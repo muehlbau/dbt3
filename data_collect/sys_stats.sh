@@ -20,8 +20,8 @@ fi
 let "COUNT=$COUNT+1"
 
 ##get database statistics
-echo "start db_stats.sh"
-./db_stats.sh $SID $RESULTS_PATH $COUNT $INTERVAL &
+#echo "start db_stats.sh"
+#./db_stats.sh $SID $RESULTS_PATH $COUNT $INTERVAL &
 #
 if [ -f ./run.sar.data ]; then
 	rm ./run.sar.data
@@ -82,12 +82,12 @@ echo "sys_stats.sh done"
 #done
 
 #reformatting the paging data files
-echo "reformatting paging data files"
-echo "Paging (sar -B  $INTERVAL $COUNT) " > $RESULTS_PATH/paging.txt
-echo "Paging (sar -B  $INTERVAL $COUNT) " > $RESULTS_PATH/paging.csv
-echo `uname -a` >>$RESULTS_PATH/paging.txt
-echo `uname -a` >>$RESULTS_PATH/paging.csv
-sar -B -f ./run.sar.data | tee -a $RESULTS_PATH/paging.txt | awk '{ if (NR>2) { if ($1!="Average:") print $3","$4","$5","$6","$7","$8; else { print $2","$3","$4","$5","$6","$7};}}'>>$RESULTS_PATH/paging.csv
+#echo "reformatting paging data files"
+#echo "Paging (sar -B  $INTERVAL $COUNT) " > $RESULTS_PATH/paging.txt
+#echo "Paging (sar -B  $INTERVAL $COUNT) " > $RESULTS_PATH/paging.csv
+#echo `uname -a` >>$RESULTS_PATH/paging.txt
+#echo `uname -a` >>$RESULTS_PATH/paging.csv
+#sar -B -f ./run.sar.data | tee -a $RESULTS_PATH/paging.txt | awk '{ if (NR>2) { if ($1!="Average:") print $3","$4","$5","$6","$7","$8; else { print $2","$3","$4","$5","$6","$7};}}'>>$RESULTS_PATH/paging.csv
 
 #reformatting the memory data files
 #echo "reformatting memory data files"
