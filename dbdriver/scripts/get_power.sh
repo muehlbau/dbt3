@@ -16,7 +16,7 @@ _test=`echo $_o | grep INTERNAL`
 #if DATE_TIME_FORMAT is not INTERANL
 if [ "$_test" = "" ]; then
 	echo "set date_time_format to INTERNAL"
-	_o=`cat <<EOF | dbmcli -d DBT3 -u dbm,dbm 2>&1
+	_o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
 	param_startsession
 	param_put DATE_TIME_FORMAT INTERNAL
 	param_checkall
