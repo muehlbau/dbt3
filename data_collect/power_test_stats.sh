@@ -9,12 +9,13 @@
 #
 # 24 Jan 2003
 
-if [ $# -lt 1 ]; then
-        echo "usage: power_test_stats.sh <scale_factor> [-d duration -i interval]"
+if [ $# -lt 2 ]; then
+        echo "usage: power_test_stats.sh <scale_factor> <output_dir> [-d duration -i interval]"
         exit
 fi
 
 scale_factor=$1
+output_dir=$2
 CPUS=`grep -c '^processor' /proc/cpuinfo`
 
 #estimated power test time
@@ -22,7 +23,7 @@ power_test_time=3280
 
 duration=0
 interval=0
-shift 1
+shift 2
 # process the command line parameters
 while getopts ":d:i:" opt; do
 	case $opt in
@@ -78,7 +79,7 @@ sapdb_script_path=$DBT3_INSTALL_PATH/scripts/sapdb
 dbdriver_path=$DBT3_INSTALL_PATH/dbdriver/scripts
 
 #make output directory
-output_dir=power
+#output_dir=power
 mkdir -p $output_dir
 
 # restart the database
@@ -100,3 +101,15 @@ $dbdriver_path/run_power_test.sh $scale_factor 1
 
 #get meminfo
 cat /proc/meminfo > $output_dir/meminfo1.out
+
+#copy sar binary to output_dir
+mv ./run.sar.data $output_dir
+
+#get query time
+dbmcli -d $SID -u dbm,dbm -uSQL dbt,dbt "sql_execute select * from time_statistics" 2>&1 > $output_dir/q_time.out
+ 
+#calculate query power
+$dbdriver_path/get_power.sh 1 $scale_factor 2>&1 > $output_dir/calc_power.out
+
+#copy power.out
+cp ./power.out $output_dir/power.out
