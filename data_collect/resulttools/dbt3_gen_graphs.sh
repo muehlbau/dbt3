@@ -17,6 +17,7 @@ fi
 input_dir=$1
 output_dir=$2
 analyzetool_path=$DBT3_INSTALL_PATH/data_collect/analyzetools/sapdb
+CPUS=`grep -c ^processor /proc/cpuinfo`
 
 VERSION=`uname -r | awk -F "." '{print $2}'`
 
@@ -38,11 +39,11 @@ echo "parse vmstat";
 
 echo "parse iostat";
 #parse iostat
-./parse_iostat.pl -i $input_dir/iostat.txt -d $output_dir/iostat -co "iostat taken every 60 seconds" -o '-d'
+./parse_iostat.pl -i $input_dir/iostat.txt -d $output_dir/iostat -co "iostat -d taken every 60 seconds" -o '-d'
 
 echo "parse sar -b";
 #parse sar io
-./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_io -c "sar -d taken every 60 seconds" -op '-b'
+./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar_io -c "sar -b taken every 60 seconds" -op '-b'
 
 echo "parse sar -r";
 #parse sar memory
@@ -56,11 +57,11 @@ if [ $VERSION -eq 5 ]
 then
 	echo "parse sar -P";
 	#parse sar individual cpu
-	./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar -c "sar -P taken every 60 seconds" -op '-P' -n 8
+	./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar -c "sar -P taken every 60 seconds" -op '-P' -n $CPUS
 else
 	echo "parse sar -U";
 	#parse sar individual cpu
-	./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar -c "sar -U taken every 60 seconds" -op '-U' -n 8
+	./parse_sar.pl -i $input_dir/run.sar.data -out $output_dir/sar -c "sar -U taken every 60 seconds" -op '-U' -n $CPUS
 fi
 
 echo "parse sar -W";
@@ -111,7 +112,7 @@ fi
 #parse x_cons output
 $analyzetool_path/parse_xcons_io.pl -i "$input_dir/db_stat/x_cons*.out" -o $output_dir -p $input_dir/param.out 
 
-$analyzetool_path/parse_xcons_process.pl -i "$input_dir/db_stat/x_cons*.out" -o $output_dir
+#$analyzetool_path/parse_xcons_process.pl -i "$input_dir/db_stat/x_cons*.out" -o $output_dir
 
 ./gr_single_dir.pl -i "$output_dir/xcons_dataio*.dat" -o $output_dir/xcons_dataread -c 1, -b "xcons_dataio" -e ".dat" -t "xcons datadevice read"
 
