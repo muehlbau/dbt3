@@ -39,6 +39,32 @@ gen_results()
 	echo "<body>" >> ${SUBDIR}/index.html
 
 	echo "<img src=\"plots/cpu.png\" />" >> ${SUBDIR}/index.html
+	echo "<p>" >> ${SUBDIR}/index.html
+	echo "<a href=\"vmcharts.html\">vmstat charts</a>" >> ${SUBDIR}/index.html
+	echo "</p>" >> ${SUBDIR}/index.html
+
+	# Create HTML page for chargs.
+	echo "<html>" > ${SUBDIR}/vmcharts.html
+	echo "<head>" >> ${SUBDIR}/vmcharts.html
+	echo "<title>Database Test 3 $1 Result vmstat Charts</title>" >> ${SUBDIR}/vmcharts.html
+	echo "</head>" >> ${SUBDIR}/vmcharts.html
+	echo "<body>" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/cpu.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "<hr />" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/cs.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "<hr />" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/in.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "<hr />" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/io.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "<hr />" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/memory.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "<hr />" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/procs.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "<hr />" >> ${SUBDIR}/vmcharts.html
+	echo "<img src=\"plots/swap.png\" /><br />" >> ${SUBDIR}/vmcharts.html
+	echo "</body>" >> ${SUBDIR}/vmcharts.html
+	echo "</html>" >> ${SUBDIR}/vmcharts.html
+
 
 	echo "<h2>System Statistics</h2>" >> ${SUBDIR}/index.html
 	echo "<a href=\"sar.txt\">sar</a><br />" >> ${SUBDIR}/index.html
