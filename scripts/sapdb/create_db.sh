@@ -17,7 +17,7 @@ if [ "$id" = "0" ]; then
 fi 
 
 # dir where the database system files are
-SYS_DIR="/home/sapdb"
+SYS_DIR="/dbt3"
 
 # stop and drop probably existing demo database
 echo "stop and drop existing $SID..."
@@ -41,15 +41,9 @@ echo "set parameters for $SID..."
 $DBT3_INSTALL_PATH/scripts/sapdb/set_param.sh 0
 # devsapce definition
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
-param_adddevspace 1 SYS  $SYS_DIR/$SID/DBT3_SYS_001   F
-param_adddevspace 1 DATA /dev/raw/raw11  R 150000
-param_adddevspace 2 DATA /dev/raw/raw12  R 150000
-param_adddevspace 3 DATA /dev/raw/raw13  R 150000
-param_adddevspace 4 DATA /dev/raw/raw14  R 150000
-param_adddevspace 5 DATA /dev/raw/raw15  R 150000
-param_adddevspace 6 DATA /dev/raw/raw16  R 150000
-param_adddevspace 7 DATA /dev/raw/raw17  R 150000
-param_adddevspace 1 LOG /dev/raw/raw18  R 150000
+param_adddevspace 1 SYS  $SYS_DIR/$SID/SYS_001   F
+param_adddevspace 1 DATA $SYS_DIR/$SID/DBT3_DATA_001 F 524228
+param_adddevspace 1 LOG  $SYS_DIR/$SID/DBT3_LOG_001  F 8192
 quit
 EOF`
 _test=`echo $_o | grep OK`
