@@ -1,0 +1,45 @@
+#! /bin/sh
+
+# set_db_env.sh
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003 Open Source Development Lab, Inc.
+# History:
+# June-4-2003: Created by Jenny Zhang
+# June-20-2003: Added checking $PGDATA to avoid blowing away the cluster
+#		Thanks to Tom Lane
+
+# dont start script as root!
+id=`id | sed s/\(.*// | sed s/uid=//`
+
+if [ "$id" = "0" ]; then
+	echo "dont start script as root"
+	exit 1
+fi
+
+	echo "shutting down postgresql server..."
+	pg_ctl stop > /dev/null 2>&1
+	#wait for the processes to stop
+	sleep 10
+
+
+if [ -d $PGDATA ]; then
+	echo "======================================="
+	echo "PGData directory $PGDATA already exists"
+	echo "Skipping initdb"
+	echo "======================================="
+else
+
+	# create directory where to put the database files
+	mkdir -p $PGDATA
+
+	# initialize database cluster
+	echo "initializing database cluster..."
+	initdb -D $PGDATA > /dev/null 2>&1
+fi
+	# start remote communication server
+	echo "start postgresql server..."
+	@TOPDIR@/scripts/pgsql/start_db.sh
+
