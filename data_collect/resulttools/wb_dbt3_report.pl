@@ -504,7 +504,7 @@ sub change_file_name {
 	for (my $i=0; $i<=$#filelist; $i++)
 	{
 		my $new_name=$filelist[$i];
-		$new_name=~s/$from/$to/;
+		$new_name=~s/$from$/$to/;
 		system("mv", "$filelist[$i]", "$new_name");
 	}
 }
