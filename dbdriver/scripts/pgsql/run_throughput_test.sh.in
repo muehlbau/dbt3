@@ -28,7 +28,7 @@ GTIME="@TOPDIR@/dbdriver/utils/gtime"
 echo "`date`:=======throughput test $perf_run_number========"
 s_time=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THRUPUT', current_timestamp, $s_time);"
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THRUPUT', current_timestamp, $s_time);"
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_number}.THRUPUT', current_timestamp, $s_time);"
 
 #generate the queries for throughput test
 #and start the streams
@@ -51,7 +51,7 @@ done
 
 wait
 echo "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_number}.THRUPUT' and int_time=$s_time"
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_number}.THRUPUT' and int_time=$s_time;"
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_number}.THRUPUT' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: end throughput test run "
 let "diff_time=$e_time-$s_time"

@@ -45,10 +45,10 @@ $parsequery_pgsql_dir/parse_query $query_file $tmp_query_file S
 echo "`date`: start queries "
 s_time=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('QUERY$query_name', current_timestamp, $s_time)"
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('QUERY$query_name', current_timestamp, $s_time);"
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('QUERY$query_name', current_timestamp, $s_time);"
 psql $SID -f $tmp_query_file -o $output_dir/${query_name}.out
 echo "update time_statistics set e_time=current_timestamp where task_name='QUERY$query_name' and int_time=$s_time"
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='QUERY$query_name' and int_time=$s_time;"
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='QUERY$query_name' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"

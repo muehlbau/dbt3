@@ -51,10 +51,10 @@ $parsequery_dir/parse_query $query_file $tmp_query_file T $perf_run_num $stream_
 echo "`date`: start throughput queries for stream $stream_num "
 s_time=`$GTIME`
 echo "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}', current_timestamp, $s_time)"
-psql -d $SID -U dbt -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL', current_timestamp, $s_time);"
-psql $SID -f $tmp_query_file -o /home/pgsql/dbt3/run/thruput_qs${stream_num}.out
+psql -d $SID -U $PGUSER -c "insert into time_statistics (task_name, s_time, int_time) values ('PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL', current_timestamp, $s_time);"
+psql $SID -f $tmp_query_file -o /home/pgsql/dbt3/run/thuput_qs${stream_num}.result
 echo "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL' and int_time=$s_time;"
-psql -d $SID -U dbt -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL' and int_time=$s_time;"
+psql -d $SID -U $PGUSER -c "update time_statistics set e_time=current_timestamp where task_name='PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL' and int_time=$s_time;"
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"
