@@ -13,18 +13,13 @@ from
 where
 	s_suppkey in (
 		select
-			ps_suppkey
+			distinct (ps_suppkey)
 		from
-			partsupp
+			partsupp,
+			part
 		where
-			ps_partkey in (
-				select
-					p_partkey
-				from
-					part
-				where
-					p_name like ':1%'
-			)
+			ps_partkey=p_partkey
+			and p_name like ':1%'
 			and ps_availqty > (
 				select
 					0.5 * sum(l_quantity)
