@@ -20,6 +20,7 @@ echo $throughput
 #calculate the query per hour * SF
 echo "the QphH is:"
 bc -l<<END-OF-INPUT
+scale = 6
 sqrt($power*$throughput)
 quit
 END-OF-INPUT

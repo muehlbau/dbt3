@@ -43,6 +43,7 @@ echo "Throughput takes $Ts seconds"
 #calculate throughput numerical quantity
 echo "throughput numerical quantity:"
 bc -l<<END-OF-INPUT
+scale = 6
 22*3600*${number_of_stream}*${scale_factor}/$Ts
 quit
 END-OF-INPUT

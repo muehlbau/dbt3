@@ -8,7 +8,7 @@ fi
 perf_run_number=$1
 scale_factor=$2
 
-_o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
+_o=`cat <<EOF | dbmcli -d DBT3 -u dbm,dbm 2>&1
 param_getvalue DATE_TIME_FORMAT
 quit
 EOF`
@@ -59,6 +59,7 @@ done
 #calculate the query per hour * SF
 echo "the power: "
 bc -l<<END-OF-INPUT
+scale = 6
 3600*${scale_factor}*e(-1/24*(l(${power_query[1]})+l(${power_query[2]})+l(${power_query[3]})+l(${power_query[4]})+l(${power_query[5]})+l(${power_query[6]})+l(${power_query[7]})+l(${power_query[8]})+l(${power_query[9]})+l(${power_query[10]})+l(${power_query[11]})+l(${power_query[12]})+l(${power_query[13]})+l(${power_query[14]})+l(${power_query[15]})+l(${power_query[16]})+l(${power_query[17]})+l(${power_query[18]})+l(${power_query[19]})+l(${power_query[20]})+l(${power_query[21]})+l(${power_query[22]})+l(${power_rf[1]})+l(${power_rf[2]})))
 quit
 END-OF-INPUT
