@@ -1,0 +1,343 @@
+diff -Naru tpch-dbgen/Makefile dbgen/Makefile
+--- tpch-dbgen/Makefile	Wed Dec 31 16:00:00 1969
++++ dbgen/Makefile	Fri Nov 22 10:00:24 2002
+@@ -0,0 +1,128 @@
++# @(#)makefile.suite	2.1.8.1
++################
++## CHANGE NAME OF ANSI COMPILER HERE
++################
++CC      =  gcc
++# Current values for DATABASE are: INFORMIX, DB2, TDAT (Teradata)
++#                                  SQLSERVER, SYBASE
++# Current values for MACHINE are:  ATT, DOS, HP, IBM, ICL, MVS, 
++#                                  SGI, SUN, U2200, VMS
++# Current values for WORKLOAD are:  TPCH, TPCR
++DATABASE=SAPDB 
++MACHINE =HP 
++WORKLOAD =TPCH
++#
++# add -EDTERABYTE if orderkey will execeed 32 bits (SF >= 300)
++# and make the appropriate change in gen_schema() of runit.sh
++#CFLAGS	= -O -DDBNAME=\"dss\" -D$(MACHINE) -D$(DATABASE) -D$(WORKLOAD)
++CFLAGS	= -g -O -DDBNAME=\"dss\" -D$(DATABASE) -D$(WORKLOAD) -DSTDLIB_HAS_GETOPT -DEOL_HANDLING -DSEPARATOR=\',\'
++LDFLAGS = -O
++# The OBJ,EXE and LIB macros will need to be changed for compilation under
++#  Windows NT
++OBJ     = .o
++EXE     =
++LIBS    = -lm
++#
++# NO CHANGES SHOULD BE NECESSARY BELOW THIS LINE
++###############
++TREE_ROOT=/tmp/tree
++#
++PROG1 = dbgen$(EXE)
++PROG2 = qgen$(EXE)
++PROGS = $(PROG1) $(PROG2)
++#
++HDR1 = dss.h rnd.h config.h dsstypes.h shared.h bcd2.h
++HDR2 = tpcd.h permute.h
++HDR  = $(HDR1) $(HDR2)
++#
++SRC1 = build.c driver.c bm_utils.c rnd.c print.c load_stub.c bcd2.c \
++	speed_seed.c text.c permute.c
++SRC2 = qgen.c varsub.c 
++SRC  = $(SRC1) $(SRC2)
++#
++OBJ1 = build$(OBJ) driver$(OBJ) bm_utils$(OBJ) rnd$(OBJ) print$(OBJ) \
++	load_stub$(OBJ) bcd2$(OBJ) speed_seed$(OBJ) text$(OBJ) permute$(OBJ)
++OBJ2 = build$(OBJ) bm_utils$(OBJ) qgen$(OBJ) rnd$(OBJ) varsub$(OBJ) \
++	text$(OBJ) bcd2$(OBJ) permute$(OBJ) speed_seed$(OBJ)
++OBJS = $(OBJ1) $(OBJ2)
++#
++SETS = dists.dss 
++DOC=README HISTORY PORTING.NOTES BUGS
++DDL  = dss.ddl dss.ri
++OTHER=makefile.suite $(SETS) $(DDL) 
++# case is *important* in TEST_RES
++TEST_RES = O.res L.res c.res s.res P.res S.res n.res r.res
++#
++DBGENSRC=$(SRC1) $(HDR1) $(OTHER) $(DOC) $(SRC2) $(HDR2) $(SRC3)
++QD=1.sql 2.sql 3.sql 4.sql 5.sql 6.sql 7.sql 8.sql 9.sql 10.sql \
++	11.sql 12.sql 13.sql 14.sql 15.sql 16.sql 17.sql 18.sql \
++	19.sql 20.sql 21.sql 22.sql
++VARIANTS= 8a.sql 12a.sql 13a.sql 14a.sql 15a.sql 
++ANS   = 1.ans 2.ans 3.ans 4.ans 5.ans 6.ans 7.ans 8.ans 9.ans 10.ans 11.ans \
++	12.ans 13.ans 14.ans 15.ans 16.ans 17.ans 18.ans 19.ans 20.ans \
++	21.ans 22.ans
++QSRC  = $(FQD) $(VARIANTS)
++ALLSRC=$(DBGENSRC) 
++TREE_DOC=tree.readme tree.changes appendix.readme appendix.version answers.readme queries.readme variants.readme
++JUNK  = 
++#
++all: $(PROGS)
++$(PROG1): $(OBJ1) $(SETS) 
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ1) $(LIBS)
++$(PROG2): permute.h $(OBJ2) 
++	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ2) $(LIBS)
++clean:
++	rm -f $(PROGS) $(OBJS) $(JUNK)
++lint:
++	lint $(CFLAGS) -u -x -wO -Ma -p $(SRC1)
++	lint $(CFLAGS) -u -x -wO -Ma -p $(SRC2)
++
++tar: $(DBGENSRC) 
++	tar cvhf $(PROG1).tar $(DBGENSRC) 
++dbgenshar: $(DBGENSRC)
++	shar -o dbgen.shar $(DBGENSRC)
++zip: $(DBGENSRC)
++	zip dbgen $(DBGENSRC)
++tree: $(DBGENSRC) $(FQD) $(VARIANTS) $(TREE_DOC) $(ANS)
++	rm -rf $(TREE_ROOT)
++	mkdir $(TREE_ROOT) 
++	mkdir $(TREE_ROOT)/appendix 
++	mkdir $(TREE_ROOT)/appendix/queries 
++	mkdir $(TREE_ROOT)/appendix/variants 
++	mkdir $(TREE_ROOT)/appendix/dbgen 
++	mkdir $(TREE_ROOT)/appendix/answers 
++	cp tree.readme $(TREE_ROOT)/README
++	cp appendix.readme $(TREE_ROOT)/appendix/README
++	cp answers.readme $(TREE_ROOT)/appendix/answers/README
++	cp queries.readme $(TREE_ROOT)/appendix/queries/README
++	cp variants.readme $(TREE_ROOT)/appendix/variants/README
++	cp tree.changes $(TREE_ROOT)/CHANGES
++	cp appendix.version $(TREE_ROOT)/appendix/VERSION
++	cp $(FQD) $(TREE_ROOT)/appendix/queries
++	cp $(VARIANTS) $(TREE_ROOT)/appendix/variants
++	cp $(DBGENSRC) $(TREE_ROOT)/appendix/dbgen
++	cp $(ANS) $(TREE_ROOT)/appendix/answers
++	(cd $(TREE_ROOT); tar chf - .) |compress > tree.tar.Z
++	(cd $(TREE_ROOT); zip -r  - . )  > tree.zip
++	date > tree.update
++portable:
++	@ for f in $(SRC) $(HDR) ; \
++	do  \
++	expand $$f > /tmp/$$f; \
++	awk 'length > 72 { print FILENAME ":" NR " too long " }' /tmp/$$f ; \
++        rm /tmp/$$f ; \
++	done
++release:
++	@chkout $(SRC) $(HDR)
++	@ for f in $(SRC) $(HDR) ; \
++		do \
++		expand $$f > /tmp/$$f ; \
++		mv /tmp/$$f $$f ; \
++		done
++	@chkin $(SRC) $(HDR)
++
++rnd$(OBJ): rnd.h
++$(OBJ1): $(HDR1)
++$(OBJ2): dss.h tpcd.h config.h
++$(QSRC) $(ALLSRC): 
++	get -r`cat .version` ./SCCS/s.$@
+diff -Naru tpch-dbgen/bm_utils.c dbgen/bm_utils.c
+--- tpch-dbgen/bm_utils.c	Fri Nov 22 15:48:13 2002
++++ dbgen/bm_utils.c	Tue Nov 12 10:29:39 2002
+@@ -118,7 +118,8 @@
+ #pragma warning(default:4127)
+ #endif 
+         printf("%s [Y/N]: ", prompt);
+-        gets(reply);
++        //gets(reply);
++	fscanf(stdin, "%s", reply);
+         switch (*reply)
+             {
+             case 'y':
+@@ -348,6 +349,9 @@
+     FILE     *f;
+     struct stat fstats;
+     int      retcode;
++    FILE     *p;
++    char cmd[256];
++    char pwd[128];
+ 
+ 
+     if (*tdefs[tbl].name == PATH_SEP)
+@@ -356,6 +360,13 @@
+         sprintf(fullpath, "%s%c%s",
+             env_config(PATH_TAG, PATH_DFLT), PATH_SEP, tdefs[tbl].name);
+ 
++    pwd[0]='\0';
++    if (strcmp(env_config(PATH_TAG, PATH_DFLT), PATH_DFLT) == 0)
++    {
++            p = popen("pwd", "r");
++            fscanf(p, "%s", pwd);
++    }
++
+     retcode = stat(fullpath, &fstats);
+     if (retcode && (errno != ENOENT))
+         {
+@@ -381,6 +392,18 @@
+     if (header && columnar && tdefs[tbl].header != NULL)
+         tdefs[tbl].header(f);
+ 
++    /* create symbolic links */
++    printf("creating links in /tmp to file %s\n", fullpath);
++    if (pwd[0] == '\0')
++    {
++         sprintf(cmd, "ln -fs %s /tmp/%s", fullpath, tdefs[tbl].name);
++    }
++    else
++    {
++         sprintf(cmd, "ln -fs %s/%s /tmp/%s", pwd, tdefs[tbl].name, tdefs[tbl].name);
++    }
++    popen(cmd, "r");
++
+     return (f);
+ }
+ 
+diff -Naru tpch-dbgen/driver.c dbgen/driver.c
+--- tpch-dbgen/driver.c	Fri Nov 22 15:48:13 2002
++++ dbgen/driver.c	Mon Oct 28 14:49:31 2002
+@@ -896,6 +896,7 @@
+  * traverse the tables, invoking the appropriate data generation routine for any to be built
+  */
+ 	for (i = PART; i <= REGION; i++)
++	{
+ 		if (table & (1 << i))
+ 		{
+ 			if (children > 1 && i < NATION)
+@@ -944,6 +945,7 @@
+ 					printf("Validation checksum for %s at %d GB: %0x\n", 
+ 						 tdefs[i].name, scale, tdefs[i].vtotal);
+ 		}
++	}
+ 			
+ 		if (direct)
+ 			close_direct ();
+diff -Naru tpch-dbgen/print.c dbgen/print.c
+--- tpch-dbgen/print.c	Fri Nov 22 15:48:13 2002
++++ dbgen/print.c	Fri Nov  1 10:45:53 2002
+@@ -24,12 +24,22 @@
+ {
+ 	char upath[128];
+ 	FILE *res;
++	char cmd[256];
++	char pwd[128];
++	FILE *p;
++
++	pwd[0]='\0';
++	if (strcmp(env_config(PATH_TAG, PATH_DFLT), PATH_DFLT) == 0)
++	{
++		p = popen("pwd", "r");
++		fscanf(p, "%s", pwd);
++	}
+ 
+ 	if (updates)
+ 		{
+ 		if (update > 0) /* updates */
+ 			if ( insert_segments )
+-				{
++			{
+ 				int this_segment;
+ 				if(strcmp(tdefs[table].name,"orders.tbl"))
+ 					this_segment=++insert_orders_segment;
+@@ -38,26 +48,66 @@
+ 				sprintf(upath, "%s%c%s.u%d.%d", 
+ 					env_config(PATH_TAG, PATH_DFLT),
+ 					PATH_SEP, tdefs[table].name, update%10000,this_segment);
++				printf("creating links in /tmp to file %s\n", upath);
++				if (pwd[0] == '\0')
++				{
++                                	sprintf(cmd, "ln -fs %s /tmp/%s.u%d.%d", upath, tdefs[table].name, update%10000,this_segment);
+ 				}
+-			else
++				else
+ 				{
++                                	sprintf(cmd, "ln -fs %s/%s.u%d.%d /tmp/%s.u%d.%d", pwd, tdefs[table].name, update%10000,this_segment, tdefs[table].name, update%10000,this_segment);
++				}
++                                popen(cmd, "r");
++			}
++			else
++			{
+ 				sprintf(upath, "%s%c%s.u%d",
+ 				env_config(PATH_TAG, PATH_DFLT),
+ 				PATH_SEP, tdefs[table].name, update);
++				printf("creating links in /tmp to file %s\n", upath);
++				if (pwd[0] == '\0')
++				{
++                                	sprintf(cmd, "ln -fs %s /tmp/%s.u%d", upath, tdefs[table].name, update);
++				}
++				else
++				{
++                                	sprintf(cmd, "ln -fs %s/%s.u%d /tmp/%s.u%d", pwd, tdefs[table].name, update, tdefs[table].name, update);
+ 				}
++                                popen(cmd, "r");
++			}
+ 		else /* deletes */
+ 			if ( delete_segments )
+-				{
++			{
+ 				++delete_segment;
+ 				sprintf(upath, "%s%cdelete.u%d.%d",
+ 					env_config(PATH_TAG, PATH_DFLT), PATH_SEP, -update%10000,
+ 					delete_segment);
++				printf("creating links in /tmp to file %s\n", upath);
++				if (pwd[0] == '\0')
++				{
++                                	sprintf(cmd, "ln -fs %s /tmp/delete.u%d.%d", upath, -update%10000, delete_segment);
+ 				}
+-			else
++				else
+ 				{
++                                	sprintf(cmd, "ln -fs %s/delete.u%d.%d /tmp/delete.u%d.%d", pwd, -update%10000, delete_segment, -update%10000, delete_segment);
++				}
++                                popen(cmd, "r");
++			}
++			else
++			{
+ 				sprintf(upath, "%s%cdelete.%d",
+ 				env_config(PATH_TAG, PATH_DFLT), PATH_SEP, -update);
++				printf("creating links in /tmp to file %s\n", upath);
++				if (pwd[0] == '\0')
++				{
++                                	sprintf(cmd, "ln -fs %s /tmp/delete.%d", upath, -update);
+ 				}
++				else
++				{
++                                	sprintf(cmd, "ln -fs %s/delete.%d /tmp/delete.%d", pwd, -update, -update);
++				}
++                                popen(cmd, "r");
++			}
+ 		return(fopen(upath, "w"));
+         }
+     res = tbl_open(table, "w");
+@@ -71,6 +121,9 @@
+ 	int dollars,
+ 		cents;
+ 
++#ifdef SAPDB
++	fprintf(target,"%c", '"');
++#endif
+ 	switch(format)
+ 	{
+ 	case DT_STR:
+@@ -131,6 +184,9 @@
+ 		break;
+ 	}
+ 
++#ifdef SAPDB
++	fprintf(target,"%c", '"');
++#endif
+ #ifdef EOL_HANDLING
+ 	if (sep)
+ #endif /* EOL_HANDLING */
+diff -Naru tpch-dbgen/tpcd.h dbgen/tpcd.h
+--- tpch-dbgen/tpcd.h	Fri Nov 22 15:48:13 2002
++++ dbgen/tpcd.h	Mon Oct 14 10:37:19 2002
+@@ -33,6 +33,15 @@
+ /*
+  * database portability defines
+  */
++#ifdef SAPDB
++#define GEN_QUERY_PLAN  ""
++#define START_TRAN      ""
++#define END_TRAN        "COMMIT;"
++#define SET_OUTPUT      ""
++#define SET_ROWCOUNT    "--#set rowcount %d\ngo\n\n"
++#define SET_DBASE       "CONNECT TO %s ;\n"
++#endif
++
+ #ifdef DB2
+ #define GEN_QUERY_PLAN  "SET CURRENT EXPLAIN SNAPSHOT ON;"
+ #define START_TRAN      ""
