@@ -16,7 +16,7 @@ while getopts "i:o:x:" opt; do
 		i)
 			INFILE=$OPTARG
 			;;
-		i)
+		o)
 			OUTDIR=$OPTARG
 			;;
 		x)
