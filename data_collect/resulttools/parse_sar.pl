@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_sar.pl 891 2003-04-04 01:28:43Z jztpcw $ $Author: jztpcw $ $Date
+# $Id: parse_sar.pl 900 2003-04-05 00:28:14Z jztpcw $ $Author: jztpcw $ $Date
 
 use strict;
 use English;
@@ -14,47 +14,6 @@ use lib "$DBT3_PERL_MODULE";
 use Data_report;
 
 use constant DEBUG => 0;
-
-# get sar version info so that we know whick key file to look at
-sub get_sar_v {
-	my $str = `sar -V 2>&1 | head -1 `;
-	chomp $str;
-	my @outline = split / /, $str;
-	return $outline[ 2 ];
-}
-
-# get devioe name from input file
-sub get_file_disknames {
-	my ( $infile ) = @_;
-	my ( @odsks, @line, $i );
-	$i = 0;
-	die "file $infile does not exist: $!" unless ( -f "$infile" );
-	my $ios = new FileHandle;
-
-	die "can not open file $infile: $!" unless ( $ios->open( "$infile" ) );
-	while ( <$ios> )
-	{
-		next if ( ( /^Linux/ ) || ( /^$/ ) || ( /^avg/ ) || ( /^IO/ )
-			|| ( /^Disk/ ) || ( /^iostat/ ) || ( /^Device/ )
-			|| ( /^ / ) || ( /^Time/ ));
-		@line = split /\s+/;
-		# if the device is not in the list yet, add it
-		# else we found all the devices
-		if ( !grep {$_ eq $line[0]} @odsks )
-		{
-			$odsks[$i] = $line[0];
-			$i++;
-		}
-		else
-		{
-			$ios->close;	
-			return @odsks;
-		}
-	}
-	$ios->close;
-
-	return @odsks;
-}
 
 sub sar_parse {
 	my ( $infile, $outfile, $comment, $option, $num_of_columns, $start_column ) = @_;
@@ -104,7 +63,8 @@ open sar binary with option and generate gnuplot data files
 my ( $option, $infile, $outfile, $comment, $num_cpus, $configfile, 
 	$writeme, $hlp );
 
-my ( %options, $cline, $num_columns, $start_column );
+my ( %options, $cline, $num_columns, $start_column, $sar_path, $os_version
+	$sar_version );
 
 my $fcf = new FileHandle;
 GetOptions(
@@ -193,8 +153,20 @@ if ( $writeme ) {
 	$ncf->close;
 }
 
-my $version = get_sar_v;
-my $keyfile = "sar.$version.key";
+$os_version = get_os_version;
+
+# this is used my system, you might need to change it
+if ( $os_version =~ /2\.4\./ )
+{
+	$sar_path = "/usr/bin";
+}
+elsif ( $os_version =~ /2\.5\./ )
+{
+	$sar_path = "/usr/local/bin";
+}
+
+$sar_version = get_iostat_version($sar_path);
+my $keyfile = "sar.$sar_version.key";
 my $header_type = 'ap';
 # if the key file exists for this version
 # use human readable header
@@ -222,6 +194,8 @@ else
 # else header_type is 'ap' and header is read from the $infile
 if ( $option eq '-P' || $option eq '-A' )
 {
+	#sysstat > 4.1.2 use -P instead of -A	
+	if ( $sar_version =~ /4\.1\.2/ ) { $option = '-P';}
 	for (my $i=0; $i<$num_cpus; $i++)
 	{
 		eval {sar_parse( "sar $option $i -f $infile |", "$outfile.cpu$i", $comment, $option, $num_columns, $start_column)};
