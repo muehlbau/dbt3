@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ $# -ne 3 ]; then
-        echo "Usage: ./get_thuput.sh <perf_run_number> <scale_factor> <num_stream>"
+        echo "Usage: ./$0 <perf_run_number> <scale_factor> <num_stream>"
         exit
 fi
 
@@ -37,7 +37,7 @@ fi
 # get throughput time
 echo "get throughput time"
 #echo "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.THRUPUT'"
-Ts=`dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.THUPUT'"|grep -v 'OK' |grep -v 'END' | xargs ./string_to_number.sh `
+Ts=`dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.THUPUT'"|grep -v 'OK' |grep -v 'END' | xargs $DBT3_INSTALL_PATH/dbdriver/scripts/string_to_number.sh `
 echo "Throughput takes $Ts seconds"
 
 #calculate throughput numerical quantity

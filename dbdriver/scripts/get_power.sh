@@ -17,6 +17,7 @@ _test=`echo $_o | grep INTERNAL`
 if [ "$_test" = "" ]; then
 	echo "set date_time_format to INTERNAL"
 	_o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
+	db_cold
 	param_startsession
 	param_put DATE_TIME_FORMAT INTERNAL
 	param_checkall
@@ -39,7 +40,7 @@ index=1
 while [ "$index" -le 22 ]
 do
 #echo "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.POWER.Q${index}'"
-power_query[$index]=`dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.POWER.Q${index}'"|grep -v 'OK' |grep -v 'END' | xargs ./string_to_number.sh `
+power_query[$index]=`dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.POWER.Q${index}'"|grep -v 'OK' |grep -v 'END' | xargs $DBT3_INSTALL_PATH/dbdriver/scripts/string_to_number.sh `
 echo " power_query[$index]: ${power_query[$index]}"
 let "index = $index + 1"
 done
@@ -50,7 +51,7 @@ index=1
 while [ "$index" -le 2 ]
 do
 #echo "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.POWER.RF${index}'"
-power_rf[$index]=`dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.POWER.RF${index}'"|grep -v 'OK' |grep -v 'END' | xargs ./string_to_number.sh `
+power_rf[$index]=`dbmcli -d DBT3 -u dbm,dbm -uSQL dbt,dbt "sql_execute select timediff(e_time, s_time) from time_statistics where task_name='PERF${perf_run_number}.POWER.RF${index}'"|grep -v 'OK' |grep -v 'END' | xargs $DBT3_INSTALL_PATH/dbdriver/scripts/string_to_number.sh `
 echo "power rf[$index]: ${power_rf[$index]}"
 let "index = $index + 1"
 done
