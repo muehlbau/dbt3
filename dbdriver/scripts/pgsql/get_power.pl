@@ -9,11 +9,10 @@
 #
 # Author: Jenny Zhang
 use strict;
-use SAP::DBTech::dbm;
 use Pod::Usage;
 use FileHandle;
 use Getopt::Long;
-use Env qw(SID DBT3_PERL_MODULE);
+use Env qw(SID DBT3_PERL_MODULE PGUSER);
 use lib "$DBT3_PERL_MODULE";
 use Data_report;
 
@@ -95,7 +94,7 @@ if ( $writeme ) {
 my (@tmp_power_query, @tmp_power_refresh);
 for ($i=1; $i<=22; $i++)
 {
-	$tmp_power_query[$i] = `psql -d $SID -U dbt -c "select (e_time-s_time) as diff_time from time_statistics where task_name='PERF$perf_run_number.POWER.Q$i';"|grep -v row|grep -v diff`;
+	$tmp_power_query[$i] = `psql -d $SID -U $PGUSER -c "select (e_time-s_time) as diff_time from time_statistics where task_name='PERF$perf_run_number.POWER.Q$i';"|grep -v row|grep -v diff`;
 	$tmp_power_query[$i] =~ s/-*//;
 	chop($tmp_power_query[$i]);
 	$power_query[$i]=convert_to_seconds($tmp_power_query[$i]);
@@ -104,7 +103,7 @@ for ($i=1; $i<=22; $i++)
 # get execution time for the power refresh functions
 for ($i=1; $i<=2; $i++)
 {
-	$tmp_power_refresh[$i] = `psql -d $SID -U dbt -c "select (e_time-s_time) as diff_time from time_statistics where task_name='PERF$perf_run_number.POWER.RF$i';"|grep -v row|grep -v diff`;
+	$tmp_power_refresh[$i] = `psql -d $SID -U $PGUSER -c "select (e_time-s_time) as diff_time from time_statistics where task_name='PERF$perf_run_number.POWER.RF$i';"|grep -v row|grep -v diff`;
 	$tmp_power_refresh[$i] =~ s/-*//;
 	chop($tmp_power_refresh[$i]);
 	$power_refresh[$i]=convert_to_seconds($tmp_power_refresh[$i]);
@@ -115,13 +114,11 @@ for ($i=1; $i<=2; $i++)
 my $tmp_query = 1;
 for ( $i=1; $i<=22; $i++ )
 {
-	print "power query $i: $power_query[$i]\n";
 	$tmp_query = $power_query[$i] * $tmp_query;
 }
 my $tmp_refresh = 1;
 for ( $i=1; $i<=2; $i++ )
 {
-	print "power refresh $i: $power_refresh[$i]\n";
 	$tmp_refresh = $power_refresh[$i] * $tmp_refresh
 }
 
