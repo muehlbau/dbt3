@@ -1,1 +1,18 @@
-@PSQL@ -d $SID -f @TOPDIR@/scripts/pgsql/create_indexes.sql
+#!/bin/bash
+
+echo "Creating indexes..."
+@PSQL@ -d $SID -c "CREATE INDEX i_l_shipdate ON lineitem (l_shipdate);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_suppkey_partkey ON lineitem (l_partkey, l_suppkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_partkey ON lineitem (l_partkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_suppkey ON lineitem (l_suppkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_receiptdate ON lineitem (l_receiptdate);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_orderkey ON lineitem (l_orderkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_orderkey_quantity ON lineitem (l_orderkey, l_quantity);"
+@PSQL@ -d $SID -c "CREATE INDEX i_c_nationkey ON customer (c_nationkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_o_orderdate ON orders (o_orderdate);"
+@PSQL@ -d $SID -c "CREATE INDEX i_o_custkey ON orders (o_custkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_s_nationkey ON supplier (s_nationkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_ps_partkey ON partsupp (ps_partkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_ps_suppkey ON partsupp (ps_suppkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_n_regionkey ON nation (n_regionkey);"
+@PSQL@ -d $SID -c "CREATE INDEX i_l_commitdate ON lineitem (l_commitdate);"

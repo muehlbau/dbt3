@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Updating optimizer statistics..."
+
 #@VACUUMDB@ -z $SID
 @PSQL@ $SID -c "analyze supplier"
 @PSQL@ $SID -c "analyze part"

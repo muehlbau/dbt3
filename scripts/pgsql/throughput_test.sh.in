@@ -82,8 +82,6 @@ GTIME="$SRCDIR/dbdriver/utils/gtime"
 DBSTATS="$DBSCRIPTDIR/db_stats.sh"
 QGEN="$SRCDIR/datagen/dbgen/qgen"
 
-echo "`date`:=======throughput test $TAG========"
-
 # Clear the read profile counters.
 if [ -f /proc/profile ]; then
 	clearprof
@@ -94,8 +92,8 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	clearoprof
 fi
 
-bash -x $DBSCRIPTDIR/stop_db.sh
-bash -x $DBSCRIPTDIR/start_db.sh "$db_param"
+bash $DBSCRIPTDIR/stop_db.sh
+bash $DBSCRIPTDIR/start_db.sh "$db_param"
 
 s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT"
@@ -117,12 +115,11 @@ bash $SRCDIR/scripts/stop_sysstats.sh
 
 bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT"
 e_time=`$GTIME`
-echo "`date`: end throughput test run "
 let "diff_time=$e_time-$s_time"
-echo "elapsed time for throughput test $diff_time"
+echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
 
 # Stop the database after the test.
-bash -x $DBSCRIPTDIR/stop_db.sh
+bash $DBSCRIPTDIR/stop_db.sh
 
 if [ -f /proc/profile ]; then
 	profname="Throughput_Test_$TAG"

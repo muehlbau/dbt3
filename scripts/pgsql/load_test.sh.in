@@ -97,7 +97,7 @@ if [ $GENERATE -ne 0 ]; then
 	date
 	cd $SRCDIR/scripts/pgsql
 else
-	echo "build the database without generating the data files"
+	echo "Create the database using existing datafiles."
 fi
 
 # Initialize profile counters.
@@ -112,32 +112,28 @@ fi
 # Start collecting system statistics.
 bash $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR -p load
 
-echo "Create database"
-bash -x $SRCDIR/scripts/pgsql/create_db.sh "$db_param"
-echo
+bash $SRCDIR/scripts/pgsql/create_db.sh "$db_param"
 	
-echo "Create tables"
-bash -x $SRCDIR/scripts/pgsql/create_tables.sh
-echo
+bash $SRCDIR/scripts/pgsql/create_tables.sh
 
-echo "`date +'%Y-%m-%d %H:%M:%S'` start load test"
+echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
 bash $DBSCRIPTDIR/record_start.sh -n "LOAD"
 
 # Handle moving the temp space.
 if [ $redirect_tmp -eq 1 ]
 then 
-	bash -x $SRCDIR/scripts/pgsql/stop_db.sh
+	bash $SRCDIR/scripts/pgsql/stop_db.sh
 	echo "create symbolic links for pgsql_tmp"
 	rm -rf /db_tmp/*
-	bash -x $SRCDIR/scripts/pgsql/ln_pgsql_tmp.sh
-	bash -x $SRCDIR/scripts/pgsql/start_db.sh "$db_param"
+	bash $SRCDIR/scripts/pgsql/ln_pgsql_tmp.sh
+	bash $SRCDIR/scripts/pgsql/start_db.sh "$db_param"
 fi
 
 # Handle moving the database log.
 if [ $redirect_xlog -eq 1 ]
 then 
-	bash -x $SRCDIR/scripts/pgsql/stop_db.sh
+	bash $SRCDIR/scripts/pgsql/stop_db.sh
 	echo "create symbolic links for pgsql_xlog"
 	rm -rf /db_xlog/*
 	ln -s /db_xlog $PGDATA/pg_xlog_tmp
@@ -145,29 +141,26 @@ then
 	mv $PGDATA/pg_xlog/* $PGDATA/pg_xlog_tmp/
 	rm -rf $PGDATA/pg_xlog
 	mv $PGDATA/pg_xlog_tmp $PGDATA/pg_xlog
-	bash -x $SRCDIR/scripts/pgsql/start_db.sh "$db_param"
+	bash $SRCDIR/scripts/pgsql/start_db.sh "$db_param"
 fi
 
 date
-echo "Load database"
-bash -x $SRCDIR/scripts/pgsql/load_db.sh
+bash $SRCDIR/scripts/pgsql/load_db.sh
 date
 	
 date
-echo "Create indexes"
-bash -x $SRCDIR/scripts/pgsql/create_indexes.sh
+bash $SRCDIR/scripts/pgsql/create_indexes.sh
 date
 	
 date
-echo "Update optimizer statistics"
-bash -x $SRCDIR/scripts/pgsql/update_statistics.sh
+bash $SRCDIR/scripts/pgsql/update_statistics.sh
 date
 
 bash $DBSCRIPTDIR/record_end.sh -n "LOAD"
 e_time=`$GTIME`
-echo "`date +'%Y-%m-%d %H:%M:%S'` load test end"
+echo "`date +'%Y-%m-%d %H:%M:%S'` Load Test Completed"
 let "diff_time=$e_time-$s_time"
-echo "elapsed time for load test ${i} $diff_time"
+echo "Elapsed time for Load Test : $diff_time seconds"
 
 # Stop collecting system statistics.
 bash $SRCDIR/scripts/stop_sysstats.sh

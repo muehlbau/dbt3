@@ -43,7 +43,6 @@ fi
 
 # Generate the queries with EXPLAIN to get plans.
 rm -f $query_file
-echo "generate queries in $qgen_dir"
 $qgen_dir/qgen -c -r `cat $seed_file` -s $scale_factor -l $param_file $query_name -x > $query_file
 
 # modify $query_file so that the commands are in one line

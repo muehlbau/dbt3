@@ -12,8 +12,7 @@ SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
-DIR=`dirname $0`
-. ${DIR}/dbt3_profile
+. dbt3_profile
 
 GTIME=$SRCDIR/dbdriver/utils/gtime
 
@@ -84,10 +83,10 @@ if [ $SEED -eq 0 ]; then
 else
 	echo $SEED > $SEED_FILE
 fi
-echo "seed: `cat $SEED_FILE`"
+echo "Using seed: `cat $SEED_FILE`"
 
 # Load Test
-bash -x $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE
+bash $DBSCRIPTDIR/load_test.sh -o $OUTPUT_DIR -p "$PARAMETERS" -r $REDIR_TMP -x $REDIR_LOG -y $USE_OPROFILE -f $SCALE_FACTOR -g $GENERATE
 
 i=1
 while [ $i -le $MAX ]
@@ -97,20 +96,20 @@ do
 	bash $DBSCRIPTDIR/record_start.sh -n "PERF${i}"
 
 	# Power Test
-	bash -x $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE
+	bash $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE
 
 	# Throughput Test
-	bash -x $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE
+	bash $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR -p "$PARAMETERS" -e $EXPLAIN_ANALYZE -t $i -y $USE_OPROFILE
 
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
-	bash -x $DBSCRIPTDIR/start_db.sh "$PARAMETERS"
+	bash  $DBSCRIPTDIR/start_db.sh "$PARAMETERS"
 
 	# End time of a Power and Throughput test.
 	bash $DBSCRIPTDIR/record_end.sh -n "PERF${i}"
 	e_time=`$GTIME`
 	let "diff_time=$e_time-$s_time"
-	echo "elapsed time for performance test ${i} $diff_time"
+	echo "Elapsed time for performance test ${i} : $diff_time seconds"
 
 	# Increment loop counter.
 	let "i=$i+1"

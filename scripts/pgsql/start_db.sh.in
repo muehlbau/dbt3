@@ -1,15 +1,10 @@
-#!/bin/bash
-
-DIR=`dirname $0`
-. ${DIR}/pgsql_profile || exit 1
-
-DB_PARAM=$1
-
-CMD="@PG_CTL@ -D ${PGDATA}/${SID} start -l @TOPDIR@/run/db_logfile.txt"
-if [ "$db_param" ]; then
-	CMD="${CMD} -o ${DB_PARAM}"
+db_param=$1
+if [ ! -d @TOPDIR@/run ]; then
+	mkdir @TOPDIR@/run
 fi
-
-${CMD}
-
+if [ "$db_param" ]; then
+	@PG_CTL@ start -l @TOPDIR@/run/db_logfile.txt -o "$db_param"
+else
+	@PG_CTL@ start -l @TOPDIR@/run/db_logfile.txt
+fi
 sleep 10

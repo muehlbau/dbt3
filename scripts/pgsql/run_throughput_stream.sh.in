@@ -48,7 +48,6 @@ let "seed = $seed + $stream_num"
 # generate the queries for thoughput test
 rm -f $query_file
 rm -f $tmp_query_file
-echo "generate queries in $SRCDIR/datagen/dbgen"
 if [ $explain_analyze -eq 0 ]
 then
 	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file> $query_file

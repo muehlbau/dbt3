@@ -1,5 +1,4 @@
 #!/bin/sh
-set -x
 
 # assumes the user created database files is the last one
 # will not work if there are more than 1 user created database

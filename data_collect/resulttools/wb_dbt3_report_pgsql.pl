@@ -298,7 +298,7 @@ if ($composite != 0 && $power !=0 && $thruput != 0)
 	}
 		
 	#convert load test time from seconds to hh:mm:ss format
-	print "diffload $diffload\n";
+#	print "diffload $diffload\n";
 	my ($h, $m, $s, $tmp_index);
 	($h, $m, $s) = convert_time_format($diffload);
 	print $fh "<tr><td><a href=\"$relative_indir/dbt3_explain.html#Load\"> LOAD</a></td><td>$sload</td><td>$eload</td>";
@@ -473,7 +473,7 @@ sub table_of_glob {
 
 	#generate a list of *.png files
 	my @filelist = glob( "$indir/$globname" );
-	print "filelist $#filelist", join ( '  ', @filelist ) if DEBUG;
+#	print "filelist $#filelist", join ( '  ', @filelist ) if DEBUG;
 
 	print $fh start_table( { -border => undef } );
 	if ( $flag == 0 ) {
@@ -536,7 +536,7 @@ sub change_file_name {
 	my ($indir, $globname, $from, $to) = @_;
 	#generate a list of *.png files
 	my @filelist = glob("$indir/$globname");
-	print "filelist $#filelist", join ( '  ', @filelist ) if DEBUG;
+#	print "filelist $#filelist", join ( '  ', @filelist ) if DEBUG;
 
 	for (my $i=0; $i<=$#filelist; $i++)
 	{

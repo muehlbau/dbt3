@@ -9,41 +9,33 @@
 # June-4-2003 Create by Jenny Zhang
 
 date
-echo -n "loading table supplier..."
+echo -n "Loading table supplier... "
 @PSQL@ -d $SID -c "COPY supplier FROM '$DSS_PATH/supplier.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table part..."
+echo -n "Loading table part... "
 @PSQL@ -d $SID -c "COPY part FROM '$DSS_PATH/part.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table partsupp..."
+echo -n "Loading table partsupp... "
 @PSQL@ -d $SID -c "COPY partsupp FROM '$DSS_PATH/partsupp.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table customer..."
+echo -n "Loading table customer... "
 @PSQL@ -d $SID -c "COPY customer FROM '$DSS_PATH/customer.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table orders..."
+echo -n "Loading table orders... "
 @PSQL@ -d $SID -c "COPY orders FROM '$DSS_PATH/orders.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table lineitem..."
+echo -n "Loading table lineitem... "
 @PSQL@ -d $SID -c "COPY lineitem FROM '$DSS_PATH/lineitem.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table nation..."
+echo -n "Loading table nation... "
 @PSQL@ -d $SID -c "COPY nation FROM '$DSS_PATH/nation.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."
 
 date
-echo -n "loading table region..."
+echo -n "Loading table region... "
 @PSQL@ -d $SID -c "COPY region FROM '$DSS_PATH/region.tbl' USING DELIMITERS '|';" || exit 1
-echo "done."

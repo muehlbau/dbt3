@@ -108,7 +108,6 @@ if ( $writeme ) {
 #read configuration from config.txt file
 my $fconfig = new FileHandle;
 
-print "indir is $indir\n";
 unless ( $fconfig->open( "< $indir/config.txt" ) )   { die "No config file $!"; }
 my (%configs);
 
@@ -161,7 +160,6 @@ if ( -e "$indir/calc_composite.out" )
 		elsif ( /composite/) { $composite = $value; }
 	}
 	close($fcomposite);
-	print "power $power, thruput $thruput, composite $composite\n";
 }	
 elsif ( -e "$indir/calc_power.out" )
 {

@@ -115,10 +115,8 @@ if ( $writeme ) {
 
 $db_script_patch = "@TOPDIR@/scripts/@DATABASE_TO_USE@";
 
-print "calculate power\n";
 system("$db_script_patch/get_power.pl -p $perf_run_number -s $scale_factor > composite.out ") && die "execute $db_script_patch/get_power.pl failed"; 
 
-print "calculate throughput\n";
 system("$db_script_patch/get_throughput.pl -p $perf_run_number -s $scale_factor -n $num_of_streams >> composite.out ") && die "execute $db_script_patch/get_throughput.pl failed"; 
 
 my $fcomp = new FileHandle;
@@ -140,7 +138,6 @@ while ( <$fcomp> )
 close($fcomp);
 system("rm", "composite.out");
 
-print "calculate composite\n";
 #calculate the query per hour * SF
 $composite = sqrt( $power * $throughput);
 
