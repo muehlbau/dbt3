@@ -61,6 +61,7 @@ sub cal_average_std
 			if ( /$varname/ )
 			{
 				my ( $var, $value ) = split /=/;
+				print "$var is $value\n";
 				$data[$j] = $value;
 			}
 		}
@@ -73,17 +74,20 @@ sub cal_average_std
 	
 	for ( my $i=0; $i<=$#data; $i++ )
 	{
-		print "data is $data[$i]\n";
 		$average += $data[$i];	
 	}
 	$average = $average/$num_element;
 	
 	$std = 0;
-	for ( my $i=0; $i<=$#data; $i++ )
+	if ($num_element > 1)
 	{
-		$std += ( $data[$i] - $average )**2;
+		for ( my $i=0; $i<=$#data; $i++ )
+		{
+			$std += ( $data[$i] - $average )**2;
+		}
+		$std = sqrt( $std / ($num_element - 1) );
 	}
-	$std = sqrt( $std / ($num_element - 1) );
+	else { warn "more than 1 numbers are required"; $std = -1; }
 	
 	my @retvalue;
 	$retvalue[0] = $average;
