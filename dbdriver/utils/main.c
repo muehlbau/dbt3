@@ -74,7 +74,7 @@ main(int argc, char *argv[])
 			if (run_type == POWER)
 				fprintf(query_output, "%s insert into time_statistics (task_name, s_time) values ('PERF%d.POWER.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, sql_statement.query_id);
 			else if (run_type == THROUGHPUT)
-				fprintf(query_output, "%s insert into time_statistics (task_name, s_time) values ('PERF%d.THUPUT.QS%d.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+				fprintf(query_output, "%s insert into time_statistics (task_name, s_time) values ('PERF%d.THRUPUT.QS%d.Q%d', timestamp)\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
 			first_stmt = FALSE;
 		}
 		if (rc == END_OF_STMT)
@@ -85,7 +85,7 @@ main(int argc, char *argv[])
 			if (run_type == POWER)
 				fprintf(query_output, "%s update time_statistics set e_time=timestamp where task_name='PERF%d.POWER.Q%d'\n\n", SQL_EXEC, perf_run_number, sql_statement.query_id);
 			else if (run_type == THROUGHPUT)
-				fprintf(query_output, "%s update time_statistics set e_time=timestamp where task_name='PERF%d.THUPUT.QS%d.Q%d'\n\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
+				fprintf(query_output, "%s update time_statistics set e_time=timestamp where task_name='PERF%d.THRUPUT.QS%d.Q%d'\n\n", SQL_EXEC, perf_run_number, stream_number, sql_statement.query_id);
 		}
 	}
 	
