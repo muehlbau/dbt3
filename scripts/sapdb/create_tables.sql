@@ -14,4 +14,4 @@ sql_execute create table nation (n_nationkey fixed(10), n_name char(25), n_regio
 
 sql_execute create table region (r_regionkey fixed(10), r_name char(25), r_comment varchar(152), primary key ( r_regionkey ) )
 
-sql_execute create table time_statistic (task_name varchar(40), s_time timestamp, e_time timestamp)
+sql_execute create table time_statistics (task_name varchar(40), s_time timestamp, e_time timestamp, int_time fixed(32))
