@@ -109,7 +109,7 @@ fi
 AC_OUTPUT([
 Makefile \
 datagen/dbgen/Makefile \
-scripts/set_run_env.sh \
+scripts/dbt3_profile \
 data_collect/sapdb/dbt3_stats.sh \
 data_collect/sapdb/power_test_stats.sh \
 data_collect/sapdb/single_query_stats.sh \
@@ -146,7 +146,7 @@ scripts/pgsql/drop_tables.sh \
 scripts/pgsql/grant.sh \
 scripts/pgsql/load_db.sh \
 scripts/pgsql/set_db_env.sh \
-scripts/pgsql/set_run_env.sh \
+scripts/pgsql/pgsql_profile \
 scripts/pgsql/start_db.sh \
 scripts/pgsql/stop_db.sh \
 scripts/pgsql/update_statistics.sh \
@@ -158,7 +158,7 @@ scripts/sapdb/create_tables.sh \
 scripts/sapdb/drop_tables.sh \
 scripts/sapdb/load_db.sh \
 scripts/sapdb/restore_db.sh \
-scripts/sapdb/set_run_env.sh \
+scripts/sapdb/sapdb_profile \
 scripts/sapdb/update_statistics.sh \
 make.common \
 dbdriver/utils/Makefile \

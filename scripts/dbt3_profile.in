@@ -1,19 +1,18 @@
 #!/bin/sh
-# set_run_env.sh.in: set dbt3 run environment variables for SAPDB
+# dbt3_profile.in: set dbt3 run environment variables
 #
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2002 Open Source Development Lab, Inc.
 # History:
-# June-26-2003 Create by Jenny Zhang
+# June-6-2003 Create by Jenny Zhang
+
+DATABASE=@DATABASE_TO_USE@
 
 export DSS_QUERY=@TOPDIR@/datagen/@DATABASE_TO_USE@-queries
-export DSS_PATH=/dbt3_data/sapdb
+export DSS_PATH=/mnt/data
 export DSS_CONFIG=@TOPDIR@/datagen/dbgen
-export SID=DBT3
 export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
-export DBT3_BACKUP=/dbt3_backup
-export PATH=/opt/sapdb/depend/bin/:/opt/sapdb/indep_prog/bin/:$PATH
-export SYS_DIR=/dbt3/sapdb
-export DBUSER=dbt
+
+. ${DATABASE}/${DATABASE}_profile

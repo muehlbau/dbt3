@@ -8,11 +8,7 @@
 # History:
 # June-6-2003 Create by Jenny Zhang
 
-export DSS_QUERY=@TOPDIR@/datagen/@DATABASE_TO_USE@-queries
-export DSS_PATH=/mnt/data
-export DSS_CONFIG=@TOPDIR@/datagen/dbgen
-export SID=dbt3
-export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
 export PATH=/usr/local/pgsql/bin:$PATH
-export PGDATA=/home/markw/pgdata/dbt3
-export PGUSER=markw
+
+export SID=dbt3
+export PGDATA=/home/markw/pgdata

@@ -1,7 +1,6 @@
 db_param=$1
 if [ ! -d @TOPDIR@/run ]; then
 	mkdir @TOPDIR@/run
-	chown -R pgsql:pgsql @TOPDIR@/run
 fi
 if [ "$db_param" ]; then
 	@PG_CTL@ start -l @TOPDIR@/run/db_logfile.txt -o "$db_param"

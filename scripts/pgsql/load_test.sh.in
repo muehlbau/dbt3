@@ -150,7 +150,7 @@ fi
 
 date
 echo "Load database"
-bash -x $SRCDIR/scripts/pgsql/load_db.sh
+bash -x $SRCDIR/scripts/pgsql/load_db.sh && exit 1
 date
 	
 date
