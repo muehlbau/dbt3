@@ -17,4 +17,4 @@ export DSS_PATH=/mnt/data
 export DSS_CONFIG=@TOPDIR@/datagen/dbgen
 export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
 
-. ${DIR}/${DATABASE}/${DATABASE}_profile
+. @TOPDIR@/scripts/${DATABASE}/${DATABASE}_profile
