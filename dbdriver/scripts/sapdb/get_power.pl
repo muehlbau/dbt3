@@ -40,7 +40,7 @@ my ( $perf_run_number, $hlp, $scale_factor, $configfile, $writeme,
 
 GetOptions(
 	"perf_run_number=i" => \$perf_run_number,
-	"scale_factor=i" => \$scale_factor,
+	"scale_factor=f" => \$scale_factor,
 	"help"      => \$hlp,
 	"file=s"    => \$configfile,
 	"write=s"   => \$writeme

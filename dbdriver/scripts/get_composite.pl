@@ -40,7 +40,7 @@ my ( $perf_run_number, $num_of_streams, $hlp, $scale_factor, $configfile,
 
 GetOptions(
 	"perf_run_number=i" => \$perf_run_number,
-	"scale_factor=i" => \$scale_factor,
+	"scale_factor=f" => \$scale_factor,
 	"num_of_streams=i" => \$num_of_streams,
 	"outfile=s" => \$outfile,
 	"help"      => \$hlp,
