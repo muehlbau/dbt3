@@ -1,4 +1,5 @@
-# multi_test.sh: run multiple test defined by commands
+#!/usr/bin/perl -w 
+# get_config.sh: get dbt3 run configuration
 #
 # This file is released under the terms of the Artistic License.  Please see
 # the file LICENSE, included in this package, for details.
@@ -8,7 +9,6 @@
 # Author: Jenny Zhang
 # March 2003
 
-#!/usr/bin/perl -w 
 
 use strict;
 use English;
@@ -30,7 +30,7 @@ run dbt3 test multiple times
 =head1 ARGUMENTS
 
  -run <number of tests to run>
- -command <the command to execute>
+ -commands <the command to execute>
  -file <config filename to read config from> 
  -write <filename to write config to> 
 
