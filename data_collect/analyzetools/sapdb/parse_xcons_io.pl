@@ -19,6 +19,9 @@ use File::Copy;
 use FileHandle;
 use Pod::Usage;
 use Shell qw(grep awk);
+use Env qw(DBT3_INSTALL_PATH SID DBT3_PERL_MODULE);
+use lib "$DBT3_PERL_MODULE";
+use Data_report;
 
 =head1 NAME
 
@@ -41,8 +44,8 @@ Options from a config file or command line
 =cut 
 
 my (
-	 $infile, $hlp,	$outdir, $paramfile, $writeme, 
-	 $configfile, @filelist, $sysdev, @logdev_list, @datadev_list
+	$infile, $hlp,	$outdir, $paramfile, $writeme,
+	$configfile, @filelist, $sysdev, @logdev_list, @datadev_list
 );
 
 GetOptions(
@@ -113,17 +116,22 @@ my $fparam = new FileHandle;
 
 #parse paramfile and get devspace list
 unless ( $fparam->open( "< $paramfile" ) )   { die "No parameter file $!"; }
-my ($line, @content, $datadev_index, $logdev_index);
+my ($line, @content, $datadev_index, $logdev_index, $sapdb_version);
+
+$sapdb_version = get_sapdb_version();
 
 $datadev_index=0;
 $logdev_index=0;
 while (<$fparam>)
 {
-	if ( /^SYSDEV_001/ ) {	
-		chop $_;
-		@content=split / *\t/, $_;
-		$sysdev=$content[2];
-		print "sysdev $sysdev\n";
+	if ( $sapdb_version =~ /7.3/ )
+	{
+		if ( /^SYSDEV_001/ ) {	
+			chop $_;
+			@content=split / *\t/, $_;
+			$sysdev=$content[2];
+			print "sysdev $sysdev\n";
+		}
 	}
 	if ( /^ARCHIVE_LOG_0/ ) {
 		chop $_;
@@ -163,10 +171,13 @@ for (my $i=0; $i<=$#logdev_list; $i++) {
 	print $ttt "#Devspace\tRead(s)\tWrite(s)\tTotal\n";
 }
 
-#open io file for sys device
-unless ( $fsysio->open( "> $outdir/xcons_sysio.dat" ) ) { die "cannot open output $!"; }
-print $fsysio "#device name $sysdev\n";
-print $fsysio "#Devspace\tRead(s)\tWrite(s)\tTotal\n";
+if ( $sapdb_version =~ /7.3/ )
+{
+	#open io file for sys device
+	unless ( $fsysio->open( "> $outdir/xcons_sysio.dat" ) ) { die "cannot open output $!"; }
+	print $fsysio "#device name $sysdev\n";
+	print $fsysio "#Devspace\tRead(s)\tWrite(s)\tTotal\n";
+}
 
 #open io file for data devices
 for (my $i=0; $i<=$#datadev_list; $i++) {
@@ -178,7 +189,7 @@ for (my $i=0; $i<=$#datadev_list; $i++) {
 	print $ttt "#Devspace\tRead(s)\tWrite(s)\tTotal\n";
 }
 
-#open io file for sys device
+#open io file for total
 unless ( $ftotalio->open( "> $outdir/xcons_totalio.dat" ) ) { die "cannot open output $!"; }
 print $ftotalio "#total io\n";
 print $ftotalio "#Devspace\tRead(s)\tWrite(s)\tTotal\n";
@@ -208,25 +219,29 @@ for ($xcons_index=0; $xcons_index<=$#filelist; $xcons_index++ ) {
 	unless ( $fxconsin->open( "< $xcons_name" )) { die "cannot open $xcons_name $!"; }
 	while (<$fxconsin>)
 	{
-		if ( /^$sysdev/i )
+		if ( $sapdb_version =~ /7.3/ )
 		{
-			chop $_;
-			@fields=split / +/, $_;
-			if ( $xcons_index>0 )
+			if ( /^$sysdev/i )
 			{
-				my $diffread;
-				my $diffwrite;
-				my $difftotal;
-				$diffread=$fields[2]-$sysread1;
-				$diffwrite=$fields[3]-$syswrite1;
-				$difftotal=$fields[4]-$systotal1;
-				print $fsysio "$xcons_index\t$fields[0]\t$diffread\t$diffwrite\t$difftotal\n";
+				chop $_;
+				@fields=split / +/, $_;
+				if ( $xcons_index>0 )
+				{
+					my $diffread;
+					my $diffwrite;
+					my $difftotal;
+					$diffread=$fields[2]-$sysread1;
+					$diffwrite=$fields[3]-$syswrite1;
+					$difftotal=$fields[4]-$systotal1;
+					print $fsysio 
+						"$xcons_index\t$fields[0]\t$diffread\t$diffwrite\t$difftotal\n";
+				}
+				$sysread1=$fields[2];
+				$syswrite1=$fields[3];
+				$systotal1=$fields[4];
 			}
-			$sysread1=$fields[2];
-			$syswrite1=$fields[3];
-			$systotal1=$fields[4];
 		}
-		elsif ( /^total I\/O/ )
+		if ( /^total I\/O/ )
 		{
 			chop $_;
 			@fields=split / +/, $_;
@@ -307,7 +322,10 @@ for ($xcons_index=0; $xcons_index<=$#filelist; $xcons_index++ ) {
 	}
 } 
 
-$fsysio->close;
+if ( $sapdb_version =~ /7.3/ )
+{
+	$fsysio->close;
+}
 $ftotalio->close;
 for (my $i=0; $i<=$#logdev_list; $i++)
 {
