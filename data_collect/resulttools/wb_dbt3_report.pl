@@ -351,11 +351,13 @@ print $fh h2("Raw data");
 table_of_glob("$indir/plot", "*.txt", 0);
 
 print $fh h2("gnuplot charts");
-print $fh startform({-action=>"http://webdev/jenny/cgi-bin/showchart.cgi"});
+print $fh "<form method=\"post\" action=\"http://webdev/jenny/cgi-bin/showchart.cgi \"
+	enctype=\"application/x-www-form-urlencoded\">";
+#print $fh startform({-action=>"http://webdev/jenny/cgi-bin/showchart.cgi"});
 print $fh "<INPUT TYPE=\"hidden\" NAME=\"pathname\" VALUE=\"$indir/plot\">";
 table_of_glob("$indir/plot", "*.png", 1);
 print $fh "<INPUT TYPE=\"submit\" NAME=\"showchart\" VALUE=\"Show Charts\">";
-print $fh endform;
+print $fh "</form>";
 
 print $fh h2("Run log data");
 my @runlog;
@@ -424,7 +426,7 @@ sub table_of_glob {
 	my ($indir, $globname, $flag) = @_;
 	#generate a list of *.png files
 	my @filelist = glob("$indir/$globname");
-	print "filelist $#filelist", join ( '  ', @filelist );
+	print "table_of_glob: filelist $#filelist", join ( '  ', @filelist ), "\n";
 
 	print $fh start_table( { -border => undef });
 	print $fh Tr(th[("sar", "vmstat", "iostat", "xcons")]);
@@ -500,7 +502,7 @@ sub change_file_name {
 	my ($indir, $globname, $from, $to) = @_;
 	#generate a list of *.png files
 	my @filelist = glob("$indir/$globname");
-	print "filelist $#filelist", join ( '  ', @filelist );
+	print "change_file_name: filelist $#filelist", join ( '  ', @filelist ), "\n";
 
 	for (my $i=0; $i<=$#filelist; $i++)
 	{
