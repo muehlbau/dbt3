@@ -1,7 +1,0 @@
-sql_execute alter table supplier add primary key ( s_suppkey )
-sql_execute alter table partsupp add primary key ( ps_partkey, ps_suppkey )
-sql_execute alter table customer add primary key ( c_custkey )
-sql_execute alter table order add primary key ( o_orderkey )
-sql_execute alter table lineitem add primary key ( l_orderkey, l_linenumber )
-sql_execute alter table nation add primary key ( n_nationkey )
-sql_execute alter table region add primary key ( r_regionkey )
