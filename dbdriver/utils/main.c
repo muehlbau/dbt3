@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
 					fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
 #ifdef sapdb
 					fprintf(query_output, "%s %s", SQL_EXEC, SQL_EXE_PLAN);
-				}
 #endif
+				}
 			}
 			else
 			{
