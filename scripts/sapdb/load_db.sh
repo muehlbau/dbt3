@@ -1,18 +1,18 @@
 #!/bin/sh
 date
-repmcli -u dbt,dbt -d $SID -b supplier.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/supplier.sql
 date
-repmcli -u dbt,dbt -d $SID -b part.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/part.sql
 date
-repmcli -u dbt,dbt -d $SID -b partsupp.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/partsupp.sql
 date
-repmcli -u dbt,dbt -d $SID -b customer.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/customer.sql
 date
-repmcli -u dbt,dbt -d $SID -b orders.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/orders.sql
 date
-repmcli -u dbt,dbt -d $SID -b lineitem.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/lineitem.sql
 date
-repmcli -u dbt,dbt -d $SID -b nation.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/nation.sql
 date
-repmcli -u dbt,dbt -d $SID -b region.sql
+repmcli -u dbt,dbt -d $SID -b $DBT3_INSTALL_PATH/scripts/sapdb/region.sql
 date

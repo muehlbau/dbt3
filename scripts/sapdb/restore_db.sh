@@ -4,6 +4,7 @@
 #otherwise we get I/O error
 echo "changing data_cache to 10000"
 _o=`cat <<EOF |  /opt/sapdb/depend/bin/dbmcli -d $SID -u dbm,dbm 2>&1
+db_cold
 param_startsession
 param_put DATA_CACHE 10000
 param_checkall
@@ -16,7 +17,7 @@ if ! [ "$_test" = "" ]; then
         exit 1
 fi
 echo "start restoring db"
-./define_medium.sh
+$DBT3_INSTALL_PATH/scripts/sapdb/define_medium.sh
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
 db_cold
 util_connect dbm,dbm
@@ -33,4 +34,4 @@ if [ "$_test" = "" ]; then
 fi
 
 echo "set database parameters"
-./set_param.sh 1
+$DBT3_INSTALL_PATH/scripts/sapdb/set_param.sh 1

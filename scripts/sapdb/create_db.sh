@@ -38,7 +38,7 @@ mkdir -p $SYS_DIR/$SID
 
 # setup database parameters
 echo "set parameters for $SID..."
-./set_param.sh 0
+$DBT3_INSTALL_PATH/scripts/sapdb/set_param.sh 0
 # devsapce definition
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1
 param_adddevspace 1 SYS  $SYS_DIR/$SID/SYS_001   F

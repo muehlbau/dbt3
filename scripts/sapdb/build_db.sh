@@ -19,30 +19,30 @@ then
 	fi
 
 	echo "Generating data... scale factor $SF"
-	cd ../../datagen/dbgen
+	cd $DBT3_INSTALL_PATH/datagen/dbgen
 	date
 	./dbgen -s $SF
 	echo "data files are generated"
 	date
-	cd ../../scripts/sapdb
+	cd $DBT3_INSTALL_PATH/scripts/sapdb
 else
 	echo "build the database without generating the data files"
 fi
 	echo "drop db"
-	./drop_db.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/drop_db.sh
 	echo
 	
 	echo "create db"
-	./create_db.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/create_db.sh
 	echo
 	
 	echo "create tables"
-	./create_tables.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/create_tables.sh
 	echo
 	
 	date
 	echo "start loading db"
-	./load_db.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/load_db.sh
 	date
 	echo "loading db done"
 	
@@ -51,20 +51,20 @@ fi
 	
 	date
 	echo "start creating indexes"
-	./create_indexes.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/create_indexes.sh
 	date
 	echo "creating indexes done"
 	
 	
 	date
 	echo "start updating optimizer statistics"
-	./update_statistics.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/update_statistics.sh
 	date
 	echo "updating optimizer statistics done"
 	
 	date
 	echo "start backup database"
-	./backup_db.sh
+	$DBT3_INSTALL_PATH/scripts/sapdb/backup_db.sh
 	date
 	echo "backup done"
 	
