@@ -1,5 +1,0 @@
-db_cold
-param_startsession
-param_put CACHE_SIZE 10000
-param_checkall
-param_commitsession

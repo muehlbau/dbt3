@@ -1,8 +1,0 @@
-param_addvolume 1 LOG  /dev/raw/raw8  R 120000
-param_addvolume 1 DATA /dev/raw/raw1  R 150000
-param_addvolume 2 DATA /dev/raw/raw2  R 150000
-param_addvolume 3 DATA /dev/raw/raw3  R 150000
-param_addvolume 4 DATA /dev/raw/raw4  R 150000
-param_addvolume 5 DATA /dev/raw/raw5  R 150000
-param_addvolume 6 DATA /dev/raw/raw6  R 150000
-param_addvolume 7 DATA /dev/raw/raw7  R 150000
