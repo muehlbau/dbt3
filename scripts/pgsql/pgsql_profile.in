@@ -1,17 +1,14 @@
 #!/bin/sh
-# set_run_env.sh.in: set dbt3 run environment variables
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
-#
-# Copyright (C) 2002 Open Source Development Lab, Inc.
-# History:
-# June-6-2003 Create by Jenny Zhang
 
-export PATH=/usr/local/pgsql/bin:$PATH
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002 Jenny Zhang & Open Source Development Lab, Inc.
+#
 
 export SID=dbt3
-export PGDATA=/mnt/pgdata/${SID}
+export PGDATA=/mnt/pgdata
 
 export LOAD_PARAMETERS="-c stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
 export POWER_PARAMETERS="-c stats_block_level=true -c stats_command_string=true -c stats_row_level=true"

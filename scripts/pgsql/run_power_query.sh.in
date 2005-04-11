@@ -1,13 +1,11 @@
 #!/bin/sh
+
 #
-# run_power_query.sh: run query streams in dbt3 power test
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
 #
-# Copyright (C) 2003 Open Source Development Lab, Inc.
-#
-# History: June-12-2003 Created by Jenny Zhang
 
 SRCDIR=@TOPDIR@
 
@@ -23,13 +21,9 @@ OUTPUT_DIR=$4
 RUNDIR=$5
 SEED_FILE=$6
 
-GTIME="$SRCDIR/dbdriver/utils/gtime"
-
-qgen_dir="$SRCDIR/datagen/dbgen"
 query_file="$RUNDIR/power_query"
 tmp_query_file="$RUNDIR/tmp_query.sql"
 param_file="$RUNDIR/power_param"
-parsequery_dir="$SRCDIR/dbdriver/utils"
 
 if [ ! -f $SEED_FILE ];
 then
@@ -42,12 +36,12 @@ fi
 rm -f $query_file
 if [ $EXPLAIN_ANALYZE -eq 0 ]
 then
-	$qgen_dir/qgen -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file> $query_file
+	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file> $query_file
 else
-	$qgen_dir/qgen -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file -y > $query_file
+	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file -y > $query_file
 fi
 # modify $query_file so that the commands are in one line
-$parsequery_dir/parse_query $query_file $tmp_query_file P $perf_run_number
+${PARSE_QUERY} $query_file $tmp_query_file P $perf_run_number
 
 # run the queries
 echo "`date`: Starting Power Test queries..."

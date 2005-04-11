@@ -1,13 +1,11 @@
 #!/bin/sh
+
 #
-# run_rf1.sh: run refresh function 1
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
-# History: June-11-2003 Created by Jenny Zhang
 
 SRCDIR=@TOPDIR@
 
@@ -19,12 +17,10 @@ fi
 scale_factor=$1
 RUNDIR=$2
 
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 curr_set_file_rf1="$RUNDIR/curr_set_num_rf1"
 lock_file_rf1="$RUNDIR/rf1.lock"
 min_set_file="$RUNDIR/min_set_num"
 max_set_file="$RUNDIR/max_set_num"
-DBGEN="$SRCDIR/datagen/dbgen/dbgen"
 
 # if curr_set_file does not exist, we generate 12 update sets
 # create a semaphore file so that only one process can access

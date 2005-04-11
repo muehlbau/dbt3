@@ -1,11 +1,11 @@
 #!/bin/sh
+
 #
-# throughput_stream_wrapper.sh
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see # the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2004 Mark Wong & Jenny Zhang & Open Source Development Lab, Inc.
+#
 
 SRCDIR=@TOPDIR@
 
@@ -30,8 +30,6 @@ done
 RUNDIR=$OUTPUT_DIR/run
 
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
-
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 
 # Start each stream.
 i=1

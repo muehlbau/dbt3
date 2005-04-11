@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh
+
 #
-# record_end.sh.in
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2004 Mark Wong & Open Source Development Lab, Inc.
+#
 
 SRCDIR=@TOPDIR@
 
@@ -16,8 +16,6 @@ while getopts "n:" opt; do
 		;;
 	esac
 done
-
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 
 SQL="UPDATE time_statistics SET e_time = current_timestamp WHERE task_name = '$NAME';"
 @PSQL@ -d $SID -c "$SQL"

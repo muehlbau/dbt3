@@ -1,15 +1,12 @@
 #!/bin/sh
+
 #
-# power_test.sh.in
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
 #
-# Author: Jenny Zhang
-# March 2003
-#
+
 # 15 July 2004: Reworked by Mark Wong
 
 SRCDIR=@TOPDIR@
@@ -78,19 +75,17 @@ mkdir -p $RUNDIR
 
 SCRIPTDIR=$SRCDIR/scripts
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
-parsequery_pgsql_dir="$SRCDIR/dbdriver/utils"
 
 param_file="$RUNDIR/power_plan.para"
 query_file="$RUNDIR/power_plan.sql"
 tmp_query_file="$RUNDIR/tmp_power_plan.sql"
 
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 DBSTATS="$DBSCRIPTDIR/db_stats.sh"
 
 # Generate queries for the Power test.
 SEED=`cat $SEED_FILE`
 echo "Seed : $SEED" > $OUTPUT_DIR/readme.txt
-$SRCDIR/datagen/dbgen/qgen -c -r $SEED -p 0 -s $SCALE_FACTOR -l $param_file -x > $query_file
+${QGEN} -c -r $SEED -p 0 -s $SCALE_FACTOR -l $param_file -x > $query_file
 
 # Get the EXPLAIN plans for only the SELECT statements.
 PLANDIR=$OUTPUT_DIR/db/plans
@@ -104,7 +99,7 @@ do
 	let "i=$i+1"
 done
 # Modify query file so that the commands are in one line.
-$parsequery_pgsql_dir/parse_query $query_file $tmp_query_file E
+${PARSE_QUERY} $query_file $tmp_query_file E
 
 ${SHELL} $DBSCRIPTDIR/stop_db.sh
 ${SHELL} $DBSCRIPTDIR/start_db.sh "$db_param"

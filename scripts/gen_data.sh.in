@@ -1,10 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 DIR=`dirname $0`
 . ${DIR}/dbt3_profile || exit 1
 
 SRCDIR=@TOPDIR@
-DBGEN=$SRCDIR/datagen/dbgen/dbgen
 
 if [ $# -ne 1 ]; then
 	echo "usage: gen_data.sh <scale factore>"

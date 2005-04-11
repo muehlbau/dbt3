@@ -1,19 +1,16 @@
 #!/bin/sh
+
 #
-# run_rf2.sh: run refresh function 2
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
-# Author: Jenny Zhang
 
 SRCDIR=@TOPDIR@
 
 RUNDIR=$1
 
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 curr_set_file_rf1="$RUNDIR/curr_set_num_rf1"
 curr_set_file_rf2="$RUNDIR/curr_set_num_rf2"
 lock_file_rf1="$RUNDIR/rf1.lock"

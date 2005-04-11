@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/sh
+
 #
-# run_workload.sh.in
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2004 Mark Wong & Jenny Zhang
-#                    Open Source Development Lab, Inc.
+#                    Open Source Development Labs, Inc.
+#
 
 SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
@@ -15,8 +15,6 @@ DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 
 DIR=`dirname $0`
 . ${DIR}/dbt3_profile || exit 1
-
-GTIME=$SRCDIR/dbdriver/utils/gtime
 
 SEED=0
 REDIR_LOG=0

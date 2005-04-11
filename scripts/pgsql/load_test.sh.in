@@ -1,24 +1,19 @@
 #!/bin/sh
+
 #
-# load_test.sh.in
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2002 Jenny Zhang & Open Source Development Lab, Inc.
 #
-# 15 July 2004 - Revamped by Mark Wong
 
-# this script is used to build the database
-# ./build_db.sh -g <scale_factor> will generate data and build the database
-# ./build_db.sh will load the database from previously generated data files
+# 15 July 2004 - Revamped by Mark Wong
 
 SRCDIR=@TOPDIR@
 
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
 
 DBSTATS="$DBSCRIPTDIR/db_stats.sh"
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 
 clearprof () {
 	sudo /usr/sbin/readprofile -m /boot/System.map -r
@@ -88,7 +83,7 @@ done
 if [ $GENERATE -ne 0 ]; then
 	echo "Generating data for scale factor $SF..."
 	date
-	$SRCDIR/datagen/dbgen/dbgen -s $SF
+	${DBGEN} -s $SF
 	date
 else
 	echo "Create the database using existing datafiles."

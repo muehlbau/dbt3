@@ -1,14 +1,12 @@
 #!/bin/sh
+
 #
-# throughput_test.sh
-#
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
 #
-# History: June-17-2003 Created by Jenny Zhang
-#
+
 # 2004 July 16 : Reworked by Mark Wong
 # 2004 September 28 : Turn this into a wrapper script because we don't know
 #                     how long the test will execute so we collect stats
@@ -87,9 +85,7 @@ mkdir -p $RUNDIR
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
 parsequery_dir="$SRCDIR/dbdriver/utils"
 
-GTIME="$SRCDIR/dbdriver/utils/gtime"
 DBSTATS="$DBSCRIPTDIR/db_stats.sh"
-QGEN="$SRCDIR/datagen/dbgen/qgen"
 
 # Clear the read profile counters.
 if [ -f /proc/profile ]; then
