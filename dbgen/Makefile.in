@@ -69,6 +69,7 @@ $(PROG2): permute.h $(OBJ2)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ2) $(LIBS)
 clean:
 	rm -f $(PROGS) $(OBJS) $(JUNK)
+distclean: clean
 lint:
 	lint $(CFLAGS) -u -x -wO -Ma -p $(SRC1)
 	lint $(CFLAGS) -u -x -wO -Ma -p $(SRC2)
