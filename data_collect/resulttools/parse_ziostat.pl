@@ -1,7 +1,11 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: parse_ziostat.pl 1214 2005-03-06 10:05:56Z fimath $ $Author: fimath $ $Date
+>>>>>>>>>>>>>>>>>>>> File 1
+# $Id: parse_ziostat.pl 1310 2005-04-15 19:51:07Z fimath $ $Author: fimath $ $Date
+>>>>>>>>>>>>>>>>>>>> File 2
+# $Id: parse_ziostat.pl 1310 2005-04-15 19:51:07Z fimath $ $Author: fimath $ $Date
+<<<<<<<<<<<<<<<<<<<<
 
 use strict;
 use English;

@@ -1,7 +1,11 @@
 #!/usr/bin/perl -w 
 
 # CVS Strings 
-# $Id: compare_qtime.pl 1139 2003-07-11 23:51:50Z jztpcw $ $Author: jztpcw $ $Date
+>>>>>>>>>>>>>>>>>>>> File 1
+# $Id: compare_qtime.pl 1310 2005-04-15 19:51:07Z fimath $ $Author: fimath $ $Date
+>>>>>>>>>>>>>>>>>>>> File 2
+# $Id: compare_qtime.pl 1310 2005-04-15 19:51:07Z fimath $ $Author: fimath $ $Date
+<<<<<<<<<<<<<<<<<<<<
 
 use strict;
 use English;
