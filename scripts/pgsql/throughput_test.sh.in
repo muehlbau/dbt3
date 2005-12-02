@@ -54,7 +54,7 @@ getoprof () {
 
 TEST_ARGS=
 
-while getopts "ef:n:o:p:s:t:y:" opt; do
+while getopts "ef:n:o:p:s:t:y" opt; do
 	case $opt in
 	e) TEST_ARGS="$TEST_ARGS -e"
 		;;
@@ -65,13 +65,13 @@ while getopts "ef:n:o:p:s:t:y:" opt; do
 	o) OUTPUT_DIR=$OPTARG
 	   mkdir -p $OUTPUT_DIR/results
 		;;
-	p) db_param=$OPTARG
+	p) PARAMETERS="${THROUGHPUT_PARAMETERS} $OPTARG"
 		;;
 	s) SEED_FILE=$OPTARG
 		;;
 	t) TAG=$OPTARG
 		;;
-	y) USE_OPROFILE=$OPTARG
+	y) USE_OPROFILE=1
 		;;
 	esac
 done
@@ -97,14 +97,14 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	clearoprof
 fi
 
-${SHELL} $DBSCRIPTDIR/stop_db.sh
-${SHELL} $DBSCRIPTDIR/start_db.sh "$db_param"
+${SHELL} $DBSCRIPTDIR/stop_db.sh || exit 1
+${SHELL} $DBSCRIPTDIR/start_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 
 s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT" || exit 1
 
 # Start collecting system statistics. 
-${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
+${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR || exit 1
 
 # Start collecting database statistics.
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
@@ -113,18 +113,15 @@ ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 ${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} || exit 1
 
 # Stop collecting system statistics.
-${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR
+${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR || exit 1
 
-# no effect
-#killall $DBSTATS
-
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT"
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT" || exit 1
 e_time=`$GTIME`
 let "diff_time=$e_time-$s_time"
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
 
 # Stop the database after the test.
-${SHELL} $DBSCRIPTDIR/stop_db.sh
+${SHELL} $DBSCRIPTDIR/stop_db.sh || exit 1
 
 if [ -f /proc/profile ]; then
 	profname="Throughput_Test_$TAG"

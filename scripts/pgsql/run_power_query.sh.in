@@ -25,20 +25,18 @@ query_file="$RUNDIR/power_query"
 tmp_query_file="$RUNDIR/tmp_query.sql"
 param_file="$RUNDIR/power_param"
 
-if [ ! -f $SEED_FILE ];
-then
-        echo "creating seed file $SEED_FILE, you can change the seed by"
+if [ ! -f $SEED_FILE ]; then
+	echo "creating seed file $SEED_FILE, you can change the seed by"
 	echo "modifying this file"
 	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
 fi
 
-#generate the queries for power test
+# generate the queries for power test
 rm -f $query_file
-if [ $EXPLAIN_ANALYZE -eq 0 ]
-then
-	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file> $query_file
+if [ $EXPLAIN_ANALYZE -eq 0 ]; then
+	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file> $query_file || exit 1
 else
-	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file -y > $query_file
+	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file -y > $query_file || exit 1
 fi
 # modify $query_file so that the commands are in one line
 ${PARSE_QUERY} $query_file $tmp_query_file P $perf_run_number

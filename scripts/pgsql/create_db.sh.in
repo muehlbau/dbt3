@@ -1,14 +1,11 @@
-#! /bin/sh
+#!/bin/sh
 
-# create_db.sh
 #
-# This file is released under the terms of the Artistic License.  Please see
-# the file LICENSE, included in this package, for details.
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
 #
 # Copyright (C) 2002 Open Source Development Lab, Inc.
 #
-# History:
-# June-4-2003: Jenny Zhang
 
 DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
@@ -21,11 +18,20 @@ if [ "$id" = "0" ]; then
 	exit 1
 fi
 
-db_param=$1
+OUTPUT_DIR="."
+while getopts "o:p:" OPT; do
+	case ${OPT} in
+	o)
+		OUTPUT_DIR=${OPTARG}
+		;;
+	p)
+		PARAMETERS=${OPTARG}
+		;;
+	esac
+done
 
 ${SHELL} @TOPDIR@/scripts/pgsql/stop_db.sh
 
-# since we are on STP, we can delete the database dir
 if [ -d $PGDATA ]; then
 	echo "======================================="
 	echo "PGData directory $PGDATA already exists"
@@ -33,8 +39,8 @@ if [ -d $PGDATA ]; then
 	echo "======================================="
 
 	# Don't need to initdb, blindly try to drop the dbt3 database in case
-	# is exists.
-	${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
+	# it exists.
+	${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
 	${SHELL} @TOPDIR@/scripts/pgsql/drop_db.sh
 else
 	# initialize database cluster
@@ -42,7 +48,7 @@ else
 	@INITDB@ -D $PGDATA || exit 1
 fi
 
-${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh "$db_param"
+${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit
 
 echo "Creating database $SID..."
 _o=`@CREATEDB@ $SID 2>&1`

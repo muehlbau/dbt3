@@ -85,9 +85,9 @@ int main(int argc, char *argv[])
 				if (sql_statement.query_id != 15)
 				{
 					fprintf(query_output, "%s %s", SQL_EXEC, sql_statement.statement);
-#ifdef sapdb
+#ifdef SAPDB
 					fprintf(query_output, "%s %s", SQL_EXEC, SQL_EXE_PLAN);
-#endif
+#endif /* SAPDB */
 				}
 			}
 			else

@@ -2,9 +2,9 @@
 
 # CVS Strings
 >>>>>>>>>>>>>>>>>>>> File 1
-# $Author: fimath $ $Date: 2005-04-15 12:51:07 -0700 (Fri, 15 Apr 2005) $ $Id: parse_ips.pl 1310 2005-04-15 19:51:07Z fimath $
+# $Author: fimath $ $Date: 2005-12-02 11:32:21 -0800 (Fri, 02 Dec 2005) $ $Id: parse_ips.pl 1328 2005-12-02 19:32:21Z fimath $
 >>>>>>>>>>>>>>>>>>>> File 2
-# $Author: fimath $ $Date: 2005-04-15 12:51:07 -0700 (Fri, 15 Apr 2005) $ $Id: parse_ips.pl 1310 2005-04-15 19:51:07Z fimath $
+# $Author: fimath $ $Date: 2005-12-02 11:32:21 -0800 (Fri, 02 Dec 2005) $ $Id: parse_ips.pl 1328 2005-12-02 19:32:21Z fimath $
 <<<<<<<<<<<<<<<<<<<<
 
 use strict;

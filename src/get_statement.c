@@ -1,3 +1,10 @@
+/*
+ * This file is released under the terms of the Artistic License.  Please see
+ * the file LICENSE, included in this package, for details.
+ *
+ * Copyright (C) 2002 Jenny Zhang & Open Source Development Labs, Inc.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,17 +68,17 @@ int get_statement(FILE *query_input)
 			/* otherwise, it is sql statement */
 				if ( (pos_begin=strchr(line, ';')) != NULL)
 				{
-#ifdef sapdb
+#ifdef SAPDB
 					/* if it is the end of the statement, 
 						add \n */
 					*pos_begin='\n';
 					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
-#endif
-#ifdef pgsql
+#endif /* SAPDB */
+#ifdef PGSQL
 					/* pgsql requires ';' */
 					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
 					statement_index += sprintf(sql_statement.statement+statement_index, "%c", '\n');
-#endif
+#endif /* PGSQL */
 					return END_OF_STMT;
 				}
 				/* get rid of \n */

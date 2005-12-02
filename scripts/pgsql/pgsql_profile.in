@@ -8,8 +8,11 @@
 #
 
 export SID=dbt3
-export PGDATA=/mnt/pgdata
+export PGDATA=/mnt/postgresql/pgdata
 
-export LOAD_PARAMETERS="-c stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
-export POWER_PARAMETERS="-c stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
-export THROUGHPUT_PARAMETERS="stats_block_level=true -c stats_command_string=true -c stats_row_level=true"
+export DEFAULT_LOAD_PARAMETERS=""
+export DEFAULT_POWER_PARAMETERS=""
+export DEFAULT_THROUGHPUT_PARAMETERS=""
+
+# Directory with tablespace mount points, if using tablespaces.
+TSDIR=/mnt/dbt3

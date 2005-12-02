@@ -2,9 +2,9 @@
 
 # CVS Strings 
 >>>>>>>>>>>>>>>>>>>> File 1
-# $Id: mvdirtool.pl 1310 2005-04-15 19:51:07Z fimath $ $Author: fimath $ $Date
+# $Id: mvdirtool.pl 1328 2005-12-02 19:32:21Z fimath $ $Author: fimath $ $Date
 >>>>>>>>>>>>>>>>>>>> File 2
-# $Id: mvdirtool.pl 1310 2005-04-15 19:51:07Z fimath $ $Author: fimath $ $Date
+# $Id: mvdirtool.pl 1328 2005-12-02 19:32:21Z fimath $ $Author: fimath $ $Date
 <<<<<<<<<<<<<<<<<<<<
 
 use strict;

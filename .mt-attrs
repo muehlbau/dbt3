@@ -1,0 +1,11 @@
+   file "scripts/graph_query_time.pl"
+execute "true"
+
+   file "scripts/init_seed.sh"
+execute "true"
+
+   file "scripts/pgsql/get_power.sh"
+execute "true"
+
+   file "scripts/pgsql/get_throughput.sh"
+execute "true"

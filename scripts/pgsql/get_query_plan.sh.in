@@ -30,8 +30,7 @@ query_file="$RUNDIR/$query_name.sql"
 tmp_query_file="$RUNDIR/tmp_$query_name.sql"
 param_file="$RUNDIR/$query_name.param"
 
-if [ ! -f $SEED_FILE ];
-then
+if [ ! -f $SEED_FILE ]; then
 	echo "creating seed file $SEED_FILE, you can change the seed by "
 	echo "modifying this file"
 	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
@@ -39,7 +38,7 @@ fi
 
 # Generate the queries with EXPLAIN to get plans.
 rm -f $query_file
-${QGEN} -c -r `cat $SEED_FILE` -s $scale_factor -l $param_file $query_name -x > $query_file
+${QGEN} -c -r `cat $SEED_FILE` -s $scale_factor -l $param_file $query_name -x > $query_file || exit 1
 
 # modify $query_file so that the commands are in one line
 ${PARSE_QUERY} $query_file $tmp_query_file E

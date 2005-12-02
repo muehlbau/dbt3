@@ -22,16 +22,15 @@ unless ( $stats_dir ) {
 	exit 1;
 }
 
-my @index_names = ( "supplier_pkey", "part_pkey", "partsupp_pkey",
-	"customer_pkey", "orders_pkey", "lineitem_pkey", "nation_pkey",
-	"region_pkey", "i_l_shipdate", "i_l_suppkey_partkey", "i_l_partkey",
-	"i_l_suppkey", "i_l_receiptdate", "i_l_orderkey",
-	"i_l_orderkey_quantity", "i_c_nationkey", "i_o_orderdate",
-	"i_o_custkey", "i_s_nationkey", "i_ps_partkey", "i_ps_suppkey",
-	"i_n_regionkey", "i_l_commitdate" );
+my @index_names = ("i_c_nationkey", "i_l_commitdate", "i_l_orderkey",
+		"i_l_orderkey_quantity", "i_l_partkey", "i_l_receiptdate",
+		"i_l_shipdate", "i_l_suppkey", "i_l_suppkey_partkey", "i_n_regionkey",
+		"i_o_custkey", "i_o_orderdate", "i_ps_partkey", "i_ps_suppkey",
+		"i_s_nationkey", "pk_customer", "pk_lineitem", "pk_nation", "pk_orders",
+		"pk_part", "pk_partsupp", "pk_region", "pk_supplier" );
 
-my @table_names = ( "nation", "region", "orders", "lineitem", "partsupp",
-	"customer", "supplier", "part" );
+my @table_names = ("customer", "lineitem", "nation", "orders", "part",
+		"partsupp", "region", "supplier");
 
 my @input_file;
 

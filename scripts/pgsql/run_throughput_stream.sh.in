@@ -30,9 +30,8 @@ param_file="$RUNDIR/throughput_param$stream_num"
 # output PID to a tmp file
 echo "$$" > $RUNDIR/PID$stream_num
 
-if [ ! -f $SEED_FILE ];
-then
-        echo "creating seed file $SEED_FILE, you can change the seed by "
+if [ ! -f $SEED_FILE ]; then
+	echo "creating seed file $SEED_FILE, you can change the seed by "
 	echo "modifying this file"
 	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
 fi
@@ -43,11 +42,10 @@ let "seed = $seed + $stream_num"
 # generate the queries for thoughput test
 rm -f $query_file
 rm -f $tmp_query_file
-if [ $EXPLAIN_ANALYZE -eq 0 ]
-then
-	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file> $query_file
+if [ $EXPLAIN_ANALYZE -eq 0 ]; then
+	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file> $query_file || exit 1
 else
-	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file -y > $query_file
+	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file -y > $query_file || exit 1
 fi
 # modify $query_file so that the commands are in one line
 ${PARSE_QUERY} $query_file $tmp_query_file T $perf_run_num $stream_num
@@ -67,11 +65,11 @@ done
 # run the queries
 echo "`date`: start throughput queries for stream $stream_num "
 s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
 @PSQL@ $SID -f $tmp_query_file -a >> $OUTPUT_DIR/results/thruput_qs${stream_num}.result 2>&1 || exit 1
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL"
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"

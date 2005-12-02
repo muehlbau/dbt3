@@ -303,19 +303,18 @@ optionally to generate the input data).
 
 \paragraph{PostgreSQL}
 \noindent
-It's recommended to run the complete workload using the
-run\_workload.sh script for PostgreSQL, but each individual script
-for each test phase will be briefly described.
+It's recommended to run the complete workload using the run\_workload.sh 
+since that also involves creating the database, but the database creation
+script for PostgreSQL will be briefly described here.
 
 \noindent
-scripts/pgsql/load\_test.sh [-f $<$scale\_factor$>$ -p '$<$database\_parameters$>$' -y $<$0/1$>$]
+scripts/pgsql/load\_test.sh [-f $<$scale\_factor$>$ -p '$<$database\_parameters$>$' -y $<$0/1$>$ -o $<$dir$>$]
 \begin{tabular}[c]{ll} 
 -f      & Scale factor to build. \\
+-o      & Directory to write test output into. \\
 -p      & Any PostgreSQL database parameters to use. \\
 -y      & 0 to disable oprofile [default], 1 to enable. \\
 \end{tabular}
-
-\noindent
 
 \paragraph{SAP DB}
 This script has the following usage: \\
@@ -609,7 +608,7 @@ They will only need to change environment variables to point to the
 correct database as described in Section 2.2 prior to executing the
 test kit scripts.
 
-\subsection{Run OSDL-DBT-3}
+\subsection{Run DBT-3}
 
 \subsubsection{PostgreSQL}
 
@@ -618,13 +617,17 @@ To run all three tests (load, power, throughput), execute the
 scripts/run\_workload.sh script.
 
 \noindent
-scripts/pgsql/load\_test.sh [-f $<$scale\_factor$>$ -p '$<$database\_parameters$>$' -y $<$0/1$>$]
+scripts/pgsql/run\_workload.sh [-f $<$scale\_factor$>$ -g -p '$<$load database parameters$>$' -q '$<$power database parameters$>$' -r '$<$throughput database parameters$>$' -y $<$0/1$>$]
 \begin{tabular}[c]{ll} 
--e      & 0 to get query results [default], 1 to get EXPLAIN ANALYZE results instead of query results. \\
--f      & Database scale factor to build and use, 1 by default. \\
+-e      & Flag to get EXPLAIN ANALYZE results instead of query results. \\
+-f      & Database scale factor to use, 1 by default. \\
+-g      & Build database data files. \\
 -n      & Number of streams to use, 1 by default. \\
--o      & 0 to disable oprofile [default], 1 to enable. \\
--p      & Any PostgreSQL database parameters to use. \\
+-o      & Flag to enable oprofile. \\
+-p      & Any PostgreSQL database parameters to use for the load test. \\
+-q      & Any PostgreSQL database parameters to use for the power test. \\
+-r      & Any PostgreSQL database parameters to use for the throughput test. \\
+-v      & Flag for verbose script output. \\
 \end{tabular}
 
 \subsubsection{SAP DB}

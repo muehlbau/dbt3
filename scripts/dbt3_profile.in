@@ -11,14 +11,15 @@ DIR=`dirname $0`
 
 DATABASE=@DATABASE_TO_USE@
 
-export DSS_QUERY=@TOPDIR@/queries/@DATABASE_TO_USE@
-export DSS_PATH=/tmp
-export DSS_CONFIG=@TOPDIR@/dbgen
-export DBT3_PERL_MODULE=@TOPDIR@/perlmodules
+export DSS_QUERY="@TOPDIR@/queries/@DATABASE_TO_USE@"
+export DSS_PATH="/mnt/data"
+export DSS_CONFIG="@TOPDIR@/src/dbgen"
+export DBT3_PERL_MODULE="@TOPDIR@/perlmodules"
 
-export DBGEN="@TOPDIR@/dbgen/dbgen"
+export DBGEN="${DSS_CONFIG}/dbgen"
 export GTIME="@TOPDIR@/src/gtime"
-export QGEN="@TOPDIR@/dbgen/qgen"
+export QGEN="${DSS_CONFIG}/qgen"
 export PARSE_QUERY="@TOPDIR@/src/parse_query"
+export POWER="@TOPDIR@/src/power"
 
-. @TOPDIR@/scripts/${DATABASE}/${DATABASE}_profile
+source @TOPDIR@/scripts/${DATABASE}/${DATABASE}_profile

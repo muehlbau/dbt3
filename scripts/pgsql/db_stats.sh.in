@@ -41,10 +41,10 @@ while [ 1 ]; do
 	# read the database activity table
 	@PSQL@ -d $SID -c "SELECT * FROM pg_stat_activity;" >> $DBOUTPUT_DIR/db_activity.out
 	# table info
-	@PSQL@ -d $SID -c "SELECT relid, relname, heap_blks_read, heap_blks_hit, idx_blks_read, idx_blks_hit FROM pg_statio_user_tables;" >> $DBOUTPUT_DIR/table_info.out
-	@PSQL@ -d $SID -c "SELECT relid, indexrelid, relname, indexrelname, idx_blks_read, idx_blks_hit FROM pg_statio_user_indexes;" >> $DBOUTPUT_DIR/index_info.out
+	@PSQL@ -d $SID -c "SELECT relid, relname, heap_blks_read, heap_blks_hit, idx_blks_read, idx_blks_hit FROM pg_statio_user_tables WHERE relname <> 'time_statistics' ORDER BY relname;" >> $DBOUTPUT_DIR/table_info.out
+	@PSQL@ -d $SID -c "SELECT relid, indexrelid, relname, indexrelname, idx_blks_read, idx_blks_hit FROM pg_statio_user_indexes ORDER BY indexrelname;" >> $DBOUTPUT_DIR/index_info.out
 	# scans 
-	@PSQL@ -d $SID -c "SELECT * FROM pg_stat_user_tables;" >> $DBOUTPUT_DIR/table_scan.out
-	@PSQL@ -d $SID -c "SELECT * FROM pg_stat_user_indexes;" >> $DBOUTPUT_DIR/indexes_scan.out
+	@PSQL@ -d $SID -c "SELECT * FROM pg_stat_user_tables WHERE relname <> 'time_statistics' ORDER BY relname;" >> $DBOUTPUT_DIR/table_scan.out
+	@PSQL@ -d $SID -c "SELECT * FROM pg_stat_user_indexes ORDER BY indexrelname;" >> $DBOUTPUT_DIR/indexes_scan.out
 	sleep $SAMPLE_LENGTH
 done

@@ -48,12 +48,12 @@ getoprof () {
 	sudo opstack > $OUTPUT_DIR/oprofile/call-graph.txt
 }
 
-db_param=""
+PARAMETERS=""
 SF=0
 USE_OPROFILE=0
 GENERATE=0
-TABLESPACES=0
-while getopts "f:g:o:p:ty:" opt; do
+ONLY_LOAD=0
+while getopts "f:g:lo:p:tyv" opt; do
 	case $opt in
 	f)
 		SF=$OPTARG
@@ -61,21 +61,28 @@ while getopts "f:g:o:p:ty:" opt; do
 	g)
 		GENERATE=$OPTARG
 		;;
+	l)
+		ONLY_LOAD=1
+		;;
 	o)
 		OUTPUT_DIR=$OPTARG
 		mkdir -p $OUTPUT_DIR
 		;;
 	p)
-		db_param=$OPTARG
+		PARAMETERS="${LOAD_PARAMETERS} $OPTARG"
 		;;
 	t)
-		TABLESPACES=1
+		TABLESPACE_FLAG="-t"
+		;;
+	v)
+		set -x
+		SHELL="${SHELL} -x"
 		;;
 	y)
-		USE_OPROFILE=$OPTARG
+		USE_OPROFILE=1
 		;;
 	?)
-		echo "Usage: $0 [ -o <dir> -p <db_param> -f <scale_factor> -r <0/1> -x <0/1> -y <0/1>]"
+		echo "Usage: $0 [-o <dir> -p <db_param> -f <scale_factor>]"
 		exit 1
 	esac
 done
@@ -83,7 +90,8 @@ done
 if [ $GENERATE -ne 0 ]; then
 	echo "Generating data for scale factor $SF..."
 	date
-	${DBGEN} -s $SF
+	${DBGEN} -s $SF || exit 1
+	chmod a+r ${DSS_PATH}/*.tbl
 	date
 else
 	echo "Create the database using existing datafiles."
@@ -101,12 +109,9 @@ fi
 # Start collecting system statistics.
 ${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
-${SHELL} $DBSCRIPTDIR/create_db.sh "$db_param" || exit 1
+${SHELL} $DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 	
-if [ $TABLESPACES -eq 1 ]; then
-	${SHELL} $DBSCRIPTDIR/create_tablespaces.sh || exit 1
-fi
-${SHELL} $DBSCRIPTDIR/create_tables.sh ${TABLESPACES} || exit 1
+${SHELL} $DBSCRIPTDIR/create_tables.sh ${TABLESPACE_FLAG} || exit 1
 
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
@@ -116,18 +121,20 @@ ${SHELL} $DBSCRIPTDIR/record_start.sh -n "LOAD"
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 
 date
-${SHELL} ${DBSCRIPTDIR}/load_db.sh ${TABLESPACES} || exit 1
-date
-	
-date
-${SHELL} $DBSCRIPTDIR/create_indexes.sh ${TABLESPACES} || exit 1
-date
-	
-date
-${SHELL} $DBSCRIPTDIR/update_statistics.sh || exit 1
+${SHELL} ${DBSCRIPTDIR}/load_db.sh ${TABLESPACE_FLAG} || exit 1
 date
 
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "LOAD"
+if [ ${ONLY_LOAD} -eq 0 ]; then
+	date
+	${SHELL} $DBSCRIPTDIR/create_indexes.sh ${TABLESPACE_FLAG} || exit 1
+	date
+	
+	date
+	${SHELL} $DBSCRIPTDIR/update_statistics.sh || exit 1
+	date
+fi
+
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "LOAD" || exit 1
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` Load Test Completed"
 let "diff_time=$e_time-$s_time"

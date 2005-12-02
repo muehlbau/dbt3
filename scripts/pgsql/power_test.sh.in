@@ -48,7 +48,7 @@ EXPLAIN_ANALYZE=0
 USE_OPROFILE=0
 
 # process the command line parameters
-while getopts "ef:p:o:s:t:y:" opt; do
+while getopts "ef:p:o:s:t:y" opt; do
 	case $opt in
 		e) EXPLAIN_ANALYZE=1
 			;;
@@ -57,15 +57,15 @@ while getopts "ef:p:o:s:t:y:" opt; do
 		o) OUTPUT_DIR=$OPTARG
 		   mkdir -p $OUTPUT_DIR/results
 			;;
-		p) db_param=$OPTARG
+		p) PARAMETERS="${POWER_PARAMETERS} $OPTARG"
 			;;
 		s) SEED_FILE=$OPTARG
 			;;
 		t) TAG=$OPTARG
 			;;
-		y) USE_OPROFILE=$OPTARG
+		y) USE_OPROFILE=1
 			;;
-		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e -p <db_params> -t <tag> -y USE_OPROFILE]"
+		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e -p <db_params> -t <tag> -y]"
 			exit ;;
 		esac
 done
@@ -101,11 +101,11 @@ done
 # Modify query file so that the commands are in one line.
 ${PARSE_QUERY} $query_file $tmp_query_file E
 
-${SHELL} $DBSCRIPTDIR/stop_db.sh
-${SHELL} $DBSCRIPTDIR/start_db.sh "$db_param"
+${SHELL} $DBSCRIPTDIR/stop_db.sh || exit 1
+${SHELL} $DBSCRIPTDIR/start_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 
 # Start collecting system statistics.
-${SHELL} $SCRIPTDIR/start_sysstats.sh -o $OUTPUT_DIR
+${SHELL} $SCRIPTDIR/start_sysstats.sh -o $OUTPUT_DIR || exit 1
 
 # Collect database statistics
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
@@ -121,14 +121,14 @@ if [ $USE_OPROFILE -eq 1 ]; then
 fi
 
 s_time_power=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER" || exit 1
 
 # Refresh Stream 1
 echo "`date`: Power Test : Starting Refresh Stream 1" 
 s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF1"
-${SHELL} $DBSCRIPTDIR/run_rf1.sh $SCALE_FACTOR $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf1.result 2>&1
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF1"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF1" || exit 1
+${SHELL} $DBSCRIPTDIR/run_rf1.sh $SCALE_FACTOR $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf1.result 2>&1 || exit 1
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF1" || exit 1
 e_time=`$GTIME`
 echo "`date`: Power Test : Refresh Stream 1 completed." 
 let "diff_time=$e_time-$s_time"
@@ -139,14 +139,14 @@ ${SHELL} $DBSCRIPTDIR/run_power_query.sh $SCALE_FACTOR $TAG $EXPLAIN_ANALYZE $OU
 # Refresh Stream 2
 echo "`date`: Power Test : Starting Refresh Stream 2" 
 s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF2"
-${SHELL} $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf2.result 2>&1
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF2"
+${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF2" || exit 1
+${SHELL} $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf2.result 2>&1 || exit 1
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF2" || exit 1
 e_time=`$GTIME`
 echo "`date`: Power Test : Refresh Stream 2 completed." 
 let "diff_time=$e_time-$s_time"
 
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER"
+${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER" || exit 1
 e_time_power=`$GTIME`
 echo "`date`: Power Test completed."
 let "diff_time=$e_time_power-$s_time_power"
@@ -155,10 +155,7 @@ echo "Elapsed time for Power Test : $diff_time seconds"
 # Stop collecting system statistics.
 ${SHELL} $SCRIPTDIR/stop_sysstats.sh $OUTPUT_DIR
 
-#no effect
-#killall $DBSTATS
-
-${SHELL} $DBSCRIPTDIR/stop_db.sh
+${SHELL} $DBSCRIPTDIR/stop_db.sh || exit 1
 
 if [ -f /proc/profile ]; then
 	profname="Power_Test_$TAG"

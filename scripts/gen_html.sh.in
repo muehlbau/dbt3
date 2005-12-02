@@ -23,7 +23,9 @@ RAM=`grep memory ${DIR}/config.txt | awk '{print $2}'`
 SF=`grep scale_factor ${DIR}/config.txt | awk '{print $2}'`
 STREAMS=`grep num_stream ${DIR}/config.txt | awk '{print $2}'`
 
-LOAD=`grep LOAD ${DIR}/q_time.out | awk '{ print $9 }'`
+LOAD=`grep LOAD ${DIR}/q_time.out | awk '{ print $11 }'`
+# Round to 2 decimal places, convert to hours.
+LOAD=`echo "scale=2; ${LOAD} / 3600" | bc -l`
 COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{print $3}'`
 POWER=`grep power ${DIR}/calc_composite.out | awk '{print $3}'`
 THROUGHPUT=`grep throughput ${DIR}/calc_composite.out | awk '{print $3}'`
@@ -147,7 +149,7 @@ echo "<tr>"
 echo "<td align=\"right\">Composite:</td><td align=\"right\">${COMPOSITE}</td>"
 echo "</tr>"
 echo "<tr>"
-echo "<td align=\"right\">Load Time:</td><td align=\"right\">${LOAD}</td>"
+echo "<td align=\"right\">Load Time:</td><td align=\"right\">${LOAD} Hours</td>"
 echo "</tr>"
 echo "<tr>"
 echo "<td align=\"right\">Query Processing Power:</td><td align=\"right\">${POWER}</td>"
