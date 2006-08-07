@@ -7,12 +7,14 @@
 # Copyright (C) 2002 Jenny Zhang & Open Source Development Lab, Inc.
 #
 
+export DBT3_DIR=/mnt/dbt3
+
 export SID=dbt3
-export PGDATA=/mnt/postgresql/pgdata
+export PGDATA=${DBT3_DIR}/pgdata
 
 export DEFAULT_LOAD_PARAMETERS=""
 export DEFAULT_POWER_PARAMETERS=""
 export DEFAULT_THROUGHPUT_PARAMETERS=""
 
 # Directory with tablespace mount points, if using tablespaces.
-TSDIR=/mnt/dbt3
+TSDIR=${DBT3_DIR}
