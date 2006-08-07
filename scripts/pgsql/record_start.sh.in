@@ -4,10 +4,10 @@
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2004 Mark Wong & Open Source Development Lab, Inc.
+# Copyright (C) 2004-2006 Mark Wong & Open Source Development Labs, Inc.
 #
 
-SRCDIR=@TOPDIR@
+. @TOPDIR@/scripts/dbt3_profile || exit 1
 
 while getopts "n:" opt; do
 	case $opt in
@@ -18,5 +18,8 @@ while getopts "n:" opt; do
 done
 
 s_time=`$GTIME`
-SQL="INSERT INTO time_statistics (task_name, s_time, int_time) VALUES ('$NAME', current_timestamp, $s_time);"
+SQL="
+INSERT INTO time_statistics (task_name, s_time, int_time)
+VALUES ('$NAME', current_timestamp, $s_time);
+"
 @PSQL@ -d $SID -c "$SQL"
