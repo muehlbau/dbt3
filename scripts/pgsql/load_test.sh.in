@@ -72,7 +72,7 @@ while getopts "f:g:lo:p:tyv" opt; do
 		PARAMETERS="${LOAD_PARAMETERS} $OPTARG"
 		;;
 	t)
-		TABLESPACE_FLAG="-t"
+		TABLESPACE_FLAG="-t -b"
 		;;
 	v)
 		set -x
