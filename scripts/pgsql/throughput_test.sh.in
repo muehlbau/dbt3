@@ -52,8 +52,9 @@ getoprof () {
 }
 
 TEST_ARGS=
+NO_REFRESH_FLAG=
 
-while getopts "ef:n:o:p:s:t:y" opt; do
+while getopts "ef:n:o:p:s:t:yz" opt; do
 	case $opt in
 	e) TEST_ARGS="$TEST_ARGS -e"
 		;;
@@ -71,6 +72,8 @@ while getopts "ef:n:o:p:s:t:y" opt; do
 	t) TAG=$OPTARG
 		;;
 	y) USE_OPROFILE=1
+		;;
+	z) NO_REFRESH_FLAG="-z"
 		;;
 	esac
 done
@@ -109,7 +112,7 @@ ${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR || exit 1
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 
 # Start the streams.
-${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} || exit 1
+${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} ${NO_REFRESH_FLAG} || exit 1
 
 # Stop collecting system statistics.
 ${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR || exit 1

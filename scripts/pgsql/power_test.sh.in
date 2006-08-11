@@ -45,9 +45,10 @@ getoprof () {
 
 EXPLAIN_ANALYZE=0
 USE_OPROFILE=0
+NO_REFRESH=0
 
 # process the command line parameters
-while getopts "ef:p:o:s:t:y" opt; do
+while getopts "ef:p:o:s:t:yz" opt; do
 	case $opt in
 		e) EXPLAIN_ANALYZE=1
 			;;
@@ -63,6 +64,8 @@ while getopts "ef:p:o:s:t:y" opt; do
 		t) TAG=$OPTARG
 			;;
 		y) USE_OPROFILE=1
+			;;
+		z) NO_REFRESH=1
 			;;
 		?) echo "Usage: $0 -f <SCALE_FACTOR> [-e -p <db_params> -t <tag> -y]"
 			exit ;;
@@ -122,28 +125,32 @@ fi
 s_time_power=`$GTIME`
 ${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER" || exit 1
 
-# Refresh Stream 1
-echo "`date`: Power Test : Starting Refresh Stream 1" 
-s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF1" || exit 1
-${SHELL} $DBSCRIPTDIR/run_rf1.sh $SCALE_FACTOR $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf1.result 2>&1 || exit 1
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF1" || exit 1
-e_time=`$GTIME`
-echo "`date`: Power Test : Refresh Stream 1 completed." 
-let "diff_time=$e_time-$s_time"
+if [ ${NO_REFRESH} -eq 0 ]; then
+	# Refresh Stream 1
+	echo "`date`: Power Test : Starting Refresh Stream 1" 
+	s_time=`$GTIME`
+	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF1" || exit 1
+	${SHELL} $DBSCRIPTDIR/run_rf1.sh $SCALE_FACTOR $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf1.result 2>&1 || exit 1
+	${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF1" || exit 1
+	e_time=`$GTIME`
+	echo "`date`: Power Test : Refresh Stream 1 completed." 
+	let "diff_time=$e_time-$s_time"
+fi
 
 # Execute the queries.
 ${SHELL} $DBSCRIPTDIR/run_power_query.sh $SCALE_FACTOR $TAG $EXPLAIN_ANALYZE $OUTPUT_DIR $RUNDIR $SEED_FILE || exit 1
 
-# Refresh Stream 2
-echo "`date`: Power Test : Starting Refresh Stream 2" 
-s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF2" || exit 1
-${SHELL} $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf2.result 2>&1 || exit 1
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF2" || exit 1
-e_time=`$GTIME`
-echo "`date`: Power Test : Refresh Stream 2 completed." 
-let "diff_time=$e_time-$s_time"
+if [ ${NO_REFRESH} -eq 0 ]; then
+	# Refresh Stream 2
+	echo "`date`: Power Test : Starting Refresh Stream 2" 
+	s_time=`$GTIME`
+	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.POWER.RF2" || exit 1
+	${SHELL} $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/power.perf${TAG}.rf2.result 2>&1 || exit 1
+	${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER.RF2" || exit 1
+	e_time=`$GTIME`
+	echo "`date`: Power Test : Refresh Stream 2 completed." 
+	let "diff_time=$e_time-$s_time"
+fi
 
 ${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.POWER" || exit 1
 e_time_power=`$GTIME`

@@ -18,7 +18,8 @@ usage()
 	echo "usage: get_power.sh -i <q_time.out> -p <perfrun> -s <scale factor> [-v]"
 }
 
-while getopts "i:p:s:v" OPT; do
+NO_REFRESH=0
+while getopts "i:p:s:vz" OPT; do
 	case ${OPT} in
 	i)
 		INFILE=${OPTARG}
@@ -32,6 +33,9 @@ while getopts "i:p:s:v" OPT; do
 	v)
 		set -x
 		SHELL="${SHELL} +x"
+		;;
+	z)
+		NO_REFRESH=1
 		;;
 	esac
 done
@@ -53,23 +57,25 @@ for i in `seq 1 22`; do
 	VALUES="${VALUES} ${VAL}"
 done 
 
-#
-# Get execution time for the each of the refresh functions.
-#
-for i in `seq 1 2`; do
-	VAL=`grep "PERF${PERFNUM}.POWER.RF${i}" ${INFILE} | awk '{ print $11 }'`
-	if [ -z ${VAL} ]; then
-		echo "No power data retrieved for 'PERF${PERFNUM}.POWER.RF${i}'."
-		exit 1
-	fi
+if [ ${NO_REFRESH} -eq 0 ]; then
 	#
-	# in case the refresh functions finished within 1 second
+	# Get execution time for the each of the refresh functions.
 	#
-	if [ "x${VAL}" = "x0" ]; then
-		VAL=1
-	fi
-	VALUES="${VALUES} ${VAL}"
-done 
+	for i in `seq 1 2`; do
+		VAL=`grep "PERF${PERFNUM}.POWER.RF${i}" ${INFILE} | awk '{ print $11 }'`
+		if [ -z ${VAL} ]; then
+			echo "No power data retrieved for 'PERF${PERFNUM}.POWER.RF${i}'."
+			exit 1
+		fi
+		#
+		# in case the refresh functions finished within 1 second
+		#
+		if [ "x${VAL}" = "x0" ]; then
+			VAL=1
+		fi
+		VALUES="${VALUES} ${VAL}"
+	done 
+fi
 
 ${POWER} ${SCALE_FACTOR} ${VALUES} || exit 1
 

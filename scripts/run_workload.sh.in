@@ -25,10 +25,10 @@ MAX=1
 GENERATE=0
 TEST_ARGS=
 LOAD_ARGS=
-while getopts "ef:gn:op:q:r:s:tuv" opt; do
+while getopts "ef:gn:op:q:r:s:tuvz" opt; do
 	case $opt in
 	e)
-		# PostgreSQL only.
+		# PostgreSQL only: EXPLAIN ANALIZE.
 		TEST_ARGS="$TEST_ARGS -e"
 		;;
 	f)
@@ -68,6 +68,9 @@ while getopts "ef:gn:op:q:r:s:tuv" opt; do
 		SHELL="${SHELL} -x"
 		export SHELL;
 		;;
+	z)
+		NO_REFRESH_FLAG="-z"
+		;;
 	esac
 done
 
@@ -104,10 +107,10 @@ do
 	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${i}" || exit 1
 
 	# Power Test
-	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR/power${i} -p "${POWER_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i ${OPROFILE_FLAG} || exit 1
+	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR/power${i} -p "${POWER_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
 
 	# Throughput Test
-	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR/throughput${i} -p "${THROUGHPUT_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i ${OPROFILE_FLAG} || exit 1
+	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR/throughput${i} -p "${THROUGHPUT_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
 
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
@@ -130,10 +133,14 @@ ${SHELL} $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$PO
 ${SHELL} $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out || exit 1
 
 # Calculate composite score.      
-${SHELL} $SRCDIR/scripts/get_composite.sh -i ${OUTPUT_DIR}/q_time.out -p 1 \
-		-s ${SCALE_FACTOR} -n ${STREAMS} \
-		-o ${OUTPUT_DIR}/calc_composite.out || exit 1
-perl $SRCDIR/scripts/graph_query_time.pl --if $OUTPUT_DIR/q_time.out || exit 1
+${SHELL} $SRCDIR/scripts/get_composite.sh \
+		-i ${OUTPUT_DIR}/q_time.out \
+		-p 1 \
+		-s ${SCALE_FACTOR} \
+		-n ${STREAMS} \
+		-o ${OUTPUT_DIR}/calc_composite.out \
+		${NO_REFRESH_FLAG} || exit 1
+perl $SRCDIR/scripts/graph_query_time.pl --if $OUTPUT_DIR/q_time.out ${NO_REFRESH_FLAG} || exit 1
 ${SHELL} $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
