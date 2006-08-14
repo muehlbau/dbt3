@@ -42,7 +42,7 @@ done
 
 SCRIPT_DIR="@TOPDIR@/scripts/@DATABASE_TO_USE@";
 
-POWER=`${SHELL} ${SCRIPT_DIR}/get_power.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
+POWER=`${SCRIPT_DIR}/get_power.pl -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
 THROUGHPUT=`${SHELL} ${SCRIPT_DIR}/get_throughput.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
 COMPOSITE=`echo "scale=2; sqrt(${POWER} * ${THROUGHPUT})" | bc -l`
 
