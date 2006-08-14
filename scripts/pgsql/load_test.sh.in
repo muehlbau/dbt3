@@ -52,8 +52,12 @@ SF=0
 USE_OPROFILE=0
 GENERATE=0
 ONLY_LOAD=0
-while getopts "f:g:lo:p:tyv" opt; do
+DBDATA=${DSS_PATH}
+while getopts "d:f:g:lo:p:tyv" opt; do
 	case $opt in
+	d)
+		DBDATA=${OPTARG}
+		;;
 	f)
 		SF=$OPTARG
 		;;
@@ -120,7 +124,7 @@ ${SHELL} $DBSCRIPTDIR/record_start.sh -n "LOAD"
 ${SHELL} $DBSTATS $SID $OUTPUT_DIR &
 
 date
-${SHELL} ${DBSCRIPTDIR}/load_db.sh ${TABLESPACE_FLAG} || exit 1
+${SHELL} ${DBSCRIPTDIR}/load_db.sh -d ${DBDATA} ${TABLESPACE_FLAG} || exit 1
 date
 
 if [ ${ONLY_LOAD} -eq 0 ]; then
