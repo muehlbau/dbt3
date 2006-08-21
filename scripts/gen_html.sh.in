@@ -26,8 +26,8 @@ STREAMS=`grep num_stream ${DIR}/config.txt | awk '{print $2}'`
 LOAD=`grep LOAD ${DIR}/q_time.out | awk '{ print $11 }'`
 # Round to 2 decimal places, convert to hours.
 LOAD=`echo "scale=2; ${LOAD} / 3600" | bc -l`
-COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{print $3}'`
-POWER=`grep power ${DIR}/calc_composite.out | awk '{print $3}'`
+COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{printf("%0.0f", $3)}'`
+POWER=`grep power ${DIR}/calc_composite.out | awk '{printf("%0.0f", $3)}'`
 THROUGHPUT=`grep throughput ${DIR}/calc_composite.out | awk '{print $3}'`
 
 gen_results()
