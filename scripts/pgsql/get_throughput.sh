@@ -48,7 +48,7 @@ fi
 #
 # Get the execution time for the throughput test.
 #
-THROUGHPUT=`grep "PERF${PERFNUM}.THRUPUT " ${INFILE} | awk '{ print $11 }'`
+THROUGHPUT=`grep "PERF${PERFNUM}.THRUPUT " ${INFILE} | awk -F '|' '{ print $5 }'`
 if [ -z ${THROUGHPUT} ]; then
 	echo "No throughput data retrieved from database."
 	exit 1
