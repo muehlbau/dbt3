@@ -53,8 +53,9 @@ my $value = 1;
 # Get execution time for the power queries.
 #
 for ($i = 1; $i <= 22; $i++) {
-  my $val = `grep \'PERF$perf_run_number.POWER.Q$i \' $infile | awk '{ print \$11 }'`;
-  chomp $val;
+  my $val = `grep \'PERF$perf_run_number.POWER.Q$i \' $infile | awk -F '|' '{ print \$5 }'`;
+  $val =~ s/^\s+//;
+  $val =~ s/\s+$//;
   $value *= $val;
 }
 

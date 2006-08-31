@@ -13,8 +13,16 @@
 # Rewritten from perl to bash.
 #
 
-while getopts "i:n:o:p:s:vz" OPT; do
+FLAG_POWER_TEST=0
+FLAG_THROUGHPUT_TEST=0
+while getopts "23i:n:o:p:s:vz" OPT; do
 	case ${OPT} in
+	2)
+		FLAG_POWER_TEST=1
+		;;
+	3)
+		FLAG_THROUGHPUT_TEST=1
+		;;
 	i)
 		INFILE=${OPTARG}
 		;;
@@ -42,12 +50,24 @@ done
 
 SCRIPT_DIR="@TOPDIR@/scripts/@DATABASE_TO_USE@";
 
-POWER=`${SCRIPT_DIR}/get_power.pl -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
-THROUGHPUT=`${SHELL} ${SCRIPT_DIR}/get_throughput.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
-COMPOSITE=`echo "scale=2; sqrt(${POWER} * ${THROUGHPUT})" | bc -l`
+#
+# Make sure the outfile is created.
+#
+touch ${OUTFILE}
 
-echo "power = ${POWER}" > ${OUTFILE}
-echo "throughput = ${THROUGHPUT}" >> ${OUTFILE}
-echo "composite = ${COMPOSITE}" >> ${OUTFILE}
+if [ ${FLAG_POWER_TEST} -eq 1 ]; then
+	POWER=`${SCRIPT_DIR}/get_power.pl -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
+	echo "power = ${POWER}" >> ${OUTFILE}
+fi
+
+if [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
+	THROUGHPUT=`${SHELL} ${SCRIPT_DIR}/get_throughput.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
+	echo "throughput = ${THROUGHPUT}" >> ${OUTFILE}
+fi
+
+if [ ${FLAG_POWER_TEST} -eq 1 ] && [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
+	COMPOSITE=`echo "scale=2; sqrt(${POWER} * ${THROUGHPUT})" | bc -l`
+	echo "composite = ${COMPOSITE}" >> ${OUTFILE}
+fi
 
 exit 0

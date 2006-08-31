@@ -48,7 +48,7 @@ else
 	@INITDB@ -D $PGDATA || exit 1
 fi
 
-${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit
+${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
 
 echo "Creating database $SID..."
 _o=`@CREATEDB@ $SID 2>&1`

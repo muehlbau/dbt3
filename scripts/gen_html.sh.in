@@ -23,12 +23,22 @@ RAM=`grep memory ${DIR}/config.txt | awk '{print $2}'`
 SF=`grep scale_factor ${DIR}/config.txt | awk '{print $2}'`
 STREAMS=`grep num_stream ${DIR}/config.txt | awk '{print $2}'`
 
-LOAD=`grep LOAD ${DIR}/q_time.out | awk '{ print $11 }'`
-# Round to 2 decimal places, convert to hours.
-LOAD=`echo "scale=2; ${LOAD} / 3600" | bc -l`
-COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{printf("%0.0f", $3)}'`
-POWER=`grep power ${DIR}/calc_composite.out | awk '{printf("%0.0f", $3)}'`
-THROUGHPUT=`grep throughput ${DIR}/calc_composite.out | awk '{print $3}'`
+if [ -d "${DIR}\load" ]; then
+	LOAD=`grep LOAD ${DIR}/q_time.out | awk '{ print $11 }'`
+	# Round to 2 decimal places, convert to hours.
+	LOAD=`echo "scale=2; ${LOAD} / 3600" | bc -l`
+else
+	LOAD=0
+fi
+if [ -f ${DIR}/calc_composite.out ]; then
+	COMPOSITE=`grep composite ${DIR}/calc_composite.out | awk '{printf("%0.0f", $3)}'`
+	POWER=`grep power ${DIR}/calc_composite.out | awk '{printf("%0.0f", $3)}'`
+	THROUGHPUT=`grep throughput ${DIR}/calc_composite.out | awk '{print $3}'`
+else
+	COMPOSITE="N/A"
+	POWER="N/A"
+	THROUGHPUT="N/A"
+fi
 
 gen_results()
 {
@@ -159,24 +169,35 @@ echo "<td align=\"right\">Throughput Numerical Quantity:</td><td align=\"right\"
 echo "</tr>"
 echo "</table>"
 
-echo "<h2>Query Times</h2>"
-echo "<img src=\"q_time.png\" />"
-echo "<p>"
-echo "<a href=\"q_time.out\">Text Version of Chart</a>"
-echo "</p>"
+if [ -f "${DIR}/q_time.png" ]; then
+	echo "<h2>Query Times</h2>"
+	echo "<img src=\"q_time.png\" />"
+	echo "<p>"
+	echo "<a href=\"q_time.out\">Text Version of Chart</a>"
+	echo "</p>"
+fi
 
 # Generate individual Web pages for each test result directory.
 echo "<h2>Individual Test Results</h2>"
 
 cd ${DIR}
 
-# There will always only be 1 load test.
-gen_results "Load Test" "load"
-echo "<p>"
-echo "<a href=\"load\">Load Test</a>"
-echo "</p>"
+#
+# There will only be 1 load test if any.
+#
+if [ -d "${DIR}\load" ]; then
+	gen_results "Load Test" "load"
+	echo "<p>"
+	echo "<a href=\"load\">Load Test</a>"
+	echo "</p>"
+fi
 
 echo "<p>"
+#
+# There can be multiple power* and throughput* test directories and I don't
+# know how to test for that without doing the ls.  So we're going to have
+# to live with "No such file or directory" messages if they don't exists.
+#
 i=1
 for ARG in `ls -d power*`
 do

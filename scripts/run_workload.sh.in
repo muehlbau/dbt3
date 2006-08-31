@@ -26,8 +26,29 @@ GENERATE=0
 TEST_ARGS=
 LOAD_ARGS=
 DBDATA=${DSS_PATH}
-while getopts "d:ef:gn:op:q:r:s:tuvz" opt; do
+
+RUN_ALL_TESTS=1
+RUN_LOAD_TEST=0
+RUN_POWER_TEST=0
+RUN_THROUGHPUT_TEST=0
+FLAG_POWER_TEST=""
+FLAG_THROUGHPUT_TEST=""
+while getopts "123d:ef:gn:op:q:r:s:tuvz" opt; do
 	case $opt in
+	1)
+		RUN_LOAD_TEST=1
+		RUN_ALL_TESTS=0
+		;;
+	2)
+		RUN_POWER_TEST=1
+		FLAG_POWER_TEST="-2"
+		RUN_ALL_TESTS=0
+		;;
+	3)
+		RUN_THROUGHPUT_TEST=1
+		FLAG_THROUGHPUT_TEST="-3"
+		RUN_ALL_TESTS=0
+		;;
 	d)
 		DBDATA=${OPTARG}
 		;;
@@ -78,6 +99,17 @@ while getopts "d:ef:gn:op:q:r:s:tuvz" opt; do
 	esac
 done
 
+#
+# Reset the flags based to make the logic later in the script easier.
+#
+if [ ${RUN_ALL_TESTS} -eq 1 ]; then
+	RUN_LOAD_TEST=1
+	RUN_POWER_TEST=1
+	RUN_THROUGHPUT_TEST=1
+	FLAG_POWER_TEST="-2"
+	FLAG_THROUGHPUT_TEST="-3"
+fi
+
 # Determine a unique identifer for this test run.
 RUN_NUMBER=-1
 if test -f run_number; then
@@ -100,41 +132,79 @@ else
 fi
 echo "Using seed: `cat $SEED_FILE`"
 
+#
 # Load Test
-${SHELL} $DBSCRIPTDIR/load_test.sh \
-		-o $OUTPUT_DIR/load \
-		-p "${LOAD_PARAMETERS}" \
-		${OPROFILE_FLAG} \
-		-f $SCALE_FACTOR \
-		-g $GENERATE \
-		$LOAD_ARGS \
-		-d ${DBDATA} \
-		${TABLESPACES_FLAG} || exit 1
+#
+if [ ${RUN_LOAD_TEST} -eq 1 ]; then
+	${SHELL} $DBSCRIPTDIR/load_test.sh \
+			-o $OUTPUT_DIR/load \
+			-p "${LOAD_PARAMETERS}" \
+			${OPROFILE_FLAG} \
+			-f $SCALE_FACTOR \
+			-g $GENERATE \
+			$LOAD_ARGS \
+			-d ${DBDATA} \
+			${TABLESPACES_FLAG} || exit 1
+else
+	#
+	# If the load test wasn't performed the time statistics needs to
+	# be cleared out.  Otherwise the data collection will be
+	# incomprehensible with duplicate data.
+	#
+	${DBSCRIPTDIR}/clear-time-statistics.sh || exit 1
+fi
 
 i=1
 while [ $i -le $MAX ]
 do
+	#
 	# Start time of a Power and Throughput test.
+	#
 	s_time=`$GTIME`
-	${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${i}" || exit 1
+	${SHELL} ${DBSCRIPTDIR}/record_start.sh -n "PERF${i}" || exit 1
 
-	# Power Test
-	${SHELL} $DBSCRIPTDIR/power_test.sh -f $SCALE_FACTOR -o $OUTPUT_DIR/power${i} -p "${POWER_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
+	if [ ${RUN_POWER_TEST} -eq 1 ]; then
+		#
+		# Power Test
+		#
+		${SHELL} ${DBSCRIPTDIR}/power_test.sh \
+				-f ${SCALE_FACTOR} \
+				-o ${OUTPUT_DIR}/power${i} \
+				-p "${POWER_PARAMETERS}" ${TEST_ARGS} \
+				-s ${SEED_FILE} \
+				-t ${i} ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
+	fi
 
+	if [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
+	#
 	# Throughput Test
-	${SHELL} $DBSCRIPTDIR/throughput_test.sh -n $STREAMS -f $SCALE_FACTOR -o $OUTPUT_DIR/throughput${i} -p "${THROUGHPUT_PARAMETERS}" $TEST_ARGS -s ${SEED_FILE} -t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
+	#
+		${SHELL} ${DBSCRIPTDIR}/throughput_test.sh \
+				-n ${STREAMS} \
+				-f ${SCALE_FACTOR} \
+				-o ${OUTPUT_DIR}/throughput${i} \
+				-p "${THROUGHPUT_PARAMETERS}" ${TEST_ARGS} \
+				-s ${SEED_FILE} \
+				-t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
+	fi
 
+	#
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
+	#
 	${SHELL} $DBSCRIPTDIR/start_db.sh
 
+	#
 	# End time of a Power and Throughput test.
+	#
 	${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${i}" || exit 1
 	e_time=`$GTIME`
 	let "diff_time=$e_time-$s_time"
 	echo "Elapsed time for performance test ${i} : $diff_time seconds"
 
+	#
 	# Increment loop counter.
+	#
 	let "i=$i+1"
 done
 
@@ -144,15 +214,22 @@ ${SHELL} $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$PO
 # Get query times.
 ${SHELL} $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out || exit 1
 
+#
 # Calculate composite score.      
-${SHELL} $SRCDIR/scripts/get_composite.sh \
-		-i ${OUTPUT_DIR}/q_time.out \
-		-p 1 \
-		-s ${SCALE_FACTOR} \
-		-n ${STREAMS} \
-		-o ${OUTPUT_DIR}/calc_composite.out \
-		${NO_REFRESH_FLAG} || exit 1
-perl $SRCDIR/scripts/graph_query_time.pl --if $OUTPUT_DIR/q_time.out ${NO_REFRESH_FLAG} || exit 1
+#
+if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
+	${SHELL} $SRCDIR/scripts/get_composite.sh \
+			-i ${OUTPUT_DIR}/q_time.out \
+			-p 1 \
+			-s ${SCALE_FACTOR} \
+			-n ${STREAMS} \
+			-o ${OUTPUT_DIR}/calc_composite.out \
+			${NO_REFRESH_FLAG} \
+			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
+	$SRCDIR/scripts/graph_query_time.pl \
+			--if $OUTPUT_DIR/q_time.out ${NO_REFRESH_FLAG} \
+			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
+fi
 ${SHELL} $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
