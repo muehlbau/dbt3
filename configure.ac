@@ -121,6 +121,8 @@ if test "$DATABASE_TO_USE" == "pgsql"; then
     AC_MSG_ERROR([*** initdb is required])
   fi
 
+  AC_CONFIG_FILES([scripts/pgsql/clear-time-statistics.sh],
+      [chmod +x scripts/pgsql/clear-time-statistics.sh])
   AC_CONFIG_FILES([scripts/pgsql/get_query_plan.sh],
       [chmod +x scripts/pgsql/get_query_plan.sh])
   AC_CONFIG_FILES([scripts/pgsql/get_version.sh],
