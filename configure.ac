@@ -235,6 +235,7 @@ elif test "$DATABASE_TO_USE" == "sapdb"; then
 fi
 
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([dbgen/Makefile])
 AC_CONFIG_FILES([scripts/dbt3_profile])
 AC_CONFIG_FILES([scripts/get_composite.sh], [chmod +x scripts/get_composite.sh])
 AC_CONFIG_FILES([scripts/get_config.sh], [chmod +x scripts/get_config.sh])
