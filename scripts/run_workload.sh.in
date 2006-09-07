@@ -151,6 +151,7 @@ else
 	# be cleared out.  Otherwise the data collection will be
 	# incomprehensible with duplicate data.
 	#
+	${SHELL} $DBSCRIPTDIR/start_db.sh
 	${DBSCRIPTDIR}/clear-time-statistics.sh || exit 1
 fi
 
