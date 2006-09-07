@@ -185,7 +185,7 @@ cd ${DIR}
 #
 # There will only be 1 load test if any.
 #
-if [ -d "${DIR}\load" ]; then
+if [ -d "${DIR}/load" ]; then
 	gen_results "Load Test" "load"
 	echo "<p>"
 	echo "<a href=\"load\">Load Test</a>"
