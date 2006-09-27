@@ -27,13 +27,14 @@ TEST_ARGS=
 LOAD_ARGS=
 DBDATA=${DSS_PATH}
 
+COMMENT=""
 RUN_ALL_TESTS=1
 RUN_LOAD_TEST=0
 RUN_POWER_TEST=0
 RUN_THROUGHPUT_TEST=0
 FLAG_POWER_TEST=""
 FLAG_THROUGHPUT_TEST=""
-while getopts "123d:ef:gn:op:q:r:s:tuvz" opt; do
+while getopts "123d:c:ef:gn:op:q:r:s:tuvz" opt; do
 	case $opt in
 	1)
 		RUN_LOAD_TEST=1
@@ -48,6 +49,9 @@ while getopts "123d:ef:gn:op:q:r:s:tuvz" opt; do
 		RUN_THROUGHPUT_TEST=1
 		FLAG_THROUGHPUT_TEST="-3"
 		RUN_ALL_TESTS=0
+		;;
+	c)
+		COMMENT=${OPTARG}
 		;;
 	d)
 		DBDATA=${OPTARG}
@@ -122,6 +126,10 @@ fi
 # Create output directories.
 OUTPUT_DIR=$SRCDIR/scripts/output/$RUN_NUMBER
 mkdir -p $OUTPUT_DIR
+
+if [ "x${COMMENT}" != "x" ]; then
+	echo ${COMMENT} > ${OUTPUT_DIR}/comment.txt
+fi
 
 # Set the seed file.
 SEED_FILE=$OUTPUT_DIR/seed
@@ -232,6 +240,11 @@ if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
 			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
 fi
 ${SHELL} $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
+
+#
+# Stop the database at the end of the test.
+#
+${SHELL} $DBSCRIPTDIR/stop_db.sh
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
 echo $RUN_NUMBER > run_number
