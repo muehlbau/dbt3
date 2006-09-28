@@ -1,0 +1,96 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Getopt::Long;
+
+my $help;
+my $oldfilename;
+my $newfilename;
+
+GetOptions(
+  'help' => \$help,
+  'new=s' => \$newfilename,
+  'old=s' => \$oldfilename
+);
+
+sub usage()
+{
+  print "Usage: q-time-diff --old <old q_time.out> --new <new q_time.out>\n";
+}
+
+my $need_help;
+unless ($newfilename) {
+  print "Use --new <file> to specify new q_time.out file.\n";
+  $need_help = 1;
+}
+
+unless ($oldfilename) {
+  print "Use --old <file> to specify old q_time.out file.\n";
+  $need_help = 1;
+}
+
+if ($need_help) {
+  exit();
+}
+
+unless (-f $newfilename) {
+  print "New file '$newfilename' doesn't exist.\n";
+  exit(1);
+}
+
+unless (-f $oldfilename) {
+  print "Old file '$oldfilename' doesn't exist.\n";
+  exit(1);
+}
+
+my %oldtime;
+my %newtime;
+
+open F, "< $oldfilename" or die "Can't open $oldfilename : $!";
+while (<F>) {
+  if ($_ =~ /^ PERF\d\.POWER\.Q\d/) {
+    my @d = split /\|/, $_;
+    my $query = $d[0];
+    $query =~ s/^\s+//;
+    $query =~ s/\s+$//;
+    my $time = $d[4];
+    $time =~ s/^\s+//;
+    $time =~ s/\s+$//;
+    $query =~ /PERF\d\.POWER\.Q(\d+)/;
+    #
+    # Pad with zeros so it'll sort correctly later.
+    #
+	$query = sprintf("%02.d", $1);
+    $oldtime{$query} = $time;
+  }
+}
+close F;
+
+open F, "< $newfilename" or die "Can't open $newfilename : $!";
+while (<F>) {
+  if ($_ =~ /^ PERF\d\.POWER\.Q\d/) {
+    my @d = split /\|/, $_;
+    my $query = $d[0];
+    $query =~ s/^\s+//;
+    $query =~ s/\s+$//;
+    my $time = $d[4];
+    $time =~ s/^\s+//;
+    $time =~ s/\s+$//;
+    $query =~ /PERF\d\.POWER\.Q(\d+)/;
+    #
+    # Pad with zeros so it'll sort correctly later.
+    #
+	$query = sprintf("%02.d", $1);
+    $newtime{"$query"} = $time;
+  }
+}
+close F;
+
+printf("Q  %7s %7s %7s %5.1s\n", 'old (s)', 'new (s)', '+/- (s)', '%');
+printf("-- %7s %7s %7s %5s\n", '-------', '-------', '-------', '-----');
+foreach my $k (sort keys %oldtime) {
+  my $diff = $newtime{$k} - $oldtime{$k};
+  my $percent = $diff / $oldtime{$k} * -100;
+  printf("%02.d %7.1f %7.1f %7.1f %5.1f\n",
+      $k, $oldtime{$k}, $newtime{$k}, $diff, $percent);
+}
