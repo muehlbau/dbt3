@@ -73,5 +73,5 @@ EXTRA_DIST = \
              scripts/vmplot.sh \
              scripts/graph_query_time.pl \
              scripts/pgsql/analyze_stats.pl \
-             scripts/pgsql/get_power.sh \
+             scripts/pgsql/get_power.pl \
              scripts/pgsql/get_throughput.sh
