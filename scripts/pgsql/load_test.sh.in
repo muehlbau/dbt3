@@ -52,7 +52,7 @@ USE_OPROFILE=0
 GENERATE=0
 ONLY_LOAD=0
 DBDATA=${DSS_PATH}
-while getopts "d:f:g:lo:p:tyv" opt; do
+while getopts "d:f:g:lo:p:ty" opt; do
 	case $opt in
 	d)
 		DBDATA=${OPTARG}
@@ -75,10 +75,6 @@ while getopts "d:f:g:lo:p:tyv" opt; do
 		;;
 	t)
 		TABLESPACE_FLAG="-t -b"
-		;;
-	v)
-		set -x
-		SHELL="${SHELL} -x"
 		;;
 	y)
 		USE_OPROFILE=1
@@ -109,41 +105,41 @@ if [ $USE_OPROFILE -eq 1 ]; then
 fi
 
 # Start collecting system statistics.
-${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
+$SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
-${SHELL} $DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
+$DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 	
-${SHELL} $DBSCRIPTDIR/create_tables.sh ${TABLESPACE_FLAG} || exit 1
+$DBSCRIPTDIR/create_tables.sh ${TABLESPACE_FLAG} || exit 1
 
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "LOAD"
+$DBSCRIPTDIR/record_start.sh -n "LOAD"
 
 # Collect database statistics
-${SHELL} $DBSTATS $SID $OUTPUT_DIR &
+$DBSTATS $SID $OUTPUT_DIR &
 
 date
-${SHELL} ${DBSCRIPTDIR}/load_db.sh -d ${DBDATA} ${TABLESPACE_FLAG} || exit 1
+${DBSCRIPTDIR}/load_db.sh -d ${DBDATA} ${TABLESPACE_FLAG} || exit 1
 date
 
 if [ ${ONLY_LOAD} -eq 0 ]; then
 	date
-	${SHELL} $DBSCRIPTDIR/create_indexes.sh ${TABLESPACE_FLAG} || exit 1
+	$DBSCRIPTDIR/create_indexes.sh ${TABLESPACE_FLAG} || exit 1
 	date
 	
 	date
-	${SHELL} $DBSCRIPTDIR/update_statistics.sh || exit 1
+	$DBSCRIPTDIR/update_statistics.sh || exit 1
 	date
 fi
 
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "LOAD" || exit 1
+$DBSCRIPTDIR/record_end.sh -n "LOAD" || exit 1
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` Load Test Completed"
 let "diff_time=$e_time-$s_time"
 echo "Elapsed time for Load Test : $diff_time seconds"
 
 # Stop collecting system statistics.
-${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR
+$SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR
 
 # Collect profile data.
 if [ -f /proc/profile ]; then
