@@ -1,10 +1,9 @@
-#!/bin/sh
-
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2002 Jenny Zhang & Open Source Development Lab, Inc.
+# Copyright (C) 2002-2006 Jenny Zhang & Open Source Development Labs, Inc.
 #
 
 # 15 July 2004 - Revamped by Mark Wong
