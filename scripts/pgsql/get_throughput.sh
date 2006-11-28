@@ -1,12 +1,9 @@
 #!/bin/bash
-
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
-#
-
+# Copyright (C) 2003-2006 Jenny Zhang & Open Source Development Lab, Inc.
 #
 # May 27, 2005
 # Mark Wong
@@ -19,7 +16,7 @@ usage()
 	echo "           -s <scale factor> [-v]"
 }
 
-while getopts "i:n:p:s:v" OPT; do
+while getopts "i:n:p:s:" OPT; do
 	case ${OPT} in
 	i)
 		INFILE=${OPTARG}
@@ -32,10 +29,6 @@ while getopts "i:n:p:s:v" OPT; do
 		;;
 	s)
 		SCALE_FACTOR=${OPTARG}
-		;;
-	v)
-		set -x
-		SHELL="${SHELL} +x"
 		;;
 	esac
 done

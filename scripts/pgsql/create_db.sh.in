@@ -1,10 +1,9 @@
-#!/bin/sh
-
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2002 Open Source Development Lab, Inc.
+# Copyright (C) 2002-2006 Open Source Development Labs, Inc.
 #
 
 DIR=`dirname $0`
@@ -30,7 +29,7 @@ while getopts "o:p:" OPT; do
 	esac
 done
 
-${SHELL} @TOPDIR@/scripts/pgsql/stop_db.sh
+@TOPDIR@/scripts/pgsql/stop_db.sh
 
 if [ -d $PGDATA ]; then
 	echo "======================================="
@@ -40,15 +39,15 @@ if [ -d $PGDATA ]; then
 
 	# Don't need to initdb, blindly try to drop the dbt3 database in case
 	# it exists.
-	${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
-	${SHELL} @TOPDIR@/scripts/pgsql/drop_db.sh
+	@TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
+	@TOPDIR@/scripts/pgsql/drop_db.sh
 else
 	# initialize database cluster
 	echo "initializing database cluster..."
 	@INITDB@ -D $PGDATA || exit 1
 fi
 
-${SHELL} @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
+@TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
 
 echo "Creating database $SID..."
 _o=`@CREATEDB@ $SID 2>&1`

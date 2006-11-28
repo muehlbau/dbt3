@@ -1,12 +1,9 @@
-#!/bin/sh
-
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.
 # Please see # the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2003 Open Source Development Lab, Inc.
-#
-
+# Copyright (C) 2003-2006 Open Source Development Labs, Inc.
 #
 # 22 September 2004: Mark Wong
 #    Renamed from explain_single_query.sh.in since the file description didn't
@@ -33,7 +30,7 @@ param_file="$RUNDIR/$query_name.param"
 if [ ! -f $SEED_FILE ]; then
 	echo "creating seed file $SEED_FILE, you can change the seed by "
 	echo "modifying this file"
-	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
+	$SRCDIR/scripts/init_seed.sh > $SEED_FILE
 fi
 
 # Generate the queries with EXPLAIN to get plans.

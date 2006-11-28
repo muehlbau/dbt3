@@ -1,12 +1,11 @@
-#!/bin/sh
-
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
+# Copyright (C) 2003-2006 Jenny Zhang & Open Source Development Labs, Inc.
 #
-
+#
 # 2004 July 16 : Reworked by Mark Wong
 # 2004 September 28 : Turn this into a wrapper script because we don't know
 #                     how long the test will execute so we collect stats
@@ -99,31 +98,31 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	clearoprof
 fi
 
-${SHELL} $DBSCRIPTDIR/stop_db.sh || exit 1
-${SHELL} $DBSCRIPTDIR/start_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
+$DBSCRIPTDIR/stop_db.sh || exit 1
+$DBSCRIPTDIR/start_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 
 s_time=`$GTIME`
-${SHELL} $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT" || exit 1
+$DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT" || exit 1
 
 # Start collecting system statistics. 
-${SHELL} $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR || exit 1
+$SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR || exit 1
 
 # Start collecting database statistics.
-${SHELL} $DBSTATS $SID $OUTPUT_DIR &
+$DBSTATS $SID $OUTPUT_DIR &
 
 # Start the streams.
-${SHELL} $DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} ${NO_REFRESH_FLAG} || exit 1
+$DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} ${NO_REFRESH_FLAG} || exit 1
 
 # Stop collecting system statistics.
-${SHELL} $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR || exit 1
+$SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR || exit 1
 
-${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT" || exit 1
+$DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT" || exit 1
 e_time=`$GTIME`
 let "diff_time=$e_time-$s_time"
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
 
 # Stop the database after the test.
-${SHELL} $DBSCRIPTDIR/stop_db.sh || exit 1
+$DBSCRIPTDIR/stop_db.sh || exit 1
 
 if [ -f /proc/profile ]; then
 	profname="Throughput_Test_$TAG"

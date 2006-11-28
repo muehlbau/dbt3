@@ -1,12 +1,9 @@
 #!/bin/bash
-
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2003 Jenny Zhang & Open Source Development Lab, Inc.
-#
-
+# Copyright (C) 2003-2006 Jenny Zhang & Open Source Development Labs, Inc.
 #
 # May 26, 2005
 # Mark Wong
@@ -15,7 +12,7 @@
 
 FLAG_POWER_TEST=0
 FLAG_THROUGHPUT_TEST=0
-while getopts "23i:n:o:p:s:vz" OPT; do
+while getopts "23i:n:o:p:s:z" OPT; do
 	case ${OPT} in
 	2)
 		FLAG_POWER_TEST=1
@@ -38,10 +35,6 @@ while getopts "23i:n:o:p:s:vz" OPT; do
 	s)
 		SCALE_FACTOR=${OPTARG}
 		;;
-	v)
-		set -x
-		SHELL="${SHELL} +x"
-		;;
 	z)
 		NO_REFRESH_FLAG="-z"
 		;;
@@ -61,7 +54,7 @@ if [ ${FLAG_POWER_TEST} -eq 1 ]; then
 fi
 
 if [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
-	THROUGHPUT=`${SHELL} ${SCRIPT_DIR}/get_throughput.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
+	THROUGHPUT=`${SCRIPT_DIR}/get_throughput.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
 	echo "throughput = ${THROUGHPUT}" >> ${OUTFILE}
 fi
 

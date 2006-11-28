@@ -13,7 +13,7 @@ SRCDIR=@TOPDIR@
 DBDIR=@DATABASE_TO_USE@
 
 OSVER=`uname -s -r`
-DBVER=`${SHELL} $DBDIR/get_version.sh`
+DBVER=`$DBDIR/get_version.sh`
 
 CPU_MODEL=`uname -p`
 CPUS=`grep CPUS ${DIR}/config.txt | awk '{print $2}'`
@@ -127,7 +127,7 @@ gen_results()
 	echo "</body>" >> ${SUBDIR}/db.html
 	echo "</html>" >> ${SUBDIR}/db.html
 
-	${SHELL} $SRCDIR/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots -x "Minutes" > /dev/null 2>&1
+	$SRCDIR/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots -x "Minutes" > /dev/null 2>&1
 	perl $SRCDIR/scripts/${DBDIR}/analyze_stats.pl --dir ${SUBDIR}/db > /dev/null 2>&1
 }
 

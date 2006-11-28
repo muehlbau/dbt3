@@ -1,10 +1,9 @@
-#!/bin/sh
-
+#!/bin/bash
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2004 Mark Wong & Jenny Zhang
+# Copyright (C) 2004-2006 Mark Wong & Jenny Zhang
 #                    Open Source Development Labs, Inc.
 #
 
@@ -34,7 +33,7 @@ RUN_POWER_TEST=0
 RUN_THROUGHPUT_TEST=0
 FLAG_POWER_TEST=""
 FLAG_THROUGHPUT_TEST=""
-while getopts "123d:c:ef:gn:op:q:r:s:tuvz" opt; do
+while getopts "123d:c:ef:gn:op:q:r:s:tuz" opt; do
 	case $opt in
 	1)
 		RUN_LOAD_TEST=1
@@ -93,10 +92,6 @@ while getopts "123d:c:ef:gn:op:q:r:s:tuvz" opt; do
 	u)
 		TABLESPACES_FLAG="-t"
 		;;
-	v)
-		SHELL="${SHELL} -x"
-		export SHELL;
-		;;
 	z)
 		NO_REFRESH_FLAG="-z"
 		;;
@@ -134,7 +129,7 @@ fi
 # Set the seed file.
 SEED_FILE=$OUTPUT_DIR/seed
 if [ $SEED -eq 0 ]; then
-	${SHELL} $SRCDIR/scripts/init_seed.sh > $SEED_FILE
+	$SRCDIR/scripts/init_seed.sh > $SEED_FILE
 else
 	echo $SEED > $SEED_FILE
 fi
@@ -144,7 +139,7 @@ echo "Using seed: `cat $SEED_FILE`"
 # Load Test
 #
 if [ ${RUN_LOAD_TEST} -eq 1 ]; then
-	${SHELL} $DBSCRIPTDIR/load_test.sh \
+	$DBSCRIPTDIR/load_test.sh \
 			-o $OUTPUT_DIR/load \
 			-p "${LOAD_PARAMETERS}" \
 			${OPROFILE_FLAG} \
@@ -159,7 +154,7 @@ else
 	# be cleared out.  Otherwise the data collection will be
 	# incomprehensible with duplicate data.
 	#
-	${SHELL} $DBSCRIPTDIR/start_db.sh
+	$DBSCRIPTDIR/start_db.sh
 	${DBSCRIPTDIR}/clear-time-statistics.sh || exit 1
 fi
 
@@ -170,13 +165,13 @@ do
 	# Start time of a Power and Throughput test.
 	#
 	s_time=`$GTIME`
-	${SHELL} ${DBSCRIPTDIR}/record_start.sh -n "PERF${i}" || exit 1
+	${DBSCRIPTDIR}/record_start.sh -n "PERF${i}" || exit 1
 
 	if [ ${RUN_POWER_TEST} -eq 1 ]; then
 		#
 		# Power Test
 		#
-		${SHELL} ${DBSCRIPTDIR}/power_test.sh \
+		${DBSCRIPTDIR}/power_test.sh \
 				-f ${SCALE_FACTOR} \
 				-o ${OUTPUT_DIR}/power${i} \
 				-p "${POWER_PARAMETERS}" ${TEST_ARGS} \
@@ -188,7 +183,7 @@ do
 	#
 	# Throughput Test
 	#
-		${SHELL} ${DBSCRIPTDIR}/throughput_test.sh \
+		${DBSCRIPTDIR}/throughput_test.sh \
 				-n ${STREAMS} \
 				-f ${SCALE_FACTOR} \
 				-o ${OUTPUT_DIR}/throughput${i} \
@@ -201,12 +196,12 @@ do
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
 	#
-	${SHELL} $DBSCRIPTDIR/start_db.sh
+	$DBSCRIPTDIR/start_db.sh
 
 	#
 	# End time of a Power and Throughput test.
 	#
-	${SHELL} $DBSCRIPTDIR/record_end.sh -n "PERF${i}" || exit 1
+	$DBSCRIPTDIR/record_end.sh -n "PERF${i}" || exit 1
 	e_time=`$GTIME`
 	let "diff_time=$e_time-$s_time"
 	echo "Elapsed time for performance test ${i} : $diff_time seconds"
@@ -218,16 +213,16 @@ do
 done
 
 # Get system details.
-${SHELL} $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$POWER_PARAMETERS" "$THROUGHPUT_PARAMETERS" $OUTPUT_DIR || exit 1
+$SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$POWER_PARAMETERS" "$THROUGHPUT_PARAMETERS" $OUTPUT_DIR || exit 1
 
 # Get query times.
-${SHELL} $DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out || exit 1
+$DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out || exit 1
 
 #
 # Calculate composite score.      
 #
 if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
-	${SHELL} $SRCDIR/scripts/get_composite.sh \
+	$SRCDIR/scripts/get_composite.sh \
 			-i ${OUTPUT_DIR}/q_time.out \
 			-p 1 \
 			-s ${SCALE_FACTOR} \
@@ -239,12 +234,12 @@ if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
 			--if $OUTPUT_DIR/q_time.out ${NO_REFRESH_FLAG} \
 			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
 fi
-${SHELL} $SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
+$SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
 
 #
 # Stop the database at the end of the test.
 #
-${SHELL} $DBSCRIPTDIR/stop_db.sh
+$DBSCRIPTDIR/stop_db.sh
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
 echo $RUN_NUMBER > run_number
