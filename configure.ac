@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(dbt3, 1.9, osdldbt-general@lists.sourceforge.net)
+AC_INIT(dbt3, 1.10-pre1, osdldbt-general@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl Checks for programs.
@@ -149,8 +149,6 @@ if test "$DATABASE_TO_USE" == "pgsql"; then
       [chmod +x scripts/pgsql/drop_tables.sh])
   AC_CONFIG_FILES([scripts/pgsql/grant.sh],
       [chmod +x scripts/pgsql/grant.sh])
-  AC_CONFIG_FILES([scripts/pgsql/load_db.sh],
-      [chmod +x scripts/pgsql/load_db.sh])
   AC_CONFIG_FILES([scripts/pgsql/pgsql_profile],
       [chmod +x scripts/pgsql/pgsql_profile])
   AC_CONFIG_FILES([scripts/pgsql/q_time.sh],

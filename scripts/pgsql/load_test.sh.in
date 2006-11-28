@@ -109,8 +109,6 @@ $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
 $DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 	
-$DBSCRIPTDIR/create_tables.sh ${TABLESPACE_FLAG} || exit 1
-
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
 $DBSCRIPTDIR/record_start.sh -n "LOAD"
@@ -119,7 +117,7 @@ $DBSCRIPTDIR/record_start.sh -n "LOAD"
 $DBSTATS $SID $OUTPUT_DIR &
 
 date
-${DBSCRIPTDIR}/load_db.sh -d ${DBDATA} ${TABLESPACE_FLAG} || exit 1
+${DBSCRIPTDIR}/create_tables.sh -d ${DBDATA} ${TABLESPACE_FLAG} || exit 1
 date
 
 if [ ${ONLY_LOAD} -eq 0 ]; then

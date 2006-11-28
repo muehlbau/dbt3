@@ -1,18 +1,45 @@
 #!/bin/bash
-
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2005 Jenny Zhang & Open Source Development Labs, Inc.
+# Copyright (C) 2005-2006 Jenny Zhang & Open Source Development Labs, Inc.
 #
 
 DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
 
+# Load tables
+# This background stuff is honestly kinda ugly. IMO the right way to do this is to utilize make -j
+load_table() {
+	table=${1}
+	create=${2}
+	if [ x${3} == x ]; then
+		file=${table}.tbl
+	else
+		file=${3}.tbl
+	fi
+
+	local sql="COPY ${table} FROM '${DBDATA}/${file}' USING DELIMITERS '|';"
+	local cmd="@PSQL@ -e -d ${SID} -1 -c "
+	if [ x${BACKGROUND} == xyes ]; then
+		echo "Loading ${table} table in the background..."
+		${cmd} "${create} ${sql} VACUUM ANALYZE ${table};" || exit 1 &
+	else
+		echo "Loading $table table..."
+		${cmd} "${create} ${sql}" || exit 1
+	fi
+}
+
 USE_TABLESPACES=0
-while getopts "t" OPT; do
+while getopts "bd:t" OPT; do
 	case ${OPT} in
+	b)
+		BACKGROUND=yes
+		;;
+	d)
+		DBDATA=${OPTARG}
+		;;
 	t)
 		USE_TABLESPACES=1
 		;;
@@ -59,7 +86,7 @@ if [ ${USE_TABLESPACES} -eq 1 ]; then
 	${PSQL} "CREATE ${REGION_TABLESPACE} LOCATION '${TS_REGION_DIR}';"
 fi
 
-${PSQL} "
+load_table supplier "
 CREATE TABLE supplier (
 	s_suppkey  INTEGER,
 	s_name CHAR(25),
@@ -69,9 +96,9 @@ CREATE TABLE supplier (
 	s_acctbal REAL,
 	s_comment VARCHAR(101))
 	${SUPPLIER_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table part "
 CREATE TABLE part (
 	p_partkey INTEGER,
 	p_name VARCHAR(55),
@@ -83,9 +110,9 @@ CREATE TABLE part (
 	p_retailprice REAL,
 	p_comment VARCHAR(23))
 	${PART_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table partsupp "
 CREATE TABLE partsupp (
 	ps_partkey INTEGER,
 	ps_suppkey INTEGER,
@@ -93,9 +120,9 @@ CREATE TABLE partsupp (
 	ps_supplycost REAL,
 	ps_comment VARCHAR(199))
 	${PARTSUPP_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table customer "
 CREATE TABLE customer (
 	c_custkey INTEGER,
 	c_name VARCHAR(25),
@@ -106,9 +133,9 @@ CREATE TABLE customer (
 	c_mktsegment CHAR(10),
 	c_comment VARCHAR(117))
 	${CUSTOMER_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table orders "
 CREATE TABLE orders (
 	o_orderkey INTEGER,
 	o_custkey INTEGER,
@@ -120,9 +147,9 @@ CREATE TABLE orders (
 	o_shippriority INTEGER,
 	o_comment VARCHAR(79))
 	${ORDERS_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table lineitem "
 CREATE TABLE lineitem (
 	l_orderkey INTEGER,
 	l_partkey INTEGER,
@@ -141,24 +168,24 @@ CREATE TABLE lineitem (
 	l_shipmode CHAR(10),
 	l_comment VARCHAR(44))
 	${LINEITEM_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table nation "
 CREATE TABLE nation (
 	n_nationkey INTEGER,
 	n_name CHAR(25),
 	n_regionkey INTEGER,
 	n_comment VARCHAR(152))
 	${NATION_TABLESPACE};
-" || exit 1
+"
 
-${PSQL} "
+load_table region "
 CREATE TABLE region (
 	r_regionkey INTEGER,
 	r_name CHAR(25),
 	r_comment VARCHAR(152))
 	${REGION_TABLESPACE};
-" || exit 1
+"
 
 ${PSQL} "
 CREATE TABLE time_statistics (
@@ -167,5 +194,7 @@ CREATE TABLE time_statistics (
 	e_time TIMESTAMP,
 	int_time INTEGER);
 " || exit 1
+
+wait
 
 exit 0
