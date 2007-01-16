@@ -43,7 +43,7 @@ getoprof () {
 	sudo opcontrol --shutdown
 	sudo opannotate --source --assembly > $OUTPUT_DIR/oprofile/assembly.txt 2>&1
 	sudo opannotate --source --output-dir=$OUTPUT_DIR/oprofile/annotate
-	sudo opstack > $OUTPUT_DIR/oprofile/call-graph.txt
+	sudo opreport -l -c -p /lib/modules/`uname -r` -o ${OUTPUT_DIR}/oprofile/call-graph.txt > /dev/null 2>&1
 }
 
 PARAMETERS=""
