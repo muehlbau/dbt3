@@ -13,7 +13,9 @@ if [ $# -lt 5 ]; then
         exit 1
 fi
 
-DBDIR=@DATABASE_TO_USE@
+SRCDIR=@TOPDIR@
+
+DBSCRIPTDIR=$SRCDIR/scripts/@DATABASE_TO_USE@
 
 scale_factor=$1
 num_stream=$2
@@ -23,7 +25,7 @@ THROUGHPUT_PARAM=$5
 output_dir=$6
 
 kernel=`uname -s -r`
-dbver=`$DBDIR/get_version.sh`
+dbver=`bash $DBSCRIPTDIR/get_version.sh`
 procps=`vmstat -V | grep version | awk '{print $3}'`
 sysstat=`sar -V 2>&1 | head -n 1 | awk '{print $3}'`
 

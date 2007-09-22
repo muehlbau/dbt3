@@ -92,11 +92,11 @@ varsub(int qnum, int vnum, int flags)
 			switch(qnum)
 			{
 			case 1:
-				sprintf(param[1], "%d", UnifInt((long)60,(long)120,(long)qnum));
+				sprintf(param[1], "%ld", UnifInt((long)60,(long)120,(long)qnum));
 				param[2][0] = '\0';
 				break;
 			case 2:
-				sprintf(param[1], "%d", 
+				sprintf(param[1], "%ld", 
 					UnifInt((long)P_SIZE_MIN, (long)P_SIZE_MAX, qnum));
 				pick_str(&p_types_set, qnum, param[3]);
 				ptr = param[3] + strlen(param[3]);
@@ -131,8 +131,8 @@ varsub(int qnum, int vnum, int flags)
 			case 6:
 				tmp_date = UnifInt(93,97,qnum);
                 sprintf(param[1], "19%d-01-01", tmp_date);
-				sprintf(param[2], "0.0%d", UnifInt(2, 9, qnum));
-				sprintf(param[3], "%d", UnifInt((long)24, (long)25, (long)qnum));
+				sprintf(param[2], "0.0%ld", UnifInt(2, 9, qnum));
+				sprintf(param[3], "%ld", UnifInt((long)24, (long)25, (long)qnum));
 				param[4][0] = '\0';
 				break;
 			case 7:
@@ -189,7 +189,7 @@ varsub(int qnum, int vnum, int flags)
 			case 16:
 				tmp1 = UnifInt(1, 5, qnum); 
 				tmp2 = UnifInt(1, 5, qnum);
-				sprintf(param[1], "Brand#%d%d", tmp1, tmp2);
+				sprintf(param[1], "Brand#%ld%ld", tmp1, tmp2);
 				pick_str(&p_types_set, qnum, param[2]);
 				ptr = param[2] + strlen(param[2]);
 				while (*(--ptr) != ' ');
@@ -204,7 +204,7 @@ varsub(int qnum, int vnum, int flags)
 			case 17:
 				tmp1 = UnifInt(1, 5, qnum); 
 				tmp2 = UnifInt(1, 5, qnum);
-				sprintf(param[1], "Brand#%d%d", tmp1, tmp2);
+				sprintf(param[1], "Brand#%ld%ld", tmp1, tmp2);
 				pick_str(&p_cntr_set, qnum, param[2]);
 				param[3][0] = '\0';
 				break;
@@ -215,13 +215,13 @@ varsub(int qnum, int vnum, int flags)
 			case 19:
 				tmp1 = UnifInt(1, 5, qnum); 
 				tmp2 = UnifInt(1, 5, qnum);
-				sprintf(param[1], "Brand#%d%d", tmp1, tmp2);
+				sprintf(param[1], "Brand#%ld%ld", tmp1, tmp2);
 				tmp1 = UnifInt(1, 5, qnum); 
 				tmp2 = UnifInt(1, 5, qnum);
-				sprintf(param[2], "Brand#%d%d", tmp1, tmp2);
+				sprintf(param[2], "Brand#%ld%ld", tmp1, tmp2);
 				tmp1 = UnifInt(1, 5, qnum); 
 				tmp2 = UnifInt(1, 5, qnum);
-				sprintf(param[3], "Brand#%d%d", tmp1, tmp2);
+				sprintf(param[3], "Brand#%ld%ld", tmp1, tmp2);
 				sprintf(param[4], "%ld", UnifInt(1, 10, qnum));
 				sprintf(param[5], "%ld", UnifInt(10, 20, qnum));
 				sprintf(param[6], "%ld", UnifInt(20, 30, qnum));

@@ -61,6 +61,7 @@ while getopts "123d:c:ef:gn:op:q:r:s:tuz" opt; do
 		;;
 	f)
 		SCALE_FACTOR=$OPTARG
+		echo "SCALE: $SCALE_FACTOR"
 		;;
 	g)
 		GENERATE=1
@@ -122,6 +123,8 @@ fi
 OUTPUT_DIR=$SRCDIR/scripts/output/$RUN_NUMBER
 mkdir -p $OUTPUT_DIR
 
+
+
 if [ "x${COMMENT}" != "x" ]; then
 	echo ${COMMENT} > ${OUTPUT_DIR}/comment.txt
 fi
@@ -176,7 +179,11 @@ do
 				-o ${OUTPUT_DIR}/power${i} \
 				-p "${POWER_PARAMETERS}" ${TEST_ARGS} \
 				-s ${SEED_FILE} \
-				-t ${i} ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
+				-t ${i} ${OPROFILE_FLAG} ${NO_REFRESH_FLAG}
+		if [ $? -eq 1 ] ; then 
+			echo "power_test problem!"
+			exit 1  
+		fi
 	fi
 
 	if [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
@@ -189,7 +196,11 @@ do
 				-o ${OUTPUT_DIR}/throughput${i} \
 				-p "${THROUGHPUT_PARAMETERS}" ${TEST_ARGS} \
 				-s ${SEED_FILE} \
-				-t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} || exit 1
+				-t $i ${OPROFILE_FLAG} ${NO_REFRESH_FLAG} 
+		if [ $? -eq 1 ] ; then 
+			echo "throughput_test problem!"
+			exit 1  
+		fi
 	fi
 
 	#
@@ -203,13 +214,13 @@ do
 	#
 	$DBSCRIPTDIR/record_end.sh -n "PERF${i}" || exit 1
 	e_time=`$GTIME`
-	let "diff_time=$e_time-$s_time"
+	diff_time=`expr $e_time - $s_time`
 	echo "Elapsed time for performance test ${i} : $diff_time seconds"
 
 	#
 	# Increment loop counter.
 	#
-	let "i=$i+1"
+	i=`expr $i + 1`
 done
 
 # Get system details.
@@ -230,7 +241,7 @@ if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
 			-o ${OUTPUT_DIR}/calc_composite.out \
 			${NO_REFRESH_FLAG} \
 			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
-	$SRCDIR/scripts/graph_query_time.pl \
+	${DBSCRIPTDIR}/graph_query_time.pl \
 			--if $OUTPUT_DIR/q_time.out ${NO_REFRESH_FLAG} \
 			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
 fi

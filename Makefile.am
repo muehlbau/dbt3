@@ -43,6 +43,46 @@ EXTRA_DIST = \
              queries/pgsql/7.sql \
              queries/pgsql/8.sql \
              queries/pgsql/9.sql \
+             queries/mysql/1.sql \
+             queries/mysql/10.sql \
+             queries/mysql/11.sql \
+             queries/mysql/12.sql \
+             queries/mysql/13.sql \
+             queries/mysql/14.sql \
+             queries/mysql/15.sql \
+             queries/mysql/16.sql \
+             queries/mysql/17.sql \
+             queries/mysql/18.sql \
+             queries/mysql/19.sql \
+             queries/mysql/2.sql \
+             queries/mysql/20.sql \
+             queries/mysql/21.sql \
+             queries/mysql/22.sql \
+             queries/mysql/3.sql \
+             queries/mysql/4.sql \
+             queries/mysql/5.sql \
+             queries/mysql/6.sql \
+             queries/mysql/7.sql \
+             queries/mysql/8.sql \
+             queries/mysql/9.sql \
+	     queries/mysql/ddl \
+             queries/mysql/ddl/part.sql \
+             queries/mysql/ddl/region.sql \
+             queries/mysql/ddl/customer.sql \
+             queries/mysql/ddl/orders.sql \
+             queries/mysql/ddl/partsupp.sql \
+             queries/mysql/ddl/nation.sql \
+             queries/mysql/ddl/supplier.sql \
+             queries/mysql/ddl/lineitem.sql \
+             queries/mysql/ddl/nitro \
+             queries/mysql/ddl/nitro/part.sql \
+             queries/mysql/ddl/nitro/region.sql \
+             queries/mysql/ddl/nitro/customer.sql \
+             queries/mysql/ddl/nitro/orders.sql \
+             queries/mysql/ddl/nitro/partsupp.sql \
+             queries/mysql/ddl/nitro/nation.sql \
+             queries/mysql/ddl/nitro/supplier.sql \
+             queries/mysql/ddl/nitro/lineitem.sql \
              queries/sapdb/1.sql \
              queries/sapdb/10.sql \
              queries/sapdb/11.sql \
@@ -74,4 +114,7 @@ EXTRA_DIST = \
              scripts/graph_query_time.pl \
              scripts/pgsql/analyze_stats.pl \
              scripts/pgsql/get_power.pl \
-             scripts/pgsql/get_throughput.sh
+             scripts/pgsql/get_throughput.sh \
+             scripts/mysql/analyze_stats.pl \
+             scripts/mysql/get_power.pl \
+             scripts/mysql/get_throughput.pl

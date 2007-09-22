@@ -60,10 +60,10 @@ gen_phone(long ind, char *target, long seed)
     RANDOM(exchg, 100, 999, seed);
 	RANDOM(number, 1000, 9999, seed);
 	
-	sprintf(target, "%02d", 10 + (ind % NATIONS_MAX));
-    sprintf(target + 3, "%03d", acode);
-    sprintf(target + 7, "%03d", exchg);
-    sprintf(target + 11, "%04d", number);
+	sprintf(target, "%02ld", 10 + (ind % NATIONS_MAX));
+    sprintf(target + 3, "%03ld", acode);
+    sprintf(target + 7, "%03ld", exchg);
+    sprintf(target + 11, "%04ld", number);
     target[2] = target[6] = target[10] = '-';
 	
     return;

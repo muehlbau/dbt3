@@ -79,6 +79,11 @@ int get_statement(FILE *query_input)
 					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
 					statement_index += sprintf(sql_statement.statement+statement_index, "%c", '\n');
 #endif /* PGSQL */
+#ifdef MYSQL
+					/* mysql requires ';' */
+					statement_index += sprintf(sql_statement.statement+statement_index, "%s", line);
+					statement_index += sprintf(sql_statement.statement+statement_index, "%c", '\n');
+#endif /* MYSQL */
 					return END_OF_STMT;
 				}
 				/* get rid of \n */

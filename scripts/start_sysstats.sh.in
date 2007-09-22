@@ -21,9 +21,21 @@ while getopts "o:s:" opt; do
 	esac
 done
 
-@SAR@ -o $OUTPUT_DIR/sar.out $SAMPLE_LENGTH 0 &
+touch $OUTPUT_DIR/sar.out
+touch $OUTPUT_DIR/iostat.out
+touch $OUTPUT_DIR/iostatx.out
+touch $OUTPUT_DIR/vmstat.out
+ 
+echo "Starting sys stats using $OUTPUT_DIR"
+if test "x@SAR@" != "x" ; then
+  @SAR@ -o $OUTPUT_DIR/sar.out $SAMPLE_LENGTH 0 &
+fi
 
-@IOSTAT@ -d $SAMPLE_LENGTH  >> $OUTPUT_DIR/iostat.out &
-@IOSTAT@ -d -x $SAMPLE_LENGTH  >> $OUTPUT_DIR/iostatx.out &
+if test "x@IOSTAT@" != "x" ; then
+  @IOSTAT@ -d $SAMPLE_LENGTH  >> $OUTPUT_DIR/iostat.out &
+  @IOSTAT@ -d -x $SAMPLE_LENGTH  >> $OUTPUT_DIR/iostatx.out &
+fi
 
-@VMSTAT@ -n $SAMPLE_LENGTH >> $OUTPUT_DIR/vmstat.out &
+if test "x@VMSTAT@" != "x" ; then
+  @VMSTAT@ -n $SAMPLE_LENGTH >> $OUTPUT_DIR/vmstat.out &
+fi

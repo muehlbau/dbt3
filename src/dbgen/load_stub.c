@@ -138,7 +138,7 @@ ld_order (order_t *p, int mode)
     return(0);
 }
 
-ld_line (order_t *p, int mode)
+int ld_line (order_t *p, int mode)
 {
     static int count = 0;
 

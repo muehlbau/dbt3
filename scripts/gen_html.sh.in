@@ -10,7 +10,7 @@ fi
 DIR=$1
 
 SRCDIR=@TOPDIR@
-DBDIR=@DATABASE_TO_USE@
+DBDIR=$SRCDIR/scripts/@DATABASE_TO_USE@
 
 OSVER=`uname -s -r`
 DBVER=`$DBDIR/get_version.sh`
@@ -128,7 +128,7 @@ gen_results()
 	echo "</html>" >> ${SUBDIR}/db.html
 
 	$SRCDIR/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots -x "Minutes" > /dev/null 2>&1
-	perl $SRCDIR/scripts/${DBDIR}/analyze_stats.pl --dir ${SUBDIR}/db > /dev/null 2>&1
+	perl ${DBDIR}/analyze_stats.pl --dir ${SUBDIR}/db > /dev/null 2>&1
 }
 
 echo "<html>"

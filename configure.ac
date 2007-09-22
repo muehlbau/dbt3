@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(dbt3, 1.10-pre1, osdldbt-general@lists.sourceforge.net)
+AC_INIT(dbt3, 1.10-pre2, osdldbt-general@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl Checks for programs.
@@ -35,44 +35,193 @@ dnl if test "$ENABLE_TPCR" = "yes"; then
 dnl   AC_DEFINE(TPCR, 1)
 dnl fi
 
-dnl> Configuration options for different databases, PostgreSQL is default.
-AC_ARG_WITH(postgresql,
-	[ AC_HELP_STRING([ --with-postgresql=DIR], [Default.])],
-	[ PGSQL_PATH=$withval DATABASE_TO_USE="pgsql" SEPARATOR_FOR_DB="|" ],
-	[ DATABASE_TO_USE="pgsql" SEPARATOR_FOR_DB="|" ])
-AC_ARG_WITH(sapdb,
-	[  --with-sapdb],
-	[DATABASE_TO_USE="sapdb" SEPARATOR_FOR_DB=","], [])
-
-TOPDIR=`pwd`
-AC_SUBST(TOPDIR)
-AC_SUBST(DATABASE_TO_USE)
-AC_SUBST(SEPARATOR_FOR_DB)
 
 AC_PATH_PROGS([SAR], [sar bsdsar], ,
              [$PATH:/usr/local/bin:/usr/bin])
 if test -z "$SAR"; then
   AC_MSG_WARN([*** sar or bsdsar not found some scripts may not be usable])
-  SAR=/usr/bin/sar
+  SAR=
 fi
 
 AC_PATH_PROGS([IOSTAT], [iostat], ,
              [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
 if test -z "$IOSTAT"; then
   AC_MSG_WARN([*** iostat not found some scripts may not be usable])
-  IOSTAT=/usr/bin/iostat
+  IOSTAT=
 fi
 
 AC_PATH_PROGS([VMSTAT], [vmstat], ,
              [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
 if test -z "$VMSTAT"; then
   AC_MSG_WARN([*** vmstat not found some scripts may not be usable])
-  VMSTAT=/usr/bin/vmstat
+  VMSTAT=
 fi
 
-if test "$DATABASE_TO_USE" == "pgsql"; then
+dnl REQUIRE_PROG(LOCKFILEPROG, lockfile, [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+AC_PATH_PROGS([LOCKFILEPROG],[lockfile lockfile-create], , 
+             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+if test -z "$LOCKFILEPROG"; then 
+  AC_MSG_ERROR([Couldn't find lockfile program!])
+fi 
+if test `basename "$LOCKFILEPROG"` = "lockfile-create" ; then 
+  LOCKFILECREATE="$LOCKFILEPROG"
+  AC_PATH_PROGS([LOCKFILEREMOVE],[lockfile-remove], ,
+             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+  AC_PATH_PROGS([LOCKFILETOUCH],[lockfile-touch], ,
+             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+  AC_SUBST(LOCKFILETOUCH)
+elif test `basename "$LOCKFILEPROG"` = "lockfile" ; then 
+  LOCKFILECREATE="$LOCKFILEPROG -s 0"
+  LOCKFILEREMOVE="rm -f"
+
+fi
+AC_SUBST(LOCKFILECREATE)
+AC_SUBST(LOCKFILEREMOVE)
+
+dnl> Configuration options for different databases, MySQL is default.
+AC_ARG_WITH(postgresql,
+	[ AC_HELP_STRING([ --with-postgresql=DIR], [])],
+	[ PGSQL_PATH=$withval DATABASE_TO_USE="pgsql" DATABASE_DEF="PGSQL=1"],
+	[])
+AC_ARG_WITH(mysql,
+	[ AC_HELP_STRING([ --with-mysql=DIR], [Default.])],
+	[ MYSQL_PATH=$withval DATABASE_TO_USE="mysql" DATABASE_DEF="MYSQL=1"],
+	[])
+AC_ARG_WITH(sapdb,
+	[  --with-sapdb],
+	[DATABASE_TO_USE="sapdb" DATABASE_DEF="SABDB=1"], [])
+
+AC_DEFINE(WORKLOAD,"TPCH")
+AC_DEFINE(TPCH)
+TOPDIR=`pwd`
+AC_SUBST(TOPDIR)
+AC_SUBST(DATABASE_TO_USE)
+
+if test "$DATABASE_TO_USE" = "mysql"; then
+  dnl check if the user has the mysql binaries we need
+  if test "$MYSQL_PATH" = "yes"; then
+    MYSQL_TEST_PATH=$PATH
+    MYSQL_BASEDIR_CNF=
+    MYSQL_BASEDIR=.
+  else
+    MYSQL_TEST_PATH=$MYSQL_PATH/bin:$MYSQL_PATH/sbin:$MYSQL_PATH/libexec:$MYSQL_PATH/scripts
+    MYSQL_BASEDIR_CNF="basedir=$MYSQL_PATH"
+    MYSQL_BASEDIR="$MYSQL_PATH"
+  fi
+
+  AC_SUBST(MYSQL_BASEDIR)
+  AC_SUBST(MYSQL_BASEDIR_CNF)
+
+  REQUIRE_PROG(MYSQL_CONFIG, mysql_config, [$MYSQL_TEST_PATH])
+  REQUIRE_PROG(MYSQL_CLIENT, mysql, [$MYSQL_TEST_PATH])
+  REQUIRE_PROG(MYSQL_ADMIN, mysqladmin, [$MYSQL_TEST_PATH])
+  REQUIRE_PROG(MYSQLIMPORT, mysqlimport, [$MYSQL_TEST_PATH])
+  REQUIRE_PROG(MYSQL_INSTALL_DB, mysql_install_db, [$MYSQL_TEST_PATH])
+  REQUIRE_PROG(MYSQLD_SAFE, mysqld_safe, [$MYSQL_TEST_PATH])
+  REQUIRE_PROG(MYSQLD, mysqld, [$MYSQL_TEST_PATH])
+
+  MY_CNF=$TOPDIR/scripts/mysql/my.cnf
+  MYSQL_CLIENT="${MYSQL_CLIENT} --defaults-file=${MY_CNF}"
+  MYSQL_ADMIN="${MYSQL_ADMIN} --defaults-file=${MY_CNF}"
+  MYSQLIMPORT="${MYSQLIMPORT} --defaults-file=${MY_CNF}"
+  MYSQL_INSTALL_DB="${MYSQL_INSTALL_DB} --defaults-file=${MY_CNF}"
+  MYSQLD="${MYSQLD} --defaults-file=${MY_CNF}"
+  MYSQLD_SAFE="${MYSQLD_SAFE} --defaults-file=${MY_CNF}"
+  
+  AC_SUBST(MYSQLD)
+  AC_SUBST(MYSQLD_SAFE)
+
+  AC_ARG_WITH(mysql-datadir,
+	[ AC_HELP_STRING([ --with-mysql-datadir=DIR],[])],
+	[ MYSQL_DATADIR=$withval],
+	[ MYSQL_DATADIR=${TOPDIR}/scripts/mysql/mydata ])
+  AC_SUBST(MYSQL_DATADIR)
+  AC_ARG_WITH(mysql-engine,
+	[ AC_HELP_STRING([ --with-mysql-engine=ENGINE],[Default MyISAM])],
+	[ MYSQL_ENGINE=$withval],
+	[ MYSQL_ENGINE=MyISAM])
+  myengine=`echo $MYSQL_ENGINE | tr 'A-Z' 'a-z'`
+  case $myengine in
+    myisam)
+      MYSQL_ENGINE_TUNING="--skip-innodb --key-buffer-size=500M"
+      ;;
+    innodb)
+      MYSQL_ENGINE_TUNING="--key-buffer-size=16M --innodb_log_file_size=100M --innodb_buffer_pool_size=500M --innodb-doublewrite=false --innodb_flush_method=O_DIRECT "
+      ;;
+    nitro)
+      MYSQL_ENGINE_TUNING="--skip-innodb --nitro_attempt_query_rewrite=0 --nitro_batch_enabled=1 --nitro_bulk_load_enabled=1 --sql-mode='TRADITIONAL' "
+      ;;
+    *)
+      MYSQL_ENGINE_TUNING=""
+      ;;
+  esac
+  AC_SUBST(MYSQL_ENGINE)  
+  AC_SUBST(MYSQL_ENGINE_TUNING)
+
+  MYSQL_PID=$MYSQL_DATADIR/mysql.pid
+  MYSQL_SOCK=$MYSQL_DATADIR/mysql.sock
+  AC_SUBST(MYSQL_PID)
+  AC_SUBST(MYSQL_SOCK)
+
+  AC_DEFINE(MYSQL, 1)
+
+  AC_CONFIG_FILES([scripts/mysql/my.cnf])
+  AC_CONFIG_FILES([scripts/mysql/lockfile.sh])
+  AC_CONFIG_FILES([scripts/mysql/clear-time-statistics.sh],
+      [chmod +x scripts/mysql/clear-time-statistics.sh])
+  AC_CONFIG_FILES([scripts/mysql/get_query_plan.sh],
+      [chmod +x scripts/mysql/get_query_plan.sh])
+  AC_CONFIG_FILES([scripts/mysql/get_version.sh],
+      [chmod +x scripts/mysql/get_version.sh])
+  AC_CONFIG_FILES([scripts/mysql/run_power_query.sh],
+      [chmod +x scripts/mysql/run_power_query.sh])
+  AC_CONFIG_FILES([scripts/mysql/run_rf1.sh],
+      [chmod +x scripts/mysql/run_rf1.sh])
+  AC_CONFIG_FILES([scripts/mysql/run_rf2.sh],
+      [chmod +x scripts/mysql/run_rf2.sh])
+  AC_CONFIG_FILES([scripts/mysql/run_throughput_stream.sh],
+      [chmod +x scripts/mysql/run_throughput_stream.sh])
+  AC_CONFIG_FILES([scripts/mysql/create_db.sh],
+      [chmod +x scripts/mysql/create_db.sh])
+  AC_CONFIG_FILES([scripts/mysql/init_db.sh],
+      [chmod +x scripts/mysql/init_db.sh])
+  AC_CONFIG_FILES([scripts/mysql/create_tables.sh],
+      [chmod +x scripts/mysql/create_tables.sh])
+  AC_CONFIG_FILES([scripts/mysql/db_stats.sh],
+      [chmod +x scripts/mysql/db_stats.sh])
+  AC_CONFIG_FILES([scripts/mysql/drop_db.sh],
+      [chmod +x scripts/mysql/drop_db.sh])
+  AC_CONFIG_FILES([scripts/mysql/drop_tables.sh],
+      [chmod +x scripts/mysql/drop_tables.sh])
+  AC_CONFIG_FILES([scripts/mysql/grant.sh],
+      [chmod +x scripts/mysql/grant.sh])
+  AC_CONFIG_FILES([scripts/mysql/mysql_profile],
+      [chmod +x scripts/mysql/mysql_profile])
+  AC_CONFIG_FILES([scripts/mysql/q_time.sh],
+      [chmod +x scripts/mysql/q_time.sh])
+  AC_CONFIG_FILES([scripts/mysql/start_db.sh],
+      [chmod +x scripts/mysql/start_db.sh])
+  AC_CONFIG_FILES([scripts/mysql/stop_db.sh],
+      [chmod +x scripts/mysql/stop_db.sh])
+  AC_CONFIG_FILES([scripts/mysql/update_statistics.sh],
+      [chmod +x scripts/mysql/update_statistics.sh])
+  AC_CONFIG_FILES([scripts/mysql/load_test.sh],
+      [chmod +x scripts/mysql/load_test.sh])
+  AC_CONFIG_FILES([scripts/mysql/power_test.sh],
+      [chmod +x scripts/mysql/power_test.sh])
+  AC_CONFIG_FILES([scripts/mysql/throughput_test.sh],
+      [chmod +x scripts/mysql/throughput_test.sh])
+  AC_CONFIG_FILES([scripts/mysql/throughput_stream_wrapper.sh],
+      [chmod +x scripts/mysql/throughput_stream_wrapper.sh])
+  AC_CONFIG_FILES([scripts/mysql/record_end.sh],
+      [chmod +x scripts/mysql/record_end.sh])
+  AC_CONFIG_FILES([scripts/mysql/record_start.sh],
+      [chmod +x scripts/mysql/record_start.sh])
+
+
+elif test "$DATABASE_TO_USE" = "pgsql"; then
   dnl check if the user has specified path for pgsql
-  if test "$pgsql_path" == "yes"; then
+  if test "$pgsql_path" = "yes"; then
     AC_PATH_PROGS(PG_CONFIG, pg_config, no)
   else
     AC_PATH_PROGS(PG_CONFIG, pg_config, no, "$PGSQL_PATH/bin")
@@ -180,7 +329,7 @@ if test "$DATABASE_TO_USE" == "pgsql"; then
       [chmod +x scripts/pgsql/record_end.sh])
   AC_CONFIG_FILES([scripts/pgsql/record_start.sh],
       [chmod +x scripts/pgsql/record_start.sh])
-elif test "$DATABASE_TO_USE" == "sapdb"; then
+elif test "$DATABASE_TO_USE" = "sapdb"; then
   AC_DEFINE(SAPDB, 1)
 
   AC_CONFIG_FILES([data_collect/sapdb/dbt3_stats.sh],
@@ -242,7 +391,6 @@ elif test "$DATABASE_TO_USE" == "sapdb"; then
 fi
 
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([dbgen/Makefile])
 AC_CONFIG_FILES([scripts/dbt3_profile])
 AC_CONFIG_FILES([scripts/get_composite.sh], [chmod +x scripts/get_composite.sh])
 AC_CONFIG_FILES([scripts/get_config.sh], [chmod +x scripts/get_config.sh])
@@ -253,5 +401,6 @@ AC_CONFIG_FILES([scripts/start_sysstats.sh],
     [chmod +x scripts/start_sysstats.sh])
 AC_CONFIG_FILES([scripts/stop_sysstats.sh], [chmod +x scripts/stop_sysstats.sh])
 AC_CONFIG_FILES([src/Makefile])
+AC_CONFIG_FILES([src/dbgen/Makefile])
 
 AC_OUTPUT

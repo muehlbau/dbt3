@@ -1,6 +1,7 @@
 /* @(#)speed_seed.c	2.1.8.2 */
 #include <stdio.h>
 #include <stdlib.h>
+#define NEED_LNOISE 1
 #include "dss.h"
 
 /*  _tal long RandSeed = "Random^SeedFromTimestamp" (void); */

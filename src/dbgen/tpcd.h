@@ -51,6 +51,15 @@
 #define SET_DBASE       "CONNECT TO %s ;\n"
 #endif /* PGSQL */
 
+#ifdef MYSQL
+#define GEN_QUERY_PLAN  "EXPLAIN"
+#define START_TRAN      "START TRANSACTION;"
+#define END_TRAN        "COMMIT;"
+#define SET_OUTPUT      ""
+#define SET_ROWCOUNT    "LIMIT %d;\n"
+#define SET_DBASE       "USE %s ;\n"
+#endif /* MYSQL */
+
 #ifdef DB2
 #define GEN_QUERY_PLAN  "SET CURRENT EXPLAIN SNAPSHOT ON;"
 #define START_TRAN      ""
@@ -69,7 +78,7 @@
 #define SET_DBASE       "database %s ;\n"
 #endif
 
-#ifdef 	SQLSERVER
+#ifdef SQLSERVER
 #define GEN_QUERY_PLAN  "set showplan on\nset noexec on\ngo\n"
 #define START_TRAN      "begin transaction\ngo\n"
 #define END_TRAN        "commit transaction\ngo\n"

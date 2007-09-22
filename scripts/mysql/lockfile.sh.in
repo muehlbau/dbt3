@@ -1,0 +1,20 @@
+LOCKFILECREATE="@LOCKFILECREATE@"
+LOCKFILEREMOVE="@LOCKFILEREMOVE@"
+LOCKFILETOUCH="@LOCKFILETOUCH@"
+LOCKFILEPID=
+
+function lockfile_create() { 
+  $LOCKFILECREATE $1  
+  if test ! -x $LOCKFILETOUCH ; then 
+    $LOCKFILETOUCH $1 &
+    # Save the PID of the lockfile-touch process
+    LOCKFILEPID="$!"
+  fi
+}
+
+function lockfile_remove() { 
+  if test ! -z $LOCKFILEPID ; then 
+    kill $LOCKFILEPID
+  fi
+  $LOCKFILEREMOVE $1
+}

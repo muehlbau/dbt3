@@ -248,7 +248,7 @@ void
 usage(void)
 {
 printf("%s Parameter Substitution (v. %d.%d.%d%s)\n", 
-          NAME, VERSION,RELEASE,
+          NAME, MAJOR,RELEASE,
             MODIFICATION,PATCH);
 printf("Copyright %s %s\n", TPC, C_DATES);
 printf("USAGE: %s <options> [ queries ]\n", prog);
@@ -391,7 +391,7 @@ setup(void)
 }
 
 
-main(int ac, char **av)
+int main(int ac, char **av)
 {
     int i;
     FILE *ifp;
@@ -405,7 +405,7 @@ main(int ac, char **av)
     if (flags & VERBOSE)
         fprintf(ofp, 
 	    "-- TPC %s Parameter Substitution (Version %d.%d.%d%s)\n",
-            NAME, VERSION, RELEASE, MODIFICATION, PATCH);
+            NAME, MAJOR, RELEASE, MODIFICATION, PATCH);
 
     setup();
 
@@ -439,14 +439,14 @@ main(int ac, char **av)
             for (i=optind; i < ac; i++)
                 {
                 char qname[10];
-                sprintf(qname, "%d", SEQUENCE(snum, atoi(av[i])));
+                sprintf(qname, "%ld", SEQUENCE(snum, atoi(av[i])));
                 qsub(qname, flags);
                 }
         else
             for (i=1; i <= QUERIES_PER_SET; i++)
                 {
                 char qname[10];
-                sprintf(qname, "%d", SEQUENCE(snum, i));
+                sprintf(qname, "%ld", SEQUENCE(snum, i));
                 qsub(qname, flags);
                 }
     else

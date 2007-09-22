@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2004-2006 Mark Wong & Open Source Development Labs, Inc.
+#
+
+. @TOPDIR@/scripts/dbt3_profile || exit 1
+
+while getopts "n:" opt; do
+	case $opt in
+	n)
+		NAME=$OPTARG
+		;;
+	esac
+done
+
+SQL="
+UPDATE time_statistics
+SET e_time = current_timestamp
+WHERE task_name = '$NAME';
+"
+@MYSQL_CLIENT@  -D $SID -e "$SQL"

@@ -78,7 +78,6 @@ sub process {
 	my $png_filename = $filename;
 	$png_filename =~ s/data$/png/;
 	open( FILE, ">$stats_dir/$input_filename" );
-	print FILE "plot \"$filename\" using 1:1 title \"$names[ 0 ]\" with lines, \\\n";
 	my $i;
 	for ( $i = 1; $i < (scalar @names) - 1; $i++ ) {
 		print FILE "\"$filename\" using 1:" . ($i + 1) .
@@ -91,7 +90,7 @@ sub process {
 	print FILE "set term png small\n";
 	print FILE "set output \"$png_filename\"\n";
 	print FILE "set yrange [0:]\n";
-	print FILE "replot\n";
+	print FILE "plot \"$filename\" using 1:1 title \"$names[ 0 ]\" with lines, \\\n";
 	close( FILE );
 }
 

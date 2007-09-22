@@ -4,6 +4,7 @@
 #define DECLARER				/* EXTERN references get defined here */
 #define NO_FUNC (int (*) ()) NULL	/* to clean up tdefs */
 #define NO_LFUNC (long (*) ()) NULL		/* to clean up tdefs */
+#define NEED_LNOISE 1
 
 #include "config.h"
 #include <stdlib.h>
@@ -339,6 +340,7 @@ gen_tbl (int tnum, long start, long count, long upd_num)
 			mk_order (i, &o, upd_num % 10000);
 
 		  if (insert_segments  && (upd_num > 0))
+                        {
 			if((upd_num / 10000) < residual_rows)
 				{
 				if((++rows_this_segment) > rows_per_segment) 
@@ -355,54 +357,74 @@ gen_tbl (int tnum, long start, long count, long upd_num)
 					upd_num += 10000;
 					}
 				}
-
+                        }
 			if (set_seeds == 0)
-				if (validate)
+				{
+ 				if (validate) 
+					{
 					tdefs[tnum].verify(&o, 0);
+					}
 				else
+					{
 					tdefs[tnum].loader[direct] (&o, upd_num);
+					}
+				}
 			break;
 		case SUPP:
 			mk_supp (i, &supp);
 			if (set_seeds == 0)
+				{
 				if (validate)
+					{
 					tdefs[tnum].verify(&supp, 0);
+					}
 				else
+					{
 					tdefs[tnum].loader[direct] (&supp, upd_num);
+					}
+				}
 			break;
 		case CUST:
 			mk_cust (i, &cust);
-			if (set_seeds == 0)
+			if (set_seeds == 0) 
+				{
 				if (validate)
 					tdefs[tnum].verify(&cust, 0);
 				else
 					tdefs[tnum].loader[direct] (&cust, upd_num);
+				}
 			break;
 		case PSUPP:
 		case PART:
   		case PART_PSUPP: 
 			mk_part (i, &part);
-			if (set_seeds == 0)
+			if (set_seeds == 0) 
+				{
 				if (validate)
 					tdefs[tnum].verify(&part, 0);
 				else
 					tdefs[tnum].loader[direct] (&part, upd_num);
+				}
 			break;
 		case NATION:
 			mk_nation (i, &code);
 			if (set_seeds == 0)
+				{
 				if (validate)
 					tdefs[tnum].verify(&code, 0);
 				else
 					tdefs[tnum].loader[direct] (&code, 0);
+				}
 			break;
 		case REGION:
 			mk_region (i, &code);
-			if (set_seeds == 0)
+			if (set_seeds == 0) 
+				{
 				if (validate)
 					tdefs[tnum].verify(&code, 0);
 				else
 					tdefs[tnum].loader[direct] (&code, 0);
+				}
 			break;
 		}
 		row_stop(tnum);
@@ -482,7 +504,7 @@ partial (int tbl, int s)
 	
 	if (verbose > 0)
 	{
-		fprintf (stderr, "\tStarting to load stage %d of %d for %s...",
+		fprintf (stderr, "\tStarting to load stage %d of %ld for %s...",
 			s, children, tdefs[tbl].comment);
 	}
 	
@@ -510,7 +532,7 @@ pload (int tbl)
 	
 	if (verbose > 0)
 	{
-		fprintf (stderr, "Starting %d children to load %s",
+		fprintf (stderr, "Starting %ld children to load %s",
 			children, tdefs[tbl].comment);
 	}
 	for (c = 0; c < children; c++)
@@ -732,7 +754,7 @@ process_options (int count, char **vector)
 			  case 'h':				/* something unexpected */
 				  fprintf (stderr,
 					  "%s Population Generator (Version %d.%d.%d%s)\n",
-					  NAME, VERSION, RELEASE,
+					  NAME, MAJOR, RELEASE,
 					  MODIFICATION, PATCH);
 				  fprintf (stderr, "Copyright %s %s\n", TPC, C_DATES);
 				  usage ();
@@ -820,7 +842,7 @@ main (int ac, char **av)
 		{
 		fprintf (stderr,
 			"%s Population Generator (Version %d.%d.%d%s)\n",
-			NAME, VERSION, RELEASE, MODIFICATION, PATCH);
+			NAME, MAJOR, RELEASE, MODIFICATION, PATCH);
 		fprintf (stderr, "Copyright %s %s\n", TPC, C_DATES);
 		}
 	
@@ -857,8 +879,8 @@ main (int ac, char **av)
 			{
 			if (verbose > 0)
 				fprintf (stderr,
-				"Generating update pair #%d for %s [pid: %d]",
-				upd_num + 1, tdefs[ORDER_LINE].comment, DSS_PROC);
+				"Generating update pair #%ld for %s [pid: %ld]",
+				upd_num + 1, tdefs[ORDER_LINE].comment, (long int)DSS_PROC);
 			insert_orders_segment=0;
 			insert_lineitem_segment=0;
 			delete_segment=0;
@@ -936,13 +958,13 @@ main (int ac, char **av)
 						rowcnt = tdefs[i].base;
 					if (verbose > 0)
 						fprintf (stderr, "%s data for %s [pid: %ld]",
-						(validate)?"Validating":"Generating", tdefs[i].comment, DSS_PROC);
+						(validate)?"Validating":"Generating", tdefs[i].comment, (long int)DSS_PROC);
 					gen_tbl (i, minrow, rowcnt, upd_num);
 					if (verbose > 0)
 						fprintf (stderr, "done.\n");
 				}
 				if (validate)
-					printf("Validation checksum for %s at %d GB: %0x\n", 
+					printf("Validation checksum for %s at %ld GB: %0lx\n", 
 						 tdefs[i].name, scale, tdefs[i].vtotal);
 		}
 	}

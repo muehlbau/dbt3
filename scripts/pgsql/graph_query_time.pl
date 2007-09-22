@@ -212,7 +212,6 @@ if ($flag_throughput_test) {
 
 print $outfile "set style line 1 lt 1 lw 50\n";
 print $outfile "set style line 2 lt 2 lw 50\n";
-print $outfile "plot $plots\n";
 print $outfile "set term png small\n";
 print $outfile "set output \"q_time.png\"\n";
 if ($no_refresh) {
@@ -222,7 +221,7 @@ print $outfile "set xtics \(\"Q1\" 1, \"Q2\" 2, \"Q3\" 3, \"Q4\" 4, \"Q5\" 5, \"
 }
 print $outfile "set ylabel \"Query Time in Seconds\"\n";
 print $outfile "set xrange [0:25]\n";
-print $outfile "replot\n";
+print $outfile "plot $plots\n";
 $outfile->close;
 
 chdir $dirname;

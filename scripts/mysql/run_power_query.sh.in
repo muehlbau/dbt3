@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003-2006 Jenny Zhang & Open Source Development Labs, Inc.
+#
+
+SRCDIR=@TOPDIR@
+
+DBSCRIPTDIR=$SRCDIR/scripts/@DATABASE_TO_USE@
+
+if [ $# -ne 6 ]; then
+        echo "Usage: ./run_power_query.sh <scale_factor> <perf_run_number> <0/1 - explain analyze off/on> <output dir> <run dir> <seed file>"
+        exit 1
+fi
+
+scale_factor=$1
+perf_run_number=$2
+EXPLAIN_ANALYZE=$3
+OUTPUT_DIR=$4
+RUNDIR=$5
+SEED_FILE=$6
+
+query_file="$RUNDIR/power_query"
+tmp_query_file="$RUNDIR/tmp_query.sql"
+param_file="$RUNDIR/power_param"
+
+if [ ! -f $SEED_FILE ]; then
+	echo "creating seed file $SEED_FILE, you can change the seed by"
+	echo "modifying this file"
+	$SRCDIR/scripts/init_seed.sh > $SEED_FILE
+fi
+
+# generate the queries for power test
+rm -f $query_file
+if [ $EXPLAIN_ANALYZE -eq 0 ]; then
+	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file> $query_file || exit 1
+else
+	${QGEN} -c -r `cat $SEED_FILE` -p 0 -s $scale_factor -l $param_file -y > $query_file || exit 1
+fi
+
+echo -n "running parse query..."
+# modify $query_file so that the commands are in one line
+${PARSE_QUERY} $query_file $tmp_query_file P $perf_run_number
+echo "done"
+
+# run the queries
+echo "`date`: Starting Power Test queries... "
+s_time=`$GTIME`
+
+$DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_number}.POWER.QS" || exit 1
+
+cat $tmp_query_file | @MYSQL_CLIENT@ -v -v -v $SID >> $OUTPUT_DIR/results/power_query.result 2>&1 
+if [ $? -eq 1 ] ; then 
+	echo "power_query failed"
+	exit 1
+fi
+$DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_number}.POWER.QS" || exit 1
+e_time=`$GTIME`
+echo "`date`: Power Test queries completed."
+diff_time=`expr $e_time - $s_time`
+echo "Elapsed time for Power Test queries : $diff_time seconds"
+
+exit 0

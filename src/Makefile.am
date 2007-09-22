@@ -9,7 +9,7 @@ AUTOMAKE_OPTIONS = no-dependencies
 
 # Can't include dbgen until we can figure out how to conver the Makefile for
 # automake.
-#SUBDIRS = dbgen
+SUBDIRS = dbgen
 
 INCLUDES = -Iinclude
 

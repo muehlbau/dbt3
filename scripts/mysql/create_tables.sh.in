@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2005-2006 Jenny Zhang & Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+engine=`echo $MYSQL_ENGINE | tr 'A-Z' 'a-z' `
+
+# Load tables
+# This background stuff is honestly kinda ugly. IMO the right way to do this is to utilize make -j
+load_table() {
+    table=${1}
+    if [ x${2} == x ]; then
+	file=${table}.tbl
+    else
+	file=${2}.tbl
+    fi
+    if [ -f $DSS_QUERY/ddl/$engine/${table}.sql ] ; then 
+	cat $DSS_QUERY/ddl/$engine/${table}.sql | $MYSQL_CLIENT $SID || exit 1
+    else
+        cat $DSS_QUERY/ddl/${table}.sql | $MYSQL_CLIENT $SID || exit 1
+    fi
+    # This disable/enable trick only works on MyISAM for the moment. 
+    $MYSQL_CLIENT -D $SID -e "alter table $table disable keys;"
+    $MYSQLIMPORT --fields-terminated-by='|' ${SID} ${DBDATA}/${file}
+    $MYSQL_CLIENT -D $SID -e "alter table $table enable keys;"
+}
+
+while getopts "bd:e:" OPT; do
+    case ${OPT} in
+	b)
+	BACKGROUND=yes
+	;;
+	d)
+	DBDATA=${OPTARG}
+	;;
+	e)
+	MYSQL_ENGINE=${OPTARG}
+	;;
+    esac
+done
+
+
+load_table supplier 
+load_table part
+load_table partsupp
+load_table customer
+load_table orders
+load_table lineitem
+load_table nation
+load_table region
+
+${MYSQL_CLIENT} -D ${SID} -e "
+CREATE TABLE time_statistics (
+	task_name VARCHAR(40),
+	s_time TIMESTAMP default current_timestamp,
+	e_time TIMESTAMP,
+	int_time INTEGER) engine=myisam;
+" || exit 1
+
+wait
+
+exit 0

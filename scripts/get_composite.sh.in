@@ -46,21 +46,21 @@ SCRIPT_DIR="@TOPDIR@/scripts/@DATABASE_TO_USE@";
 #
 # Make sure the outfile is created.
 #
-touch ${OUTFILE}
+cat /dev/null >  ${OUTFILE}
 
 if [ ${FLAG_POWER_TEST} -eq 1 ]; then
-	POWER=`${SCRIPT_DIR}/get_power.pl -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
-	echo "power = ${POWER}" >> ${OUTFILE}
+	POWER=`perl ${SCRIPT_DIR}/get_power.pl -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
+	echo "power = ${POWER}"  | tee -a ${OUTFILE}
 fi
 
 if [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
-	THROUGHPUT=`${SCRIPT_DIR}/get_throughput.sh -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
-	echo "throughput = ${THROUGHPUT}" >> ${OUTFILE}
+	THROUGHPUT=`${SCRIPT_DIR}/get-throughput -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
+	echo "throughput = ${THROUGHPUT}" | tee -a ${OUTFILE}
 fi
 
 if [ ${FLAG_POWER_TEST} -eq 1 ] && [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
 	COMPOSITE=`echo "scale=2; sqrt(${POWER} * ${THROUGHPUT})" | bc -l`
-	echo "composite = ${COMPOSITE}" >> ${OUTFILE}
+	echo "composite = ${COMPOSITE}" | tee -a ${OUTFILE}
 fi
 
 exit 0

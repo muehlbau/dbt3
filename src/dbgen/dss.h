@@ -8,14 +8,14 @@
 #define  DSS_H
 #ifdef TPCH
 #define NAME			"TPC-H"
-#define VERSION           1
+#define MAJOR           1
 #define RELEASE           3
 #define MODIFICATION      0
 #define PATCH             ""
 #endif
 #ifdef TPCR
 #define NAME			"TPC-R"
-#define VERSION           1
+#define MAJOR           1
 #define RELEASE           3
 #define MODIFICATION      0
 #define PATCH             ""
@@ -59,9 +59,12 @@
 
 #define INTERNAL_ERROR(p)  {fprintf(stderr,"%s", p);abort();}
 #define LN_CNT  4
+
+#ifdef NEED_LNOISE
 static char lnoise[4] = {'|', '/', '-', '\\' };
 #define LIFENOISE(n, var)	\
 	if (verbose > 0) fprintf(stderr, "%c\b", lnoise[(var%LN_CNT)])
+#endif
 
 #define MALLOC_CHECK(var) \
     if ((var) == NULL) \
@@ -263,11 +266,11 @@ extern tdef tdefs[];
 #define  P_SIZE       126
 #define  P_NAME_SCL   5
 #define  P_MFG_TAG    "Manufacturer#"
-#define  P_MFG_FMT     "%s%01d"
+#define  P_MFG_FMT     "%s%01ld"
 #define  P_MFG_MIN     1
 #define  P_MFG_MAX     5
 #define  P_BRND_TAG   "Brand#"
-#define  P_BRND_FMT   "%s%02d"
+#define  P_BRND_FMT   "%s%02ld"
 #define  P_BRND_MIN     1
 #define  P_BRND_MAX     5
 #define  P_SIZE_MIN    1
@@ -311,7 +314,7 @@ extern tdef tdefs[];
  */
 #define  C_SIZE       165
 #define  C_NAME_TAG   "Customer#"
-#define  C_NAME_FMT   "%s%09d"
+#define  C_NAME_FMT   "%s%09ld"
 #define  C_MSEG_MAX    5
 #define  C_ABAL_MIN   -99999
 #define  C_ABAL_MAX    999999
@@ -325,7 +328,7 @@ extern tdef tdefs[];
 #define  O_ODATE_MAX     (STARTDATE + TOTDATE - \
                          (L_SDTE_MAX + L_RDTE_MAX) - 1)
 #define  O_CLRK_TAG      "Clerk#"
-#define  O_CLRK_FMT      "%s%09d"
+#define  O_CLRK_FMT      "%s%09ld"
 #define  O_CLRK_SCL      1000
 #define  O_LCNT_MIN      1
 #define  O_LCNT_MAX      7
@@ -465,10 +468,10 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define  PR_END(fp)    fprintf(fp, "\n")   /* finish the record here */
 #ifdef MDY_DATE
 #define  PR_DATE(tgt, yr, mn, dy)	\
-   sprintf(tgt, "%02d-%02d-19%02d", mn, dy, yr)
+   sprintf(tgt, "%02ld-%02ld-19%02ld", mn, dy, yr)
 #else
 #define  PR_DATE(tgt, yr, mn, dy)	\
-sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
+sprintf(tgt, "19%02ld-%02ld-%02ld", yr, mn, dy)
 #endif /* DATE_FORMAT */
 
 /*

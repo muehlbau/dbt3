@@ -1,0 +1,73 @@
+#
+# The MySQL database server configuration file.
+#
+[client]
+user = root
+port		= 3306
+socket		= @MYSQL_SOCK@
+
+[mysql]
+prompt=\u:\d>\_
+
+# Here is entries for some specific programs
+# The following values assume you have at least 32M ram
+
+# This was formally known as [safe_mysqld]. Both versions are currently parsed.
+[mysqld_safe]
+socket		= @MYSQL_SOCK@
+#nice		= 0
+
+[mysqld]
+#
+# * Basic Settings
+#
+default-storage-engine  = @MYSQL_ENGINE@
+skip-networking
+pid-file	= @MYSQL_PID@
+socket		= @MYSQL_SOCK@
+#port		= 33306
+#basedir		= /usr
+@MYSQL_BASEDIR_CNF@
+datadir		= @MYSQL_DATADIR@
+#tmpdir		= /tmp
+skip-external-locking
+#innodb_doublewrite=false
+#innodb_flush_method=O_DIRECT
+#tmp_table_size=209715200
+#read_buffer_size=2M
+#read_rnd_buffer_size=2M
+#
+#
+# * Fine Tuning
+###
+##key_buffer		= 16M
+##max_allowed_packet	= 16M
+##thread_stack		= 128K
+#
+# * Query Cache Configuration
+#
+##query_cache_limit	= 1048576
+##query_cache_size        = 16777216
+##query_cache_type        = 1
+#
+log-error=@MYSQL_DATADIR@/mysql_error.log
+#
+# Here you can see queries with especially long duration
+#log-slow-queries	= @MYSQL_DATADIR@/mysql-slow.log
+#
+# * InnoDB
+#
+# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
+# Read the manual for more InnoDB related options. There are many!
+#innodb_log_file_size=100M
+#innodb_buffer_pool_size=200M
+# * Security Features
+#
+# Read the manual, too, if you want chroot!
+# <FIXME> - ADD SUPPORT FOR THIS
+# chroot = /var/lib/mysql/
+#
+
+[mysqld_safe]
+ledir=/
+mysqld=@MYSQLD@

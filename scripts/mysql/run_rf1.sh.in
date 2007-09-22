@@ -1,0 +1,87 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003 Open Source Development Lab, Inc.
+#
+
+SRCDIR=@TOPDIR@
+DBSCRIPTDIR=$SRCDIR/scripts/@DATABASE_TO_USE@
+. ${DBSCRIPTDIR}/lockfile.sh
+
+if [ $# -ne 2 ]; then
+        echo "Usage: ./run_rf1.sh <scale_factor> <run dir>"
+        exit 1
+fi
+
+scale_factor=$1
+RUNDIR=$2
+
+curr_set_file_rf1="$RUNDIR/curr_set_num_rf1"
+lock_file_rf1="$RUNDIR/rf1.lock"
+min_set_file="$RUNDIR/min_set_num"
+max_set_file="$RUNDIR/max_set_num"
+
+# if curr_set_file does not exist, we generate 12 update sets
+# create a semaphore file so that only one process can access
+# $curr_set_file_rf1 
+lockfile_create $lock_file_rf1
+if [ ! -f $curr_set_file_rf1 ];
+then
+	echo "generating update set 1 - 12"
+	$DBGEN -s $scale_factor -U 12
+	echo "1" > ${min_set_file}
+	echo "12" > ${max_set_file}
+	echo "0" > ${curr_set_file_rf1}
+fi
+lockfile_remove $lock_file_rf1
+
+lockfile_create $lock_file_rf1
+read set_num < $curr_set_file_rf1
+read min_set < $min_set_file
+read max_set < $max_set_file
+
+set_num=`expr $set_num + 1`
+echo $set_num > $curr_set_file_rf1
+
+# if the current set number is larger than max_set, we need to generate new set
+if [ $set_num -gt $max_set ]
+then
+	min_set=`expr $min_set + 12`
+	max_set=`expr $max_set + 12`
+	echo "Stream ${set_num} : Generating update set $min_set - $max_set..."
+	$DBGEN -s $scale_factor -U $max_set
+	echo "$min_set" > ${min_set_file}
+	echo "$max_set" > ${max_set_file}
+fi
+lockfile_remove $lock_file_rf1
+
+echo "`date`: Stream ${set_num} : Starting Refresh Stream 1..."
+s_time=`$GTIME`
+
+
+@MYSQL_CLIENT@ -D $SID -e "create table tmp_lineitem$set_num like lineitem;"
+
+@MYSQL_CLIENT@ -D $SID -e  "load data infile '/tmp/lineitem.tbl.u$set_num' into table  tmp_lineitem$set_num fields terminated by  '|';" 
+
+@MYSQL_CLIENT@ -D $SID -e "insert into lineitem select * from tmp_lineitem$set_num;"
+
+@MYSQL_CLIENT@ -D $SID -e "create table tmp_orders$set_num like orders;"
+
+@MYSQL_CLIENT@ -D $SID -e  "load data infile '/tmp/orders.tbl.u$set_num' into table tmp_orders$set_num fields terminated by '|';"
+
+@MYSQL_CLIENT@ -D $SID -e "insert into orders select * from tmp_orders$set_num;"
+
+# clean up
+@MYSQL_CLIENT@ -D $SID -e "drop table tmp_lineitem$set_num;"
+
+@MYSQL_CLIENT@ -D $SID -e "drop table tmp_orders$set_num;"
+
+e_time=`$GTIME`
+echo "`date`: Stream ${set_num} : Refresh Stream 1 completed."
+diff_time=`expr $e_time - $s_time`
+echo "Stream ${set_num} : Elapsed time for Refresh Stream 1 : $diff_time seconds"
+
+exit 0

@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2006 Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+
+OUTPUT_DIR="."
+while getopts "o:p:" OPT; do
+	case ${OPT} in
+	o)
+		OUTPUT_DIR=${OPTARG}
+		;;
+	p)
+		PARAMETERS=${OPTARG}
+		;;
+	esac
+done
+
+# This will fail if it's not running - but we don't care
+@TOPDIR@/scripts/mysql/stop_db.sh >/dev/null 2>&1
+
+if [ -d $MYSQL_DATADIR -a -d $MYSQL_DATADIR/mysql -a -f $MYSQL_DATADIR/mysql/user.frm ]; then
+	echo "======================================="
+	echo "DATADIR directory $MYSQL_DATADIR already exists"
+	echo "Skipping initdb"
+	echo "======================================="
+
+	# Don't need to initdb, blindly try to drop the dbt3 database in case
+	# it exists.
+	@TOPDIR@/scripts/mysql/start_db.sh -p "$PARAMETERS" || exit 1
+	@TOPDIR@/scripts/mysql/drop_db.sh
+	@TOPDIR@/scripts/mysql/stop_db.sh 
+else
+	# initialize database cluster
+	echo "initializing database ..."
+	@TOPDIR@/scripts/mysql/init_db.sh
+fi
+
+@TOPDIR@/scripts/mysql/start_db.sh -p "$PARAMETERS" || exit 1
+
+echo "Creating database $SID..."
+$MYSQL_ADMIN create $SID || exit 1
+
+exit 0

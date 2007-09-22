@@ -1,0 +1,62 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2007 MySQL AB
+#
+
+# dont start script as root!
+id=`id | sed s/\(.*// | sed s/uid=//`
+
+if [ "$id" = "0" ]; then
+	echo "dont start script as root"
+	exit 1
+fi
+
+export DBT3_DIR=/mnt/dbt3
+
+export SID=dbt3
+export MYDATA=${DBT3_DIR}/mydata
+export MYSQL_CLIENT="@MYSQL_CLIENT@"
+export MYSQL_ADMIN="@MYSQL_ADMIN@"
+export MYSQL_INSTALL_DB="@MYSQL_INSTALL_DB@"
+export MYSQLD="@MYSQLD@"
+export MYSQL_DATADIR="@MYSQL_DATADIR@"
+export MYSQLD_SAFE="@MYSQLD_SAFE@"
+export MYSQL_PID="@MYSQL_PID@"
+export MYSQL_SOCK="@MYSQL_SOCK@"
+export MYSQL_ENGINE="@MYSQL_ENGINE@"
+export MYSQLIMPORT="@MYSQLIMPORT@"
+export PATH="@MYSQL_BASEDIR@/bin:$PATH"
+export DSS_QUERY="@TOPDIR@/queries/@DATABASE_TO_USE@"
+
+export DEFAULT_LOAD_PARAMETERS=""
+export DEFAULT_POWER_PARAMETERS=""
+export DEFAULT_THROUGHPUT_PARAMETERS=""
+
+# Directory with tablespace mount points, if using tablespaces.
+TSDIR=${DBT3_DIR}
+
+
+
+wait_for_pid () {
+  while true ; do
+    sleep 1
+    case "$1" in
+      'created')
+        test -s $MYSQL_PID && return 0
+        kill -0 $2 || return 1
+        ;;
+      'removed')
+        test ! -s $MYSQL_PID && i='' && return 0
+        ;;
+      *)
+        echo "wait_for_pid () usage: wait_for_pid created|removed"
+        exit 1
+        ;;
+    esac
+  done
+
+}
