@@ -9,13 +9,16 @@
 
 SRCDIR=@TOPDIR@
 
-if [ $# -ne 2 ]; then
-        echo "Usage: ./run_rf1.sh <scale_factor> <run dir>"
+if [ $# -ne 3 ]; then
+        echo "Usage: ./run_rf1.sh <scale_factor> <run dir> <db port>"
         exit 1
 fi
 
 scale_factor=$1
 RUNDIR=$2
+DBPORT=$3
+
+PSQL="@PSQL@ -p ${DBPORT} -d ${SID}"
 
 curr_set_file_rf1="$RUNDIR/curr_set_num_rf1"
 lock_file_rf1="$RUNDIR/rf1.lock"
@@ -64,22 +67,22 @@ echo "COPY tmp_lineitem$set_num FROM '/tmp/lineitem.tbl.u$set_num' USING DELIMIT
 
 echo "COPY tmp_orders$set_num FROM '/tmp/orders.tbl.u$set_num' USING DELIMITERS '|';" >> tmp_orders$set_num.sql
 
-@PSQL@ -d $SID -c "create table tmp_lineitem$set_num (l_orderkey numeric(10), l_partkey numeric(10), l_suppkey numeric(10), l_linenumber numeric(10), l_quantity numeric(12,2), l_extendedprice numeric(12,2), l_discount numeric(12,2), l_tax numeric(12,2), l_returnflag char(1), l_linestatus char(1), l_shipdate date, l_commitdate date, l_receiptdate date, l_shipinstruct char(25), l_shipmode char(10), l_comment varchar(44));"
+${PSQL} -c "create table tmp_lineitem$set_num (l_orderkey numeric(10), l_partkey numeric(10), l_suppkey numeric(10), l_linenumber numeric(10), l_quantity numeric(12,2), l_extendedprice numeric(12,2), l_discount numeric(12,2), l_tax numeric(12,2), l_returnflag char(1), l_linestatus char(1), l_shipdate date, l_commitdate date, l_receiptdate date, l_shipinstruct char(25), l_shipmode char(10), l_comment varchar(44));"
 
-@PSQL@ -d $SID -f tmp_lineitem$set_num.sql
+${PSQL} -f tmp_lineitem$set_num.sql
 
-@PSQL@ -d $SID -c "insert into lineitem (select * from tmp_lineitem$set_num);"
+${PSQL} -c "insert into lineitem (select * from tmp_lineitem$set_num);"
 
-@PSQL@ -d $SID -c "create table tmp_orders$set_num (o_orderkey numeric(10), o_custkey numeric(10), o_orderstatus char(1), o_totalprice numeric(12,2), o_orderdate date, o_orderpriority char(15), o_clerk char(15), o_shippriority numeric(10), o_comment varchar(79));"
+${PSQL} -c "create table tmp_orders$set_num (o_orderkey numeric(10), o_custkey numeric(10), o_orderstatus char(1), o_totalprice numeric(12,2), o_orderdate date, o_orderpriority char(15), o_clerk char(15), o_shippriority numeric(10), o_comment varchar(79));"
 
-@PSQL@ -d $SID -f tmp_orders$set_num.sql
+${PSQL} -f tmp_orders$set_num.sql
 
-@PSQL@ -d $SID -c "insert into orders (select * from tmp_orders$set_num);"
+${PSQL} -c "insert into orders (select * from tmp_orders$set_num);"
 
 # clean up
-@PSQL@ -d $SID -c "drop table tmp_lineitem$set_num;"
+${PSQL} -c "drop table tmp_lineitem$set_num;"
 
-@PSQL@ -d $SID -c "drop table tmp_orders$set_num;"
+${PSQL} -c "drop table tmp_orders$set_num;"
 rm -f tmp_lineitem$set_num.sql
 rm -f tmp_orders$set_num.sql
 

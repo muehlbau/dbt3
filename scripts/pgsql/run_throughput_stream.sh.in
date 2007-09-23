@@ -8,8 +8,8 @@
 
 SRCDIR=@TOPDIR@
 
-if [ $# -ne 6 ]; then
-        echo "Usage: $0 <scale_factor> <perf_run_num> <stream_num> <0/1 - explain analyze off/on> <run dir> <seed file>"
+if [ $# -ne 7 ]; then
+        echo "Usage: $0 <scale_factor> <perf_run_num> <stream_num> <0/1 - explain analyze off/on> <run dir> <seed file> <db port>"
         exit 1
 fi
 
@@ -19,6 +19,8 @@ stream_num=$3
 EXPLAIN_ANALYZE=$4
 OUTPUT_DIR=$5
 SEED_FILE=$6
+DBPORT=$7
+
 RUNDIR=$OUTPUT_DIR/run
 
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
@@ -42,9 +44,11 @@ let "seed = $seed + $stream_num"
 rm -f $query_file
 rm -f $tmp_query_file
 if [ $EXPLAIN_ANALYZE -eq 0 ]; then
-	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file> $query_file || exit 1
+	$QGEN -c -r $seed -p $stream_num -s $scale_factor \
+			-l $param_file > $query_file || exit 1
 else
-	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file -y > $query_file || exit 1
+	$QGEN -c -r $seed -p $stream_num -s $scale_factor -l $param_file \
+			-y > $query_file || exit 1
 fi
 # modify $query_file so that the commands are in one line
 ${PARSE_QUERY} $query_file $tmp_query_file T $perf_run_num $stream_num
@@ -56,7 +60,9 @@ i=1
 while [ $i -le 22 ]
 do
 	if [ $i -ne 15 ]; then
-		$DBSCRIPTDIR/get_query_plan.sh $scale_factor $i $PLANDIR/throughput_stream${stream_num}_query$i.txt $RUNDIR $SEED_FILE
+		${DBSCRIPTDIR}/get_query_plan.sh ${scale_factor} ${i} \
+				${PLANDIR}/throughput_stream${stream_num}_query${i}.txt \
+				${RUNDIR} ${SEED_FILE} ${DBPORT}
 	fi
 	let "i=$i+1"
 done
@@ -64,11 +70,14 @@ done
 # run the queries
 echo "`date`: start throughput queries for stream $stream_num "
 s_time=`$GTIME`
-$DBSCRIPTDIR/record_start.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
+${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
+		-n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
-@PSQL@ $SID -f $tmp_query_file -a >> $OUTPUT_DIR/results/thruput_qs${stream_num}.result 2>&1 || exit 1
-$DBSCRIPTDIR/record_end.sh -n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
+@PSQL@ -p ${DBPORT} -d ${SID} -f ${tmp_query_file} \
+		-a >> ${OUTPUT_DIR}/results/thruput_qs${stream_num}.result 2>&1 || exit 1
+${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
+		-n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
 e_time=`$GTIME`
 echo "`date`: end queries "
 let "diff_time=$e_time-$s_time"

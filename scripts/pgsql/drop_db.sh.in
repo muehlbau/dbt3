@@ -1,6 +1,9 @@
 #!/bin/sh
 
+DBPORT=$1
+
 DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
 
-@DROPDB@ $SID
+
+@DROPDB@ -p ${DBPORT} $SID

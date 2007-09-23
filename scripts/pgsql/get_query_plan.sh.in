@@ -12,8 +12,8 @@
 
 SRCDIR=@TOPDIR@
 
-if [ $# -lt 5 ]; then
-        echo "Usage: $0 <scale_factor> <query_name> <output_file> <run dir> <seed file>"
+if [ $# -lt 6 ]; then
+        echo "Usage: $0 <scale_factor> <query_name> <output_file> <run dir> <seed file> <db port>"
         exit 1
 fi
 
@@ -22,6 +22,7 @@ query_name=$2
 output_file=$3
 RUNDIR=$4
 SEED_FILE=$5
+DBPORT=$6
 
 query_file="$RUNDIR/$query_name.sql"
 tmp_query_file="$RUNDIR/tmp_$query_name.sql"
@@ -43,6 +44,6 @@ ${PARSE_QUERY} $query_file $tmp_query_file E
 # Run the queries and save the output.
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
-@PSQL@ $SID -f $tmp_query_file -a >> $output_file 2>&1 || exit 1
+@PSQL@ -p ${DBPORT} $SID -f $tmp_query_file -a >> $output_file 2>&1 || exit 1
 
 exit 0

@@ -18,8 +18,11 @@ if [ "$id" = "0" ]; then
 fi
 
 OUTPUT_DIR="."
-while getopts "o:p:" OPT; do
+while getopts "l:o:p:" OPT; do
 	case ${OPT} in
+	l)
+		DBPORT=${OPTARG}
+		;;
 	o)
 		OUTPUT_DIR=${OPTARG}
 		;;
@@ -40,7 +43,7 @@ if [ -d $PGDATA ]; then
 	# Don't need to initdb, blindly try to drop the dbt3 database in case
 	# it exists.
 	@TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
-	@TOPDIR@/scripts/pgsql/drop_db.sh
+	@TOPDIR@/scripts/pgsql/drop_db.sh ${DBPORT}
 else
 	# initialize database cluster
 	echo "initializing database cluster..."
@@ -50,10 +53,10 @@ fi
 @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
 
 echo "Creating database $SID..."
-_o=`@CREATEDB@ $SID 2>&1`
+_o=`@CREATEDB@ -p ${DBPORT} $SID 2>&1`
 _test=`echo $_o | grep CREATE`
 if [ "$_test" = "" ]; then
-	echo "@CREATEDB@ $SID failed: $_o $_test"
+	echo "@CREATEDB@ -p ${DBPORT} $SID failed: $_o $_test"
 	exit 1
 fi
 

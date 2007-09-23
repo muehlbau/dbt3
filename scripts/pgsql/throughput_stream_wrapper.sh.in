@@ -11,11 +11,13 @@ SRCDIR=@TOPDIR@
 
 EXPLAIN_ANALYZE=0
 NO_REFRESH=0
-while getopts "ef:n:o:s:t:z" opt; do
+while getopts "ef:l:n:o:s:t:z" opt; do
 	case $opt in
 	e) EXPLAIN_ANALYZE=1
 		;;
 	f) scale_factor=$OPTARG
+		;;
+	l) DBPORT=${OPTARG}
 		;;
 	n) num_stream=$OPTARG
 		;;
@@ -38,7 +40,9 @@ DBSCRIPTDIR=$SRCDIR/scripts/pgsql
 i=1
 while [ $i -le $num_stream ] 
 do
-	bash $DBSCRIPTDIR/run_throughput_stream.sh $scale_factor $TAG $i $EXPLAIN_ANALYZE $OUTPUT_DIR $SEED_FILE > $RUNDIR/thruput_qs$i 2>&1 || exit 1 &
+	${DBSCRIPTDIR}/run_throughput_stream.sh ${scale_factor} ${TAG} ${i} \
+			${EXPLAIN_ANALYZE} ${OUTPUT_DIR} \
+			${SEED_FILE} ${DBPORT} > ${RUNDIR}/thruput_qs${i} 2>&1 || exit 1 &
 	
 	let "i=$i+1"
 done
@@ -49,13 +53,17 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 	stream_num=1
 	while [ $stream_num -le $num_stream ]
 	do
-		bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}"
+		${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
+				-n "PERF${TAG}.THRUPUT.RFST${stream_num}"
 
 		echo "`date`: Throughput Stream $stream_num : Starting Refresh Stream 1..."
 		s_time_rf1=`$GTIME`
-		bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
-		bash $DBSCRIPTDIR/run_rf1.sh $scale_factor $RUNDIR > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1 || exit 1
-		bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
+		${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
+				-n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
+		${DBSCRIPTDIR}/run_rf1.sh ${scale_factor} ${RUNDIR} \
+				${DBPORT}  > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1 || exit 1
+		${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
+				-n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
 		e_time_rf1=`$GTIME`
 		echo "`date`: Throughput Stream $stream_num : Refresh Stream 1 completed."
 		let "diff_time_rf1=$e_time_rf1-$s_time_rf1"
@@ -63,15 +71,19 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 
 		echo "`date`: Throughput Stream $stream_num : Starting Refresh Stream 2..."
 		s_time_rf2=`$GTIME`
-		bash $DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
-		bash $DBSCRIPTDIR/run_rf2.sh $RUNDIR > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf2.result 2>&1 || exit 1
-		bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
+		${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
+				-n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
+		${DBSCRIPTDIR}/run_rf2.sh ${RUNDIR} \
+				${DBPORT} > ${OUTPUT_DIR}/results/thruput.perf${TAG}.stream${stream_num}.rf2.result 2>&1 || exit 1
+		${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
+				-n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF2"
 		e_time_rf2=`$GTIME`
 		echo "`date`: Throughput Stream $stream_num : Refresh Stream 2 completed."
 		let "diff_time_rf2=$e_time_rf2-$s_time_rf2"
 		echo "Throughput Stream $stream_num : Elapsed time for Refresh Stream 2 : $diff_time_rf2 seconds"
 
-		bash $DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT.RFST${stream_num}"
+		${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
+				-n "PERF${TAG}.THRUPUT.RFST${stream_num}"
 
         	let "stream_num=$stream_num+1"
 	done

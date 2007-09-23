@@ -7,6 +7,34 @@
 #                    Open Source Development Labs, Inc.
 #
 
+usage()
+{
+	echo "usage: run_workload.sh [-123eghouz] [-c comment] [-d data dir]"
+	echo "  [-f scale factor] [-l database port] [-n streams]"
+	echo "  [-p load test database parameters]"
+	echo "  [-q power test database parameters]"
+	echo "  [-r throughput test database parameters]"
+	echo "  [-s seed]"
+	echo ""
+	echo " 1 - run load test"
+	echo " 2 - run power test"
+	echo " 3 - run throughput test"
+	echo " c - comment about the test"
+	echo " d - database directory"
+	echo " e - EXPLAIN ANALYZE (PostgreSQL only)"
+	echo " g - generate flat files"
+	echo " h - this help message"
+	echo " l - database port"
+	echo " n - number of throughput streams"
+	echo " o - enable oprofile"
+	echo " p - database parameters for the load test"
+	echo " q - database parameters for the power test"
+	echo " r - database parameters for the throughput test"
+	echo " s - seed"
+	echo " u - use tablespaces"
+	echo " z - do not run refresh streams"
+}
+
 SRCDIR=@TOPDIR@
 DATABASE=@DATABASE_TO_USE@
 SCRIPTDIR=$SRCDIR/scripts
@@ -23,7 +51,6 @@ STREAMS=1
 MAX=1
 GENERATE=0
 TEST_ARGS=
-LOAD_ARGS=
 DBDATA=${DSS_PATH}
 
 COMMENT=""
@@ -33,7 +60,7 @@ RUN_POWER_TEST=0
 RUN_THROUGHPUT_TEST=0
 FLAG_POWER_TEST=""
 FLAG_THROUGHPUT_TEST=""
-while getopts "123d:c:ef:gn:op:q:r:s:tuz" opt; do
+while getopts "123d:c:ef:ghl:n:op:q:r:s:tuz" opt; do
 	case $opt in
 	1)
 		RUN_LOAD_TEST=1
@@ -66,6 +93,13 @@ while getopts "123d:c:ef:gn:op:q:r:s:tuz" opt; do
 	g)
 		GENERATE=1
 		;;
+	h)
+		usage
+		exit 1
+		;;
+	l)
+		DBPORT=$OPTARG
+		;;
 	n)
 		STREAMS=$OPTARG
 		;;
@@ -86,9 +120,6 @@ while getopts "123d:c:ef:gn:op:q:r:s:tuz" opt; do
 		;;
 	s)
 		SEED=$OPTARG
-		;;
-	t)
-		LOAD_ARGS="$LOAD_ARGS -t"
 		;;
 	u)
 		TABLESPACES_FLAG="-t"
@@ -144,11 +175,11 @@ echo "Using seed: `cat $SEED_FILE`"
 if [ ${RUN_LOAD_TEST} -eq 1 ]; then
 	$DBSCRIPTDIR/load_test.sh \
 			-o $OUTPUT_DIR/load \
+			-z ${DBPORT} \
 			-p "${LOAD_PARAMETERS}" \
 			${OPROFILE_FLAG} \
 			-f $SCALE_FACTOR \
 			-g $GENERATE \
-			$LOAD_ARGS \
 			-d ${DBDATA} \
 			${TABLESPACES_FLAG} || exit 1
 else
@@ -157,8 +188,8 @@ else
 	# be cleared out.  Otherwise the data collection will be
 	# incomprehensible with duplicate data.
 	#
-	$DBSCRIPTDIR/start_db.sh
-	${DBSCRIPTDIR}/clear-time-statistics.sh || exit 1
+	${DBSCRIPTDIR}/start_db.sh -p "-c port=${DBPORT}"
+	${DBSCRIPTDIR}/clear-time-statistics.sh ${DBPORT} || exit 1
 fi
 
 i=1
@@ -168,7 +199,7 @@ do
 	# Start time of a Power and Throughput test.
 	#
 	s_time=`$GTIME`
-	${DBSCRIPTDIR}/record_start.sh -n "PERF${i}" || exit 1
+	${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} -n "PERF${i}" || exit 1
 
 	if [ ${RUN_POWER_TEST} -eq 1 ]; then
 		#
@@ -191,6 +222,7 @@ do
 	# Throughput Test
 	#
 		${DBSCRIPTDIR}/throughput_test.sh \
+				-l ${DBPORT} \
 				-n ${STREAMS} \
 				-f ${SCALE_FACTOR} \
 				-o ${OUTPUT_DIR}/throughput${i} \
@@ -207,12 +239,12 @@ do
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
 	#
-	$DBSCRIPTDIR/start_db.sh
+	${DBSCRIPTDIR}/start_db.sh -p "-c port=${DBPORT}"
 
 	#
 	# End time of a Power and Throughput test.
 	#
-	$DBSCRIPTDIR/record_end.sh -n "PERF${i}" || exit 1
+	$DBSCRIPTDIR/record_end.sh -l ${DBPORT} -n "PERF${i}" || exit 1
 	e_time=`$GTIME`
 	diff_time=`expr $e_time - $s_time`
 	echo "Elapsed time for performance test ${i} : $diff_time seconds"
@@ -227,7 +259,7 @@ done
 $SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$POWER_PARAMETERS" "$THROUGHPUT_PARAMETERS" $OUTPUT_DIR || exit 1
 
 # Get query times.
-$DBSCRIPTDIR/q_time.sh > $OUTPUT_DIR/q_time.out || exit 1
+${DBSCRIPTDIR}/q_time.sh -l ${DBPORT} > ${OUTPUT_DIR}/q_time.out || exit 1
 
 #
 # Calculate composite score.      

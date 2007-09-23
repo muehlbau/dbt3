@@ -4,17 +4,34 @@ use strict;
 use Getopt::Long;
 use FileHandle;
 
+sub usage()
+{
+	print "usage: graph_query_time.pl [-23z] [--if q_time.out]\n";
+	print "  options:\n";
+	print "  2  - power test data\n";
+	print "  3  - throughput test data\n";
+	print "  if - query time data file\n";
+	print "  z  - no refresh stream data\n";
+}
+
 my $infile;
 my $no_refresh;
 my $flag_power_test;
 my $flag_throughput_test;
+my $help;
 
 GetOptions(
   '2' => \$flag_power_test,
   '3' => \$flag_throughput_test,
+  "help" => \$help,
   "if=s" => \$infile,
   'z' => \$no_refresh
 );
+
+if ($help) {
+	usage();
+	exit 0;
+}
 
 my $raw_data;
 my @data;

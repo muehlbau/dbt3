@@ -53,11 +53,13 @@ getoprof () {
 TEST_ARGS=
 NO_REFRESH_FLAG=
 
-while getopts "ef:n:o:p:s:t:yz" opt; do
+while getopts "ef:l:n:o:p:s:t:yz" opt; do
 	case $opt in
 	e) TEST_ARGS="$TEST_ARGS -e"
 		;;
 	f) scale_factor=$OPTARG
+		;;
+	l) DBPORT=$OPTARG
 		;;
 	n) num_stream=$OPTARG
 		;;
@@ -86,7 +88,7 @@ mkdir -p $RUNDIR
 DBSCRIPTDIR=$SRCDIR/scripts/pgsql
 parsequery_dir="$SRCDIR/dbdriver/utils"
 
-DBSTATS="$DBSCRIPTDIR/db_stats.sh"
+DBSTATS="${DBSCRIPTDIR}/db_stats.sh"
 
 # Clear the read profile counters.
 if [ -f /proc/profile ]; then
@@ -102,21 +104,23 @@ $DBSCRIPTDIR/stop_db.sh || exit 1
 $DBSCRIPTDIR/start_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 
 s_time=`$GTIME`
-$DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT" || exit 1
+$DBSCRIPTDIR/record_start.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
 
 # Start collecting system statistics. 
 $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR || exit 1
 
 # Start collecting database statistics.
-$DBSTATS $SID $OUTPUT_DIR &
+${DBSTATS} ${OUTPUT_DIR} ${DBPORT}&
 
 # Start the streams.
-$DBSCRIPTDIR/throughput_stream_wrapper.sh -f $scale_factor -t $TAG -n $num_stream $TEST_ARGS -o $OUTPUT_DIR -s ${SEED_FILE} ${NO_REFRESH_FLAG} || exit 1
+${DBSCRIPTDIR}/throughput_stream_wrapper.sh -l ${DBPORT} -f ${scale_factor} \
+		-t ${TAG} -n ${num_stream} ${TEST_ARGS} -o ${OUTPUT_DIR} \
+		-s ${SEED_FILE} ${NO_REFRESH_FLAG} || exit 1
 
 # Stop collecting system statistics.
 $SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR || exit 1
 
-$DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT" || exit 1
+${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
 e_time=`$GTIME`
 let "diff_time=$e_time-$s_time"
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"

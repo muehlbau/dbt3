@@ -11,15 +11,18 @@ DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
 
 USE_TABLESPACES=0
-while getopts "t" OPT; do
+while getopts "l:t" OPT; do
 	case ${OPT} in
+	l)
+		DBPORT=${OPTARG}
+		;;
 	t)
 		USE_TABLESPACES=1
 		;;
 	esac
 done
 
-PSQL="@PSQL@ -e -d $SID -c"
+PSQL="@PSQL@ -p ${DBPORT} -e -d $SID -c"
 
 if [ ${USE_TABLESPACES} -eq 1 ];then
 	TS_PK_SUPPLIER_DIR="${TSDIR}/pk_supplier/ts"

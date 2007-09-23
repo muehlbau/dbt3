@@ -52,7 +52,7 @@ USE_OPROFILE=0
 GENERATE=0
 ONLY_LOAD=0
 DBDATA=${DSS_PATH}
-while getopts "d:f:g:lo:p:ty" opt; do
+while getopts "d:f:g:lo:p:tyz:" opt; do
 	case $opt in
 	d)
 		DBDATA=${OPTARG}
@@ -78,6 +78,9 @@ while getopts "d:f:g:lo:p:ty" opt; do
 		;;
 	y)
 		USE_OPROFILE=1
+		;;
+	z)
+		DBPORT=$OPTARG
 		;;
 	?)
 		echo "Usage: $0 [-o <dir> -p <db_param> -f <scale_factor>]"
@@ -107,30 +110,32 @@ fi
 # Start collecting system statistics.
 $SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
 
-$DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
+$DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -l ${DBPORT} \
+		-p "${PARAMETERS}" || exit 1
 	
 echo "`date +'%Y-%m-%d %H:%M:%S'` Starting Load Test..."
 s_time=`$GTIME`
-$DBSCRIPTDIR/record_start.sh -n "LOAD"
+$DBSCRIPTDIR/record_start.sh -l ${DBPORT} -n "LOAD"
 
 # Collect database statistics
-$DBSTATS $SID $OUTPUT_DIR &
+${DBSTATS} ${OUTPUT_DIR} ${DBPORT} &
 
 date
-${DBSCRIPTDIR}/create_tables.sh -d ${DBDATA} ${TABLESPACE_FLAG} || exit 1
+${DBSCRIPTDIR}/create_tables.sh -d ${DBDATA} -l ${DBPORT} \
+		${TABLESPACE_FLAG} || exit 1
 date
 
 if [ ${ONLY_LOAD} -eq 0 ]; then
 	date
-	$DBSCRIPTDIR/create_indexes.sh ${TABLESPACE_FLAG} || exit 1
+	$DBSCRIPTDIR/create_indexes.sh -l ${DBPORT} ${TABLESPACE_FLAG} || exit 1
 	date
 	
 	date
-	$DBSCRIPTDIR/update_statistics.sh || exit 1
+	$DBSCRIPTDIR/update_statistics.sh -l ${DBPORT} || exit 1
 	date
 fi
 
-$DBSCRIPTDIR/record_end.sh -n "LOAD" || exit 1
+$DBSCRIPTDIR/record_end.sh -l ${DBPORT} -n "LOAD" || exit 1
 e_time=`$GTIME`
 echo "`date +'%Y-%m-%d %H:%M:%S'` Load Test Completed"
 let "diff_time=$e_time-$s_time"

@@ -21,7 +21,7 @@ load_table() {
 	fi
 
 	local sql="COPY ${table} FROM '${DBDATA}/${file}' USING DELIMITERS '|';"
-	local cmd="@PSQL@ -e -d ${SID} -1 -c "
+	local cmd="@PSQL@ -p ${DBPORT} -e -d ${SID} -1 -c "
 	if [ x${BACKGROUND} == xyes ]; then
 		echo "Loading ${table} table in the background..."
 		${cmd} "${create} ${sql} VACUUM ANALYZE ${table};" || exit 1 &
@@ -32,7 +32,7 @@ load_table() {
 }
 
 USE_TABLESPACES=0
-while getopts "bd:t" OPT; do
+while getopts "bd:l:t" OPT; do
 	case ${OPT} in
 	b)
 		BACKGROUND=yes
@@ -40,13 +40,16 @@ while getopts "bd:t" OPT; do
 	d)
 		DBDATA=${OPTARG}
 		;;
+	l)
+		DBPORT=${OPTARG}
+		;;
 	t)
 		USE_TABLESPACES=1
 		;;
 	esac
 done
 
-PSQL="@PSQL@ -e -d ${SID} -c"
+PSQL="@PSQL@ -p ${DBPORT} -e -d ${SID} -c"
 
 if [ ${USE_TABLESPACES} -eq 1 ]; then
 	TS_SUPPLIER_DIR="${TSDIR}/supplier/ts"

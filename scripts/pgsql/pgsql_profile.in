@@ -11,6 +11,7 @@ export DBT3_DIR=/mnt/dbt3
 
 export SID=dbt3
 export PGDATA=${DBT3_DIR}/pgdata
+export DBPORT=5432
 
 export DEFAULT_LOAD_PARAMETERS=""
 export DEFAULT_POWER_PARAMETERS=""

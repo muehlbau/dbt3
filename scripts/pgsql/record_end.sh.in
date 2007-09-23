@@ -9,8 +9,11 @@
 
 . @TOPDIR@/scripts/dbt3_profile || exit 1
 
-while getopts "n:" opt; do
+while getopts "l:n:" opt; do
 	case $opt in
+	l)
+		DBPORT=${OPTARG}
+		;;
 	n)
 		NAME=$OPTARG
 		;;
@@ -22,4 +25,4 @@ UPDATE time_statistics
 SET e_time = current_timestamp
 WHERE task_name = '$NAME';
 "
-@PSQL@ -d $SID -c "$SQL"
+@PSQL@ -p ${DBPORT} -d $SID -c "$SQL"
