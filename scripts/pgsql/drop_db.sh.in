@@ -1,9 +1,10 @@
 #!/bin/sh
 
-DBPORT=$1
-
 DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
 
+if [ $# -eq 1 ]; then
+	DBPORT=$1
+fi
 
 @DROPDB@ -p ${DBPORT} $SID
