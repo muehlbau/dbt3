@@ -1,3 +1,13 @@
+v1.10
+
+- Updated scripts to allow running against non-default ports for PostgreSQL.
+- Updated database stat collection scripts for PostgreSQL.
+- Improved load performance for PostgreSQL by putting the COPY command as
+  part of the same transaction as the CREATE TABLE command.  v8.2 or newer
+  required to take advantage of this.
+- An assortment of script cleanups.
+- Added some support for MySQL.  The scripts are not fully integrated yet.
+
 v1.9
 
 - Fixed a couple of parameter issues with scripts.

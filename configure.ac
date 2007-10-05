@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(dbt3, 1.10-pre2, osdldbt-general@lists.sourceforge.net)
+AC_INIT(dbt3, 1.10, osdldbt-general@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl Checks for programs.
