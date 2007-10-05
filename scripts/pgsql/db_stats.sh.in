@@ -1,4 +1,40 @@
 #!/bin/bash
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003-2007 Jenny Zhang & Open Source Development Labs, Inc.
+#
+
+INDEX_INFO="\
+SELECT relname, indexrelname, idx_blks_read, idx_blks_hit \
+FROM pg_statio_user_indexes \
+ORDER BY indexrelname;"
+
+INDEX_SCAN="\
+SELECT relname, indexrelname, idx_scan, idx_tup_read, idx_tup_fetch \
+FROM pg_stat_user_indexes \
+ORDER BY indexrelname;"
+
+LOCK_STATS="\
+SELECT relname, transaction, pid, mode, granted \
+FROM pg_locks, pg_class \
+WHERE relfilenode = relation \
+ORDER BY relname;"
+
+TABLE_INFO="\
+SELECT relname, heap_blks_read, heap_blks_hit, idx_blks_read, idx_blks_hit \
+FROM pg_statio_user_tables \
+WHERE relname <> 'time_statistics' \
+ORDER BY relname;"
+
+TABLE_SCAN="\
+SELECT relname, seq_scan, seq_tup_read, idx_scan, idx_tup_fetch, n_tup_ins, \
+       n_tup_upd, n_tup_del, last_vacuum, last_autovacuum, last_analyze, \
+       last_autoanalyze \
+FROM pg_stat_user_tables \
+WHERE relname <> 'time_statistics' \
+ORDER BY relname;"
 
 if [ $# -ne 2 ]; then
 	echo "usage: db_stats.sh <output_dir> <db port>"
@@ -16,7 +52,7 @@ DBOUTPUT_DIR=$OUTPUT_DIR/db
 mkdir -p $DBOUTPUT_DIR
 
 # put db info into the readme.txt file
-@PSQL@ -p ${DBPORT} --version >> $OUTPUT_DIR/readme.txt
+${PSQL} -p ${DBPORT} --version >> $OUTPUT_DIR/readme.txt
 echo "Database statistics taken at $SAMPLE_LENGTH second intervals, $ITERATIONS times." >> $OUTPUT_DIR/readme.txt
 
 # save the database parameters
@@ -25,27 +61,28 @@ ${PSQL} -c "SHOW ALL"  > $OUTPUT_DIR/param.out
 # record indexes
 ${PSQL} -c "SELECT * FROM pg_stat_user_indexes;" -o $DBOUTPUT_DIR/indexes.out
 
+# Clear files if they already exist.
+echo "" > ${OUTPUT_DIR}/ipcs.out
+echo "" > ${DBOUTPUT_DIR}/lockstats.out
+echo "" > ${DBOUTPUT_DIR}/table_info.out
+echo "" > ${DBOUTPUT_DIR}/index_info.out
+echo "" > ${DBOUTPUT_DIR}/table_scan.out
+echo "" > ${DBOUTPUT_DIR}/index_scan.out
+
 while [ 1 ]; do
 	# collent ipcs stats
-        ipcs >> $OUTPUT_DIR/ipcs.out
-
-	# Column stats for Tom Lane.
-	${PSQL} -c "SELECT * FROM pg_stats WHERE attname = 'p_partkey';" >> $DBOUTPUT_DIR/p_partkey.out
-	${PSQL} -c "SELECT * FROM pg_stats WHERE attname = 'l_partkey';" >> $DBOUTPUT_DIR/l_partkey.out
-	${PSQL} -c "SELECT * FROM pg_stats WHERE attname = 'ps_suppkey';" >> $DBOUTPUT_DIR/ps_suppkey.out
-	${PSQL} -c "SELECT * FROM pg_stats WHERE attname = 'l_suppkey';" >> $DBOUTPUT_DIR/l_suppkey.out
+	ipcs >> ${OUTPUT_DIR}/ipcs.out
 
 	# check lock statistics
-	${PSQL} -c "SELECT relname,pid, mode, granted FROM pg_locks, pg_class WHERE relfilenode = relation;" >> $DBOUTPUT_DIR/lockstats.out
-	${PSQL} -c "SELECT * FROM pg_locks WHERE transaction IS NOT NULL;" >> $DBOUTPUT_DIR/tran_lock.out
+	${PSQL} -c "${LOCK_STATS}" >> ${DBOUTPUT_DIR}/lockstats.out
 
-	# read the database activity table
-	${PSQL} -c "SELECT * FROM pg_stat_activity;" >> $DBOUTPUT_DIR/db_activity.out
 	# table info
-	${PSQL} -c "SELECT relid, relname, heap_blks_read, heap_blks_hit, idx_blks_read, idx_blks_hit FROM pg_statio_user_tables WHERE relname <> 'time_statistics' ORDER BY relname;" >> $DBOUTPUT_DIR/table_info.out
-	${PSQL} -c "SELECT relid, indexrelid, relname, indexrelname, idx_blks_read, idx_blks_hit FROM pg_statio_user_indexes ORDER BY indexrelname;" >> $DBOUTPUT_DIR/index_info.out
+	${PSQL} -t -c "${TABLE_INFO}" >> ${DBOUTPUT_DIR}/table_info.out
+	${PSQL} -t -c "${INDEX_INFO}" >> ${DBOUTPUT_DIR}/index_info.out
+
 	# scans 
-	${PSQL} -c "SELECT * FROM pg_stat_user_tables WHERE relname <> 'time_statistics' ORDER BY relname;" >> $DBOUTPUT_DIR/table_scan.out
-	${PSQL} -c "SELECT * FROM pg_stat_user_indexes ORDER BY indexrelname;" >> $DBOUTPUT_DIR/indexes_scan.out
-	sleep $SAMPLE_LENGTH
+	${PSQL} -t -c "${TABLE_SCAN}" >> ${DBOUTPUT_DIR}/table_scan.out
+	${PSQL} -t -c "${INDEX_SCAN}" >> ${DBOUTPUT_DIR}/index_scan.out
+
+	sleep ${SAMPLE_LENGTH}
 done

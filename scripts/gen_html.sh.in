@@ -98,7 +98,7 @@ gen_results()
 	echo "<a href=\"param.out\">database parameters</a><br />" >> ${SUBDIR}/index.html
 	echo "<a href=\"db/\">database raw statistics</a> [<a href=\"db.html\">charts</a>]<br />" >> ${SUBDIR}/index.html
 	if [ "$1" != "Load Test" ]; then
-		echo "<a href=\"db/indexes.out\">table indexes</a><br />" >> ${SUBDIR}/index.html
+		echo "<a href=\"db/index.out\">table indexes</a><br />" >> ${SUBDIR}/index.html
 		echo "<a href=\"db/plans\">query plans</a><br />" >> ${SUBDIR}/index.html
 		echo "<a href=\"results\">query results</a><br />" >> ${SUBDIR}/index.html
 	fi
@@ -113,7 +113,7 @@ gen_results()
 	echo "</head>" >> ${SUBDIR}/db.html
 	echo "<body>" >> ${SUBDIR}/db.html
 	echo "Index Scans<br/>" >> ${SUBDIR}/db.html
-	echo "<img src=\"db/indexes_scan.png\" />" >> ${SUBDIR}/db.html
+	echo "<img src=\"db/index_scan.png\" />" >> ${SUBDIR}/db.html
 
 	echo "<hr/>" >> ${SUBDIR}/db.html
 
@@ -127,8 +127,9 @@ gen_results()
 	echo "</body>" >> ${SUBDIR}/db.html
 	echo "</html>" >> ${SUBDIR}/db.html
 
-	$SRCDIR/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots -x "Minutes" > /dev/null 2>&1
-	perl ${DBDIR}/analyze_stats.pl --dir ${SUBDIR}/db > /dev/null 2>&1
+	${SRCDIR}/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots \
+			-x "Minutes" > /dev/null 2>&1
+	${DBDIR}/analyze_stats.pl --dir `pwd`/${SUBDIR}/db
 }
 
 echo "<html>"

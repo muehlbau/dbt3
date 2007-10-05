@@ -34,22 +34,22 @@ my @table_names = ("customer", "lineitem", "nation", "orders", "part",
 
 my @input_file;
 
+# Note that $column starts at 0.
 sub process {
 	my ( $filename, $column, $ylabel, @names ) = @_;
 
 	# Read it all the data files and process the data.
 	my @index_data;
-	$filename = ( split /\//, $filename )[ -1 ];
 	foreach my $index ( @names ) {
 		my @data;
 		my $previous_value = 0;
 
 		# The first data point must be a zero.
 		push @data, 0;
-		open( FILE, "$stats_dir/$filename" );
+		open( FILE, "$filename" ) or die $!;
 		while ( <FILE> ) {
 			/\s$index\s/ and do {
-				my $current_value = ( split, $_ )[ $column ];
+				my $current_value = ( split /\|/, $_ )[ $column ];
 				push @data, $current_value - $previous_value;
 				$previous_value = $current_value;
 			}
@@ -61,7 +61,7 @@ sub process {
 	# Output the a graphable data file.
 	# The last data point seems kind of screwy, always drop it.
 	$filename =~ s/out$/data/;
-	open( FILE, ">$stats_dir/$filename" );
+	open( FILE, ">$filename" ) or die $!;
 	for ( my $i = 0; $i < ( scalar @{ $index_data[ 0 ] } ) - 1; $i++ ) {
 		print FILE "$i";
 		for ( my $j = 0; $j < scalar @index_data; $j++ ) {
@@ -77,32 +77,26 @@ sub process {
 	push @input_file, $input_filename;
 	my $png_filename = $filename;
 	$png_filename =~ s/data$/png/;
-	open( FILE, ">$stats_dir/$input_filename" );
+	open( FILE, ">$input_filename" ) or die $!;
 	my $i;
-	for ( $i = 1; $i < (scalar @names) - 1; $i++ ) {
-		print FILE "\"$filename\" using 1:" . ($i + 1) .
-			" title \"$names[ $i ]\" with lines, \\\n";
-	}
-	print FILE "\"$filename\" using 1:" . ($i + 1) .
-		" title \"$names[ $i ]\" with lines\n";
 	print FILE "set xlabel \"Elapsed Time (Minutes)\"\n";
 	print FILE "set ylabel \"$ylabel\"\n";
 	print FILE "set term png small\n";
 	print FILE "set output \"$png_filename\"\n";
 	print FILE "set yrange [0:]\n";
 	print FILE "plot \"$filename\" using 1:1 title \"$names[ 0 ]\" with lines, \\\n";
+	for ( $i = 1; $i < (scalar @names) - 1; $i++ ) {
+		print FILE "\"$filename\" using 1:" . ($i + 1) .
+			" title \"$names[ $i ]\" with lines, \\\n";
+	}
+	print FILE "\"$filename\" using 1:" . ($i + 1) .
+		" title \"$names[ $i ]\" with lines\n";
 	close( FILE );
 }
 
-foreach my $filename ( <$stats_dir/*indexes_scan.out> ) {
-	process( $filename, 10, "Index Scans", @index_names );
-}
-foreach my $filename ( <$stats_dir/*index_info.out> ) {
-	process( $filename, 8, "Blocks Read", @index_names );
-}
-foreach my $filename ( <$stats_dir/*table_info.out> ) {
-	process( $filename, 4, "Blocks Read", @table_names );
-}
+process( "$stats_dir/index_scan.out", 2, "Index Scans", @index_names );
+process( "$stats_dir/index_info.out", 2, "Blocks Read", @index_names );
+process( "$stats_dir/table_info.out", 1, "Blocks Read", @table_names );
 
 # Plot each gnuplot input file.
 chdir $stats_dir;
