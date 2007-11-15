@@ -57,27 +57,6 @@ if test -z "$VMSTAT"; then
   VMSTAT=
 fi
 
-dnl REQUIRE_PROG(LOCKFILEPROG, lockfile, [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
-AC_PATH_PROGS([LOCKFILEPROG],[lockfile lockfile-create], , 
-             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
-if test -z "$LOCKFILEPROG"; then 
-  AC_MSG_ERROR([Couldn't find lockfile program!])
-fi 
-if test `basename "$LOCKFILEPROG"` = "lockfile-create" ; then 
-  LOCKFILECREATE="$LOCKFILEPROG"
-  AC_PATH_PROGS([LOCKFILEREMOVE],[lockfile-remove], ,
-             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
-  AC_PATH_PROGS([LOCKFILETOUCH],[lockfile-touch], ,
-             [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
-  AC_SUBST(LOCKFILETOUCH)
-elif test `basename "$LOCKFILEPROG"` = "lockfile" ; then 
-  LOCKFILECREATE="$LOCKFILEPROG -s 0"
-  LOCKFILEREMOVE="rm -f"
-
-fi
-AC_SUBST(LOCKFILECREATE)
-AC_SUBST(LOCKFILEREMOVE)
-
 dnl> Configuration options for different databases, MySQL is default.
 AC_ARG_WITH(postgresql,
 	[ AC_HELP_STRING([ --with-postgresql=DIR], [])],
@@ -112,13 +91,33 @@ if test "$DATABASE_TO_USE" = "mysql"; then
   AC_SUBST(MYSQL_BASEDIR)
   AC_SUBST(MYSQL_BASEDIR_CNF)
 
-  REQUIRE_PROG(MYSQL_CONFIG, mysql_config, [$MYSQL_TEST_PATH])
-  REQUIRE_PROG(MYSQL_CLIENT, mysql, [$MYSQL_TEST_PATH])
-  REQUIRE_PROG(MYSQL_ADMIN, mysqladmin, [$MYSQL_TEST_PATH])
-  REQUIRE_PROG(MYSQLIMPORT, mysqlimport, [$MYSQL_TEST_PATH])
-  REQUIRE_PROG(MYSQL_INSTALL_DB, mysql_install_db, [$MYSQL_TEST_PATH])
-  REQUIRE_PROG(MYSQLD_SAFE, mysqld_safe, [$MYSQL_TEST_PATH])
-  REQUIRE_PROG(MYSQLD, mysqld, [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQL_CONFIG, mysql_config, , [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQL_CLIENT, mysql, , [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQL_ADMIN, mysqladmin, , [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQLIMPORT, mysqlimport, , [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQL_INSTALL_DB, mysql_install_db, , [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQLD_SAFE, mysqld_safe, , [$MYSQL_TEST_PATH])
+  AC_PATH_PROGS(MYSQLD, mysqld, , [$MYSQL_TEST_PATH])
+
+  dnl REQUIRE_PROG(LOCKFILEPROG, lockfile, [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+  AC_PATH_PROGS([LOCKFILEPROG],[lockfile lockfile-create], , 
+               [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+  if test -z "$LOCKFILEPROG"; then 
+    AC_MSG_ERROR([Couldn't find lockfile program!])
+  fi 
+  if test `basename "$LOCKFILEPROG"` = "lockfile-create" ; then 
+    LOCKFILECREATE="$LOCKFILEPROG"
+    AC_PATH_PROGS([LOCKFILEREMOVE],[lockfile-remove], ,
+               [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+    AC_PATH_PROGS([LOCKFILETOUCH],[lockfile-touch], ,
+               [$PATH:/usr/local/bin:/usr/bin:/usr/X11R6/bin])
+    AC_SUBST(LOCKFILETOUCH)
+  elif test `basename "$LOCKFILEPROG"` = "lockfile" ; then 
+    LOCKFILECREATE="$LOCKFILEPROG -s 0"
+    LOCKFILEREMOVE="rm -f"
+  fi
+  AC_SUBST(LOCKFILECREATE)
+  AC_SUBST(LOCKFILEREMOVE)
 
   MY_CNF=$TOPDIR/scripts/mysql/my.cnf
   MYSQL_CLIENT="${MYSQL_CLIENT} --defaults-file=${MY_CNF}"
