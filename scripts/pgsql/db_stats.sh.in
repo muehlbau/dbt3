@@ -17,7 +17,7 @@ FROM pg_stat_user_indexes \
 ORDER BY indexrelname;"
 
 LOCK_STATS="\
-SELECT relname, transaction, pid, mode, granted \
+SELECT relname, pid, mode, granted \
 FROM pg_locks, pg_class \
 WHERE relfilenode = relation \
 ORDER BY relname;"
