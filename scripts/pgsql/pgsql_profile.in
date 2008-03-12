@@ -7,7 +7,7 @@
 # Copyright (C) 2002 Jenny Zhang & Open Source Development Lab, Inc.
 #
 
-export DBT3_DIR=/mnt/dbt3
+export DBT3_DIR=${HOME}/local/dbt3
 
 export SID=dbt3
 export PGDATA=${DBT3_DIR}/pgdata

@@ -12,7 +12,7 @@ DIR=`dirname $0`
 DATABASE=@DATABASE_TO_USE@
 
 export DSS_QUERY="@TOPDIR@/queries/@DATABASE_TO_USE@"
-export DSS_PATH="/mnt/data"
+export DSS_PATH="${HOME}/local/data"
 export DSS_CONFIG="@TOPDIR@/src/dbgen"
 export DBT3_PERL_MODULE="@TOPDIR@/perlmodules"
 
