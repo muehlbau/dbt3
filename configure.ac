@@ -1,7 +1,7 @@
 AC_PREREQ(2.59)
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(dbt3, 1.10, osdldbt-general@lists.sourceforge.net)
+AC_INIT(dbt3, 1.10_beta1, osdldbt-general@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl Checks for programs.
@@ -390,6 +390,7 @@ elif test "$DATABASE_TO_USE" = "sapdb"; then
 fi
 
 AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([scripts/dbt3_profile])
 AC_CONFIG_FILES([scripts/get_composite.sh], [chmod +x scripts/get_composite.sh])
 AC_CONFIG_FILES([scripts/get_config.sh], [chmod +x scripts/get_config.sh])

@@ -5,9 +5,9 @@
 # Copyright (C) 2005 Mark Wong & Open Source Development Labs, Inc.
 #
 
-AUTOMAKE_OPTIONS = no-dependencies
+AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src
+SUBDIRS = doc src
 
 EXTRA_DIST = \
              doc/Makefile \
@@ -111,10 +111,11 @@ EXTRA_DIST = \
              queries/sapdb/9.sql \
              scripts/init_seed.sh \
              scripts/vmplot.sh \
-             scripts/graph_query_time.pl \
              scripts/pgsql/analyze_stats.pl \
              scripts/pgsql/get_power.pl \
-             scripts/pgsql/get_throughput.sh \
+             scripts/pgsql/get-throughput \
+             scripts/pgsql/graph_query_time.pl \
              scripts/mysql/analyze_stats.pl \
              scripts/mysql/get_power.pl \
-             scripts/mysql/get_throughput.pl
+             scripts/mysql/get-throughput \
+             scripts/mysql/graph_query_time.pl
