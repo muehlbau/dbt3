@@ -53,11 +53,16 @@ fi
 @TOPDIR@/scripts/pgsql/start_db.sh -o ${OUTPUT_DIR} -p "$PARAMETERS" || exit 1
 
 echo "Creating database $SID..."
-_o=`@CREATEDB@ -p ${DBPORT} $SID 2>&1`
-_test=`echo $_o | grep CREATE`
-if [ "$_test" = "" ]; then
-	echo "@CREATEDB@ -p ${DBPORT} $SID failed: $_o $_test"
-	exit 1
-fi
+# Prior to 8.3 we attempted to capture 'CREATE' from the output of the
+# 'createdb' command to determine the the command was successful.  We might
+# have to make a version check to determine the best way to determine whether
+# the command was successful or not.
+#_o=`@CREATEDB@ -p ${DBPORT} $SID 2>&1`
+#_test=`echo $_o | grep CREATE`
+#if [ "$_test" = "" ]; then
+#	echo "@CREATEDB@ -p ${DBPORT} $SID failed: $_o $_test"
+#	exit 1
+#fi
+@CREATEDB@ -p ${DBPORT} $SID 2>&1 || exit 1
 
 exit 0
