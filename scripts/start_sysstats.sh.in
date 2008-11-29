@@ -28,7 +28,7 @@ touch $OUTPUT_DIR/vmstat.out
  
 echo "Starting sys stats using $OUTPUT_DIR"
 if test "x@SAR@" != "x" ; then
-  @SAR@ -o $OUTPUT_DIR/sar.out $SAMPLE_LENGTH 0 &
+  @SAR@ -o $OUTPUT_DIR/sar.out $SAMPLE_LENGTH &
 fi
 
 if test "x@IOSTAT@" != "x" ; then
