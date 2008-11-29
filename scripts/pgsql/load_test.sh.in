@@ -15,11 +15,11 @@ DBSCRIPTDIR=$SRCDIR/scripts/pgsql
 DBSTATS="$DBSCRIPTDIR/db_stats.sh"
 
 clearprof () {
-	sudo /usr/sbin/readprofile -m /boot/System.map -r
+	sudo /usr/sbin/readprofile -m /boot/System.map-`uname -r` -r
 }
 
 getprof () {
-	sudo /usr/sbin/readprofile -n -m /boot/System.map -v | sort -grk3,4 > $OUTPUT_DIR/readprofile.txt
+	sudo /usr/sbin/readprofile -n -m /boot/System.map-`uname -r` -v | sort -grk3,4 > $OUTPUT_DIR/readprofile.txt
 }
 
 clearoprof () {
