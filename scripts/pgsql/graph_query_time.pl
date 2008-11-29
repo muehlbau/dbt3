@@ -218,26 +218,31 @@ unless( $outfile->open( "> $dirname/q_time.input" ) ) {
 
 my $plots = '';
 if ($flag_power_test) {
-  $plots .= "\"q_time_p.data\" using 1:2 title \"Power\" with imp ls 1";
+  $plots .= "\"q_time_p.data\" using 2 title \"Power Test\"";
 }
 if ($flag_throughput_test) {
   if ($flag_power_test) {
     $plots .= ", ";
   }
-  $plots .= "\"q_time_t.data\" using 1:2 title \"Throughput\" with imp ls 2";
+  $plots .= "\"q_time_t.data\" using 2 title \"Throughput Test\"";
 }
 
-print $outfile "set style line 1 lt 1 lw 50\n";
-print $outfile "set style line 2 lt 2 lw 50\n";
-print $outfile "set term png small\n";
+print $outfile "reset\n";
+print $outfile "set term png nocrop\n";
 print $outfile "set output \"q_time.png\"\n";
+print $outfile "set style data histogram\n";
+print $outfile "set style histogram cluster gap 1\n";
+print $outfile "set style fill solid border -1\n";
+print $outfile "set boxwidth 0.9\n";
 if ($no_refresh) {
-print $outfile "set xtics \(\"Q1\" 1, \"Q2\" 2, \"Q3\" 3, \"Q4\" 4, \"Q5\" 5, \"Q6\" 6, \"Q7\" 7, \"Q8\" 8, \"Q9\" 9, \"Q10\" 10, \"Q11\" 11, \"Q12\" 12, \"Q13\" 13, \"Q14\" 14, \"Q15\" 15, \"Q16\" 16, \"Q17\" 17, \"Q18\" 18, \"Q19\" 19, \"Q20\" 20, \"Q21\" 21, \"Q22\" 22\)\n";
+  print $outfile "set xtics \(\"Q1\" 0, \"Q2\" 1, \"Q3\" 2, \"Q4\" 3, \"Q5\" 4, \"Q6\" 5, \"Q7\" 6, \"Q8\" 7, \"Q9\" 8, \"Q10\" 9, \"Q11\" 10, \"Q12\" 11, \"Q13\" 12, \"Q14\" 13, \"Q15\" 14, \"Q16\" 15, \"Q17\" 16, \"Q18\" 17, \"Q19\" 18, \"Q20\" 19, \"Q21\" 20, \"Q22\" 21\)\n";
 } else {
-  print $outfile "set xtics \(\"Q1\" 1, \"Q2\" 2, \"Q3\" 3, \"Q4\" 4, \"Q5\" 5, \"Q6\" 6, \"Q7\" 7, \"Q8\" 8, \"Q9\" 9, \"Q10\" 10, \"Q11\" 11, \"Q12\" 12, \"Q13\" 13, \"Q14\" 14, \"Q15\" 15, \"Q16\" 16, \"Q17\" 17, \"Q18\" 18, \"Q19\" 19, \"Q20\" 20, \"Q21\" 21, \"Q22\" 22, \"RF1\" 23, \"RF2\" 24\)\n";
+  print $outfile "set xtics \(\"Q1\" 0, \"Q2\" 1, \"Q3\" 2, \"Q4\" 3, \"Q5\" 4, \"Q6\" 5, \"Q7\" 6, \"Q8\" 7, \"Q9\" 8, \"Q10\" 9, \"Q11\" 10, \"Q12\" 11, \"Q13\" 12, \"Q14\" 13, \"Q15\" 14, \"Q16\" 15, \"Q17\" 16, \"Q18\" 17, \"Q19\" 18, \"Q20\" 19, \"Q21\" 20, \"Q22\" 21, \"RF1\" 22, \"RF2\" 23\)\n";
 }
 print $outfile "set ylabel \"Query Time in Seconds\"\n";
-print $outfile "set xrange [0:25]\n";
+print $outfile "set auto x\n";
+print $outfile "set auto y\n";
+print $outfile "set grid noxtics ytics\n";
 print $outfile "plot $plots\n";
 $outfile->close;
 
