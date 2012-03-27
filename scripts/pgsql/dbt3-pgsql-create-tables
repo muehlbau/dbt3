@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/bin/sh
+
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2005-2006 Jenny Zhang & Open Source Development Labs, Inc.
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labss, Inc.
 #
 
 DIR=`dirname $0`
@@ -21,7 +22,7 @@ load_table() {
 	fi
 
 	local sql="COPY ${table} FROM '${DBDATA}/${file}' USING DELIMITERS '|';"
-	local cmd="@PSQL@ -p ${DBPORT} -e -d ${SID} -1 -c "
+	local cmd="psql -p ${DBPORT} -e -d ${SID} -1 -c "
 	if [ x${BACKGROUND} == xyes ]; then
 		echo "Loading ${table} table in the background..."
 		${cmd} "${create} ${sql} VACUUM ANALYZE ${table};" || exit 1 &
@@ -30,6 +31,11 @@ load_table() {
 		${cmd} "${create} ${sql}" || exit 1
 	fi
 }
+
+if [ -z ${DBNAME} ]; then
+    echo "DBNAME not defined."
+    exit 1
+fi
 
 USE_TABLESPACES=0
 while getopts "bd:l:t" OPT; do
@@ -41,7 +47,7 @@ while getopts "bd:l:t" OPT; do
 		DBDATA=${OPTARG}
 		;;
 	l)
-		DBPORT=${OPTARG}
+		PORT=${OPTARG}
 		;;
 	t)
 		USE_TABLESPACES=1
@@ -49,7 +55,10 @@ while getopts "bd:l:t" OPT; do
 	esac
 done
 
-PSQL="@PSQL@ -p ${DBPORT} -e -d ${SID} -c"
+if [ ! "x${PORT}" = "x" ]; then
+	PORTARG="-p ${PORT}"
+fi
+PSQL="psql -p ${DBPORT} -e -d ${SID} -c"
 
 if [ ${USE_TABLESPACES} -eq 1 ]; then
 	TS_SUPPLIER_DIR="${TSDIR}/supplier/ts"
@@ -196,6 +205,17 @@ CREATE TABLE time_statistics (
 	s_time TIMESTAMP,
 	e_time TIMESTAMP,
 	int_time INTEGER);
+" || exit 1
+
+${PSQL} "
+GRANT SELECT ON nation TO PUBLIC;
+GRANT SELECT ON customer TO PUBLIC;
+GRANT SELECT ON part TO PUBLIC;
+GRANT SELECT ON partsupp TO PUBLIC;
+GRANT SELECT ON region TO PUBLIC;
+GRANT SELECT,INSERT,UPDATE,DELETE ON lineitem TO PUBLIC;
+GRANT SELECT,INSERT,UPDATE,DELETE ON orders TO PUBLIC;
+GRANT SELECT,INSERT,UPDATE,DELETE ON time_statistics TO PUBLIC;
 " || exit 1
 
 wait

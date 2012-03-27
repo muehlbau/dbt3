@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2005 Jenny Zhang & Open Source Development Labs, Inc.
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labs, Inc.
 #
 
 DIR=`dirname $0`
@@ -14,7 +14,7 @@ USE_TABLESPACES=0
 while getopts "l:t" OPT; do
 	case ${OPT} in
 	l)
-		DBPORT=${OPTARG}
+		PORT=${OPTARG}
 		;;
 	t)
 		USE_TABLESPACES=1
@@ -22,7 +22,16 @@ while getopts "l:t" OPT; do
 	esac
 done
 
-PSQL="@PSQL@ -p ${DBPORT} -e -d $SID -c"
+if [ ! "x${PORT}" = "x" ]; then
+	PORTARG="-p ${PORT}"
+fi
+
+if [ -z ${DBNAME} ]; then
+	echo "DBNAME not defined."
+	exit 1
+fi
+
+PSQL="psql -p ${DBPORT} -e -d $SID -c"
 
 if [ ${USE_TABLESPACES} -eq 1 ];then
 	TS_PK_SUPPLIER_DIR="${TSDIR}/pk_supplier/ts"
@@ -134,8 +143,6 @@ if [ ${USE_TABLESPACES} -eq 1 ];then
 	TS_PK_NATION="USING INDEX ${TS_PK_NATION}"
 	TS_PK_REGION="USING INDEX ${TS_PK_REGION}"
 fi
-
-echo "Creating indexes..."
 
 ${PSQL} "
 ALTER TABLE supplier
@@ -252,5 +259,18 @@ ON lineitem (l_commitdate) ${TS_I_L_COMMITDATE};
 " || exit 1 &
 
 wait
+
+echo "Updating optimizer statistics..."
+
+${PSQL} "
+analyze supplier;
+analyze part;
+analyze partsupp;
+analyze customer;
+analyze orders;
+analyze lineitem;
+analyze nation;
+analyze region;
+" || exit 1;
 
 exit 0

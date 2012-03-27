@@ -1,0 +1,86 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+# dont start script as root!
+id=`id | sed s/\(.*// | sed s/uid=//`
+
+if [ "$id" = "0" ]; then
+	echo "dont start script as root"
+	exit 1
+fi
+
+if [ -z ${PGDATA} ]; then
+    echo "PGDATA not defined."
+    exit 1
+fi
+
+if [ -z ${DBNAME} ]; then
+    echo "DBNAME not defined."
+    exit 1
+fi
+
+XLOGPATH=""
+OUTPUT_DIR="."
+while getopts "l:o:p:x:" OPT; do
+	case ${OPT} in
+	l)
+		PORT=${OPTARG}
+		;;
+	o)
+		OUTPUT_DIR=${OPTARG}
+		;;
+	p)
+		PARAMETERS=${OPTARG}
+		;;
+	x)
+		XLOGPATH=${OPTARG}
+		;;
+	esac
+done
+
+dbt3-pgsql-stop-db
+
+# Create database
+echo "Creating database..."
+if [ -d ${PGDATA} ]; then
+	echo "PGData directory '${PGDATA}' already exists, skipping initdb..."
+else
+	# initialize database cluster
+	echo "initializing database cluster..."
+	initdb -D ${PGDATA} --locale=C || exit 1
+
+	# Use alternative XLOG directory.
+	if [ ! "x${XLOGPATH}" = "x" ]; then
+	    mkdir -p ${XLOGPATH}
+	    rm -rf ${XLOGPATH}/pg_xlog
+	    mv ${PGDATA}/pg_xlog ${XLOGPATH}/pg_xlog || exit 1;
+	    ln -s ${XLOGPATH}/pg_xlog ${PGDATA}/pg_xlog || exit 1;
+	fi
+fi
+
+if [ ! "x${PARAMETERS}" = "x" ]; then
+    PARAMOPT="-p ${PARAMETERS}"
+fi
+
+dbt3-pgsql-start-db ${PARAMOPT} || exit 1
+
+# Give the database a few seconds to get started.
+sleep 4
+
+if [ ! "x${PORT}" = "x" ]; then
+    PORTOPT="-p ${PORT}"
+fi
+
+createdb ${PORTOPT} ${DBNAME} || exit 1
+createlang ${PORTOPT} plpgsql ${DBNAME}
+
+exit 0
