@@ -1,6 +1,0 @@
-#!/bin/sh
-
-DIR=`dirname $0`
-. ${DIR}/mysql_profile || exit 1
-
-@MYSQL_ADMIN@ drop $SID

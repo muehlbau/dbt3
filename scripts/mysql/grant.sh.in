@@ -1,3 +1,0 @@
-#!/bin/sh
-
-@MYSQL_CLIENT@ -d $SID -f @TOPDIR@/scripts/mysql/grant.sql

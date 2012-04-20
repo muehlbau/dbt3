@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/bin/sh
+
 #
 # This file is released under the terms of the Artistic License.
 # Please see the file LICENSE, included in this package, for details.
 #
-# Copyright (C) 2005-2006 Jenny Zhang & Open Source Development Labs, Inc.
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labss, Inc.
 #
 
 DIR=`dirname $0`
@@ -21,14 +22,14 @@ load_table() {
 	file=${2}.tbl
     fi
     if [ -f $DSS_QUERY/ddl/$engine/${table}.sql ] ; then 
-	cat $DSS_QUERY/ddl/$engine/${table}.sql | $MYSQL_CLIENT $SID || exit 1
+	cat $DSS_QUERY/ddl/$engine/${table}.sql | mysql --defaults-file=${DEFAULTS_FILE} $DBNAME || exit 1
     else
-        cat $DSS_QUERY/ddl/${table}.sql | $MYSQL_CLIENT $SID || exit 1
+        cat $DSS_QUERY/ddl/${table}.sql | mysql --defaults-file=${DEFAULTS_FILE} $DBNAME || exit 1
     fi
     # This disable/enable trick only works on MyISAM for the moment. 
-    $MYSQL_CLIENT -D $SID -e "alter table $table disable keys;"
-    $MYSQLIMPORT --fields-terminated-by='|' ${SID} ${DBDATA}/${file}
-    $MYSQL_CLIENT -D $SID -e "alter table $table enable keys;"
+    mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "alter table $table disable keys;"
+    mysqlimport --defaults-file=${DEFAULTS_FILE} --fields-terminated-by='|' ${DBNAME} ${DBDATA}/${file}
+    mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "alter table $table enable keys;"
 }
 
 while getopts "bd:e:" OPT; do
@@ -55,12 +56,24 @@ load_table lineitem
 load_table nation
 load_table region
 
-${MYSQL_CLIENT} -D ${SID} -e "
+mysql --defaults-file=${DEFAULTS_FILE} -D ${DBNAME} -e "
 CREATE TABLE time_statistics (
 	task_name VARCHAR(40),
 	s_time TIMESTAMP default current_timestamp,
 	e_time TIMESTAMP,
 	int_time INTEGER) engine=myisam;
+" || exit 1
+
+DBUSER="dbt";
+mysql --defaults-file=${DEFAULTS_FILE} -D ${DBNAME} -e "
+grant select on nation to ${DBUSER};
+grant select on customer to ${DBUSER};
+grant select on part to ${DBUSER};
+grant select on partsupp to ${DBUSER};
+grant select on region to ${DBUSER};
+grant select,insert,update,delete on lineitem to ${DBUSER};
+grant select,insert,update,delete on orders to ${DBUSER};
+grant select,insert,update,delete on time_statistics to ${DBUSER};
 " || exit 1
 
 wait

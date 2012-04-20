@@ -1,0 +1,20 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table supplier"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table part"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table partsupp"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table customer"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table orders"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table lineitem"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table nation"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table region"

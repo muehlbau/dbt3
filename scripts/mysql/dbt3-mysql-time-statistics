@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# This file is released under the terms of the Artistic License.  Please see
+# the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2006 Mark Wong & Open Source Development Lab, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile
+
+cmd_clear=0
+cmd_start=0
+cmd_end=0
+
+while getopts "cel:n:s" opt; do
+	case $opt in
+	c)
+		cmd_clear=1
+		;;
+	e)
+		cmd_end=1
+		;;
+	n)
+		NAME=$OPTARG
+		;;
+	s)
+		cmd_start=1
+		;;
+	esac
+done
+
+if [ -z ${DBNAME} ]; then
+    echo "DBNAME not defined."
+    exit 1
+fi
+
+if [ $cmd_clear == 1 ]; then
+    SQL="DELETE FROM time_statistics"
+fi;
+
+if [ $cmd_start == 1 ]; then
+    s_time=`$GTIME`
+    SQL="INSERT INTO time_statistics (task_name, s_time, int_time) 
+         VALUES ('$NAME', current_timestamp, $s_time)"
+fi;
+
+if [ $cmd_end == 1 ]; then
+    SQL="UPDATE time_statistics SET e_time = current_timestamp WHERE task_name = '$NAME'"
+fi;
+
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "$SQL"
+

@@ -4,7 +4,7 @@
 [client]
 user = root
 port		= 3306
-socket		= @MYSQL_SOCK@
+socket		= @MYSQL_DATADIR@/mysql.sock
 
 [mysql]
 prompt=\u:\d>\_
@@ -14,7 +14,7 @@ prompt=\u:\d>\_
 
 # This was formally known as [safe_mysqld]. Both versions are currently parsed.
 [mysqld_safe]
-socket		= @MYSQL_SOCK@
+socket		= @MYSQL_DATADIR@/mysql.sock
 #nice		= 0
 
 [mysqld]
@@ -23,8 +23,8 @@ socket		= @MYSQL_SOCK@
 #
 default-storage-engine  = @MYSQL_ENGINE@
 skip-networking
-pid-file	= @MYSQL_PID@
-socket		= @MYSQL_SOCK@
+pid-file	= @MYSQL_DATADIR@/mysql.pid
+socket		= @MYSQL_DATADIR@/mysql.sock
 #port		= 33306
 #basedir		= /usr
 @MYSQL_BASEDIR_CNF@
@@ -70,4 +70,4 @@ log-error=@MYSQL_DATADIR@/mysql_error.log
 
 [mysqld_safe]
 ledir=/
-mysqld=@MYSQLD@
+mysqld=/usr/libexec/mysqld

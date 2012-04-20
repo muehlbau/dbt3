@@ -15,22 +15,17 @@ if [ "$id" = "0" ]; then
 	exit 1
 fi
 
-export DBT3_DIR=/mnt/dbt3
+export DBT3_DIR=/tmp/dbt3
 
 export SID=dbt3
 export MYDATA=${DBT3_DIR}/mydata
+export DEFAULTS_FILE="@TOPDIR@/scripts/mysql/my.cnf"
 export MYSQL_CLIENT="@MYSQL_CLIENT@"
-export MYSQL_ADMIN="@MYSQL_ADMIN@"
-export MYSQL_INSTALL_DB="@MYSQL_INSTALL_DB@"
-export MYSQLD="@MYSQLD@"
-export MYSQL_DATADIR="@MYSQL_DATADIR@"
-export MYSQLD_SAFE="@MYSQLD_SAFE@"
-export MYSQL_PID="@MYSQL_PID@"
-export MYSQL_SOCK="@MYSQL_SOCK@"
 export MYSQL_ENGINE="@MYSQL_ENGINE@"
-export MYSQLIMPORT="@MYSQLIMPORT@"
 export PATH="@MYSQL_BASEDIR@/bin:$PATH"
 export DSS_QUERY="@TOPDIR@/queries/@DATABASE_TO_USE@"
+export DBDATA="/tmp/dbt3data"
+
 
 export DEFAULT_LOAD_PARAMETERS=""
 export DEFAULT_POWER_PARAMETERS=""

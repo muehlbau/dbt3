@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2006      Open Source Development Labs, Inc.
+#               2006-2010 Mark Wong
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit
+
+if [ "x" = "x${MYDATA}" ]; then
+	echo "ERROR: MYDATA must be set"
+	exit 1
+fi
+
+HOSTNAME=`hostname`
+
+if [ ! -f "${MYDATA}/mysql.pid" ]; then
+	echo "MySQL pid file '${MYDATA}/mysql.pid' does not exist."
+	echo "MySQL was not stopped, if it was running."
+	exit 0
+fi
+MYSQL_PID=`cat ${MYDATA}/mysql.pid`
+kill ${MYSQL_PID} || exit 1
+sleep 10
+echo "MySQL stopped successfully (by kill)."
+
+exit 0

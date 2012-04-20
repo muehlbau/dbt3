@@ -1,0 +1,26 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+# Double check we have a value for PGDATA
+if [ -z ${MYDATA} ]; then
+	echo "MYDATA not defined."
+	exit 1
+fi
+
+if [ -z ${DBNAME} ]; then
+	echo "DBNAME not defined."
+	exit 1
+fi
+
+mysqladmin --defaults-file=${DEFAULTS_FILE} --force drop $DBNAME || exit 1
+
+exit 0

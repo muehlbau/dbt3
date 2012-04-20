@@ -1,0 +1,67 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+# dont start script as root!
+id=`id | sed s/\(.*// | sed s/uid=//`
+
+if [ "$id" = "0" ]; then
+	echo "dont start script as root"
+	exit 1
+fi
+
+if [ -z ${MYDATA} ]; then
+    echo "MYDATA not defined."
+    exit 1
+fi
+
+if [ -z ${DBNAME} ]; then
+    echo "DBNAME not defined."
+    exit 1
+fi
+
+OUTPUT_DIR="."
+while getopts "o:p:" OPT; do
+	case ${OPT} in
+	o)
+		OUTPUT_DIR=${OPTARG}
+		;;
+	p)
+		PARAMETERS=${OPTARG}
+		;;
+	esac
+done
+
+dbt3-mysql-stop-db
+
+if [ -d $MYDATA -a -d $MYDATA/mysql -a -f $MYDATA/mysql/user.frm ]; then
+	echo "======================================="
+	echo "DATADIR directory $MYDATA already exists"
+	echo "Skipping mysql_install_db"
+	echo "======================================="
+
+	# Don't need to initdb, blindly try to drop the dbt3 database in case
+	# it exists.
+	dbt3-mysql-start-db
+	dbt3-mysql-drop-db
+	dbt3-mysql-stop-db
+else
+	# initialize database cluster
+	echo "initializing database ..."
+	mysql_install_db --datadir=${MYDATA}
+fi
+
+dbt3-mysql-start-db -p ${DEFAULTS_FILE}
+
+echo "Creating database $DBNAME..."
+mysqladmin --defaults-file=${DEFAULTS_FILE} create $DBNAME || exit 1
+
+exit 0

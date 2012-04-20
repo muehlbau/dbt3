@@ -1,0 +1,23 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labs, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE supplier;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE part;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE partsupp;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE customer;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE orders;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE lineitem;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE nation;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE region;" $DBNAME
+mysql --defaults-file=${DEFAULTS_FILE} -e "DROP TABLE time_statistics;" $DBNAME
+
+exit 0
