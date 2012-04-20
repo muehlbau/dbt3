@@ -108,7 +108,7 @@ if [ $USE_OPROFILE -eq 1 ]; then
 fi
 
 # Start collecting system statistics.
-$SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR
+$SRCDIR/scripts/dbt3-sysstats --outdir $OUTPUT_DIR --iter 1440 --sample 60 || exit 1
 
 $DBSCRIPTDIR/create_db.sh -o ${OUTPUT_DIR} -l ${DBPORT} \
 		-p "${PARAMETERS}" || exit 1
@@ -142,7 +142,7 @@ let "diff_time=$e_time-$s_time"
 echo "Elapsed time for Load Test : $diff_time seconds"
 
 # Stop collecting system statistics.
-$SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR
+$SRCDIR/scripts/dbt3-sysstats --stop
 
 # Collect profile data.
 if [ -f /proc/profile ]; then

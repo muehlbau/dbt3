@@ -112,7 +112,7 @@ ${PARSE_QUERY} $query_file $tmp_query_file E
 #$DBSCRIPTDIR/stop_db.sh || exit 1
 $DBSCRIPTDIR/start_db.sh -p "${PARAMETERS}" || exit 1
 # Start collecting system statistics.
-$SCRIPTDIR/start_sysstats.sh -o $OUTPUT_DIR || exit 1
+$SRCDIR/scripts/dbt3-sysstats --outdir $OUTPUT_DIR --iter 1440 --sample 60 || exit 1
 
 # Collect database statistics
 $DBSTATS $SID $OUTPUT_DIR &
@@ -170,7 +170,7 @@ echo "Elapsed time for Power Test : $diff_time seconds"
 
 # Stop collecting system statistics.
 echo "Stopping system statistics"
-$SCRIPTDIR/stop_sysstats.sh $OUTPUT_DIR
+$SRCDIR/scripts/dbt3-sysstats --stop
 
 #$DBSCRIPTDIR/stop_db.sh || exit 1
 

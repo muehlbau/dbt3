@@ -107,7 +107,7 @@ s_time=`$GTIME`
 $DBSCRIPTDIR/record_start.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
 
 # Start collecting system statistics. 
-$SRCDIR/scripts/start_sysstats.sh -o $OUTPUT_DIR || exit 1
+$SRCDIR/scripts/dbt3-sysstats --outdir $OUTPUT_DIR --iter 1440 --sample 60 || exit 1
 
 # Start collecting database statistics.
 ${DBSTATS} ${OUTPUT_DIR} ${DBPORT}&
@@ -118,7 +118,7 @@ ${DBSCRIPTDIR}/throughput_stream_wrapper.sh -l ${DBPORT} -f ${scale_factor} \
 		-s ${SEED_FILE} ${NO_REFRESH_FLAG} || exit 1
 
 # Stop collecting system statistics.
-$SRCDIR/scripts/stop_sysstats.sh $OUTPUT_DIR || exit 1
+$SRCDIR/scripts/dbt3-sysstats --stop
 
 ${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
 e_time=`$GTIME`

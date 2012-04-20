@@ -349,9 +349,6 @@ AC_CONFIG_FILES([scripts/get_config.sh], [chmod +x scripts/get_config.sh])
 AC_CONFIG_FILES([scripts/gen_data.sh], [chmod +x scripts/gen_data.sh])
 AC_CONFIG_FILES([scripts/gen_html.sh], [chmod +x scripts/gen_html.sh])
 AC_CONFIG_FILES([scripts/run_workload.sh], [chmod +x scripts/run_workload.sh])
-AC_CONFIG_FILES([scripts/start_sysstats.sh],
-    [chmod +x scripts/start_sysstats.sh])
-AC_CONFIG_FILES([scripts/stop_sysstats.sh], [chmod +x scripts/stop_sysstats.sh])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([src/dbgen/Makefile])
 
