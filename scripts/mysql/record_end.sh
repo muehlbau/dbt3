@@ -7,9 +7,7 @@
 # Copyright (C) 2004-2006 Mark Wong & Open Source Development Labs, Inc.
 #
 
-. @TOPDIR@/scripts/dbt3_profile || exit 1
-
-while getopts "n:" opt; do
+while getopts "l:n:" opt; do
 	case $opt in
 	n)
 		NAME=$OPTARG
@@ -17,9 +15,4 @@ while getopts "n:" opt; do
 	esac
 done
 
-SQL="
-UPDATE time_statistics
-SET e_time = current_timestamp
-WHERE task_name = '$NAME';
-"
-@MYSQL_CLIENT@  -D $SID -e "$SQL"
+dbt3-mysql-time-statistics -e -n ${NAME}

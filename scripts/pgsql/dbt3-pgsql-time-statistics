@@ -7,7 +7,7 @@
 #
 
 DIR=`dirname $0`
-. ${DIR}/mysql_profile
+. ${DIR}/pgsql_profile
 
 cmd_clear=0
 cmd_start=0
@@ -21,6 +21,9 @@ while getopts "cel:n:s" opt; do
 	e)
 		cmd_end=1
 		;;
+	l)
+		DBPORT=${OPTARG}
+		;;
 	n)
 		NAME=$OPTARG
 		;;
@@ -30,10 +33,10 @@ while getopts "cel:n:s" opt; do
 	esac
 done
 
-if [ -z ${DBNAME} ]; then
-    echo "DBNAME not defined."
-    exit 1
-fi
+# Stand-alone PostgreSQL
+#PSQL="psql -q -p ${DBPORT} -d $SID"
+# Stado
+PSQL="psql -h localhost -U admin -q -p ${DBPORT} -d $SID"
 
 if [ $cmd_clear == 1 ]; then
     SQL="DELETE FROM time_statistics"
@@ -42,12 +45,11 @@ fi;
 if [ $cmd_start == 1 ]; then
     s_time=`$GTIME`
     SQL="INSERT INTO time_statistics (task_name, s_time, int_time) 
-         VALUES ('$NAME', now(), $s_time)"
+         VALUES ('$NAME', current_timestamp, $s_time)"
 fi;
 
 if [ $cmd_end == 1 ]; then
-    SQL="UPDATE time_statistics SET e_time = now() WHERE task_name = '$NAME'"
+    SQL="UPDATE time_statistics SET e_time = current_timestamp WHERE task_name = '$NAME'"
 fi;
 
-mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "$SQL"
-
+$PSQL -c "$SQL"

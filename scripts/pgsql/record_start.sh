@@ -7,8 +7,6 @@
 # Copyright (C) 2004-2006 Mark Wong & Open Source Development Labs, Inc.
 #
 
-. @TOPDIR@/scripts/dbt3_profile || exit 1
-
 while getopts "l:n:" opt; do
 	case $opt in
 	l)
@@ -20,9 +18,5 @@ while getopts "l:n:" opt; do
 	esac
 done
 
-s_time=`$GTIME`
-SQL="
-INSERT INTO time_statistics (task_name, s_time, int_time)
-VALUES ('$NAME', current_timestamp, $s_time);
-"
-@PSQL@ -p ${DBPORT}-d ${SID} -c "${SQL}"
+dbt3-pgsql-time-statistics -s -l ${DBPORT} -n ${NAME}
+

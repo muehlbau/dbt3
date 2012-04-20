@@ -9,4 +9,4 @@
 DIR=`dirname $0`
 . ${DIR}/mysql_profile
 
-@MYSQL_CLIENT@ -D $SID -e "DELETE FROM time_statistics;"
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "DELETE FROM time_statistics;"

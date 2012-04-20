@@ -6,9 +6,6 @@
 # Copyright (C) 2006 Mark Wong & Open Source Development Lab, Inc.
 #
 
-DIR=`dirname $0`
-. ${DIR}/pgsql_profile
-
 DBPORT=$1
 
-@PSQL@ -p ${DBPORT} -d $SID -q -c "DELETE FROM time_statistics;"
+dbt3-pgsql-time-statistics -c -l ${DBPORT}

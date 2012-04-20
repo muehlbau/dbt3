@@ -166,8 +166,6 @@ if test "$DATABASE_TO_USE" = "mysql"; then
 
   AC_CONFIG_FILES([scripts/mysql/my.cnf])
   AC_CONFIG_FILES([scripts/mysql/lockfile.sh])
-  AC_CONFIG_FILES([scripts/mysql/clear-time-statistics.sh],
-      [chmod +x scripts/mysql/clear-time-statistics.sh])
   AC_CONFIG_FILES([scripts/mysql/get_query_plan.sh],
       [chmod +x scripts/mysql/get_query_plan.sh])
   AC_CONFIG_FILES([scripts/mysql/get_version.sh],
@@ -180,30 +178,12 @@ if test "$DATABASE_TO_USE" = "mysql"; then
       [chmod +x scripts/mysql/run_rf2.sh])
   AC_CONFIG_FILES([scripts/mysql/run_throughput_stream.sh],
       [chmod +x scripts/mysql/run_throughput_stream.sh])
-  AC_CONFIG_FILES([scripts/mysql/create_db.sh],
-      [chmod +x scripts/mysql/create_db.sh])
-  AC_CONFIG_FILES([scripts/mysql/init_db.sh],
-      [chmod +x scripts/mysql/init_db.sh])
-  AC_CONFIG_FILES([scripts/mysql/create_tables.sh],
-      [chmod +x scripts/mysql/create_tables.sh])
   AC_CONFIG_FILES([scripts/mysql/db_stats.sh],
       [chmod +x scripts/mysql/db_stats.sh])
-  AC_CONFIG_FILES([scripts/mysql/drop_db.sh],
-      [chmod +x scripts/mysql/drop_db.sh])
-  AC_CONFIG_FILES([scripts/mysql/drop_tables.sh],
-      [chmod +x scripts/mysql/drop_tables.sh])
-  AC_CONFIG_FILES([scripts/mysql/grant.sh],
-      [chmod +x scripts/mysql/grant.sh])
   AC_CONFIG_FILES([scripts/mysql/mysql_profile],
       [chmod +x scripts/mysql/mysql_profile])
   AC_CONFIG_FILES([scripts/mysql/q_time.sh],
       [chmod +x scripts/mysql/q_time.sh])
-  AC_CONFIG_FILES([scripts/mysql/start_db.sh],
-      [chmod +x scripts/mysql/start_db.sh])
-  AC_CONFIG_FILES([scripts/mysql/stop_db.sh],
-      [chmod +x scripts/mysql/stop_db.sh])
-  AC_CONFIG_FILES([scripts/mysql/update_statistics.sh],
-      [chmod +x scripts/mysql/update_statistics.sh])
   AC_CONFIG_FILES([scripts/mysql/load_test.sh],
       [chmod +x scripts/mysql/load_test.sh])
   AC_CONFIG_FILES([scripts/mysql/power_test.sh],
@@ -212,10 +192,6 @@ if test "$DATABASE_TO_USE" = "mysql"; then
       [chmod +x scripts/mysql/throughput_test.sh])
   AC_CONFIG_FILES([scripts/mysql/throughput_stream_wrapper.sh],
       [chmod +x scripts/mysql/throughput_stream_wrapper.sh])
-  AC_CONFIG_FILES([scripts/mysql/record_end.sh],
-      [chmod +x scripts/mysql/record_end.sh])
-  AC_CONFIG_FILES([scripts/mysql/record_start.sh],
-      [chmod +x scripts/mysql/record_start.sh])
 
 
 elif test "$DATABASE_TO_USE" = "pgsql"; then
@@ -278,8 +254,6 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
     AC_MSG_ERROR([*** initdb is required])
   fi
 
-  AC_CONFIG_FILES([scripts/pgsql/clear-time-statistics.sh],
-      [chmod +x scripts/pgsql/clear-time-statistics.sh])
   AC_CONFIG_FILES([scripts/pgsql/get_query_plan.sh],
       [chmod +x scripts/pgsql/get_query_plan.sh])
   AC_CONFIG_FILES([scripts/pgsql/get_version.sh],
@@ -292,30 +266,12 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
       [chmod +x scripts/pgsql/run_rf2.sh])
   AC_CONFIG_FILES([scripts/pgsql/run_throughput_stream.sh],
       [chmod +x scripts/pgsql/run_throughput_stream.sh])
-  AC_CONFIG_FILES([scripts/pgsql/create_db.sh],
-      [chmod +x scripts/pgsql/create_db.sh])
-  AC_CONFIG_FILES([scripts/pgsql/create_indexes.sh],
-      [chmod +x scripts/pgsql/create_indexes.sh])
-  AC_CONFIG_FILES([scripts/pgsql/create_tables.sh],
-      [chmod +x scripts/pgsql/create_tables.sh])
   AC_CONFIG_FILES([scripts/pgsql/db_stats.sh],
       [chmod +x scripts/pgsql/db_stats.sh])
-  AC_CONFIG_FILES([scripts/pgsql/drop_db.sh],
-      [chmod +x scripts/pgsql/drop_db.sh])
-  AC_CONFIG_FILES([scripts/pgsql/drop_tables.sh],
-      [chmod +x scripts/pgsql/drop_tables.sh])
-  AC_CONFIG_FILES([scripts/pgsql/grant.sh],
-      [chmod +x scripts/pgsql/grant.sh])
   AC_CONFIG_FILES([scripts/pgsql/pgsql_profile],
       [chmod +x scripts/pgsql/pgsql_profile])
   AC_CONFIG_FILES([scripts/pgsql/q_time.sh],
       [chmod +x scripts/pgsql/q_time.sh])
-  AC_CONFIG_FILES([scripts/pgsql/start_db.sh],
-      [chmod +x scripts/pgsql/start_db.sh])
-  AC_CONFIG_FILES([scripts/pgsql/stop_db.sh],
-      [chmod +x scripts/pgsql/stop_db.sh])
-  AC_CONFIG_FILES([scripts/pgsql/update_statistics.sh],
-      [chmod +x scripts/pgsql/update_statistics.sh])
   AC_CONFIG_FILES([scripts/pgsql/load_test.sh],
       [chmod +x scripts/pgsql/load_test.sh])
   AC_CONFIG_FILES([scripts/pgsql/power_test.sh],
@@ -324,10 +280,6 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
       [chmod +x scripts/pgsql/throughput_test.sh])
   AC_CONFIG_FILES([scripts/pgsql/throughput_stream_wrapper.sh],
       [chmod +x scripts/pgsql/throughput_stream_wrapper.sh])
-  AC_CONFIG_FILES([scripts/pgsql/record_end.sh],
-      [chmod +x scripts/pgsql/record_end.sh])
-  AC_CONFIG_FILES([scripts/pgsql/record_start.sh],
-      [chmod +x scripts/pgsql/record_start.sh])
 elif test "$DATABASE_TO_USE" = "sapdb"; then
   AC_DEFINE(SAPDB, 1)
 

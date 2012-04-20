@@ -7,8 +7,6 @@
 # Copyright (C) 2004-2006 Mark Wong & Open Source Development Labs, Inc.
 #
 
-. @TOPDIR@/scripts/dbt3_profile || exit 1
-
 while getopts "l:n:" opt; do
 	case $opt in
 	l)
@@ -20,9 +18,4 @@ while getopts "l:n:" opt; do
 	esac
 done
 
-SQL="
-UPDATE time_statistics
-SET e_time = current_timestamp
-WHERE task_name = '$NAME';
-"
-@PSQL@ -p ${DBPORT} -d $SID -c "$SQL"
+dbt3-pgsql-time-statistics -e -l ${DBPORT} -n ${NAME}

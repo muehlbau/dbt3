@@ -7,9 +7,7 @@
 # Copyright (C) 2004-2006 Mark Wong & Open Source Development Labs, Inc.
 #
 
-. @TOPDIR@/scripts/dbt3_profile || exit 1
-
-while getopts "n:" opt; do
+while getopts "l:n:" opt; do
 	case $opt in
 	n)
 		NAME=$OPTARG
@@ -17,9 +15,5 @@ while getopts "n:" opt; do
 	esac
 done
 
-s_time=`$GTIME`
-SQL="
-INSERT INTO time_statistics (task_name, s_time, int_time)
-VALUES ('$NAME', current_timestamp, $s_time);
-"
-echo "$SQL" | @MYSQL_CLIENT@  $SID
+dbt3-mysql-time-statistics -s -n ${NAME}
+
