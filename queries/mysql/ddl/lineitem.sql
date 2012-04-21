@@ -14,14 +14,5 @@ CREATE TABLE lineitem (
 	l_receiptDATE DATE,
 	l_shipinstruct CHAR(25),
 	l_shipmode CHAR(10),
-	l_comment VARCHAR(44),
-	PRIMARY KEY (l_orderkey, l_linenumber), 
-	index i_l_shipdate (l_shipdate),
-	index i_l_suppkey_partkey (l_partkey, l_suppkey),
-	index i_l_partkey (l_partkey), 
-	index i_l_suppkey (l_suppkey),
-	index i_l_receiptdate (l_receiptdate),
-	index i_l_orderkey (l_orderkey),
-	index i_l_orderkey_quantity (l_orderkey, l_quantity), 
-	index i_l_commitdate (l_commitdate)
+	l_comment VARCHAR(44)
 );

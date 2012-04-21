@@ -173,7 +173,7 @@ echo "Using seed: `cat $SEED_FILE`"
 # Load Test
 #
 if [ ${RUN_LOAD_TEST} -eq 1 ]; then
-	$DBSCRIPTDIR/load_test.sh \
+	$DBSCRIPTDIR/dbt3-${DATABASE}-load-test \
 			-o $OUTPUT_DIR/load \
 			-z ${DBPORT} \
 			-p "${LOAD_PARAMETERS}" \

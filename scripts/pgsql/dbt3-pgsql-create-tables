@@ -12,24 +12,14 @@ DIR=`dirname $0`
 
 # Load tables
 # This background stuff is honestly kinda ugly. IMO the right way to do this is to utilize make -j
-load_table() {
+create_table() {
 	table=${1}
 	create=${2}
-	if [ x${3} == x ]; then
-		file=${table}.tbl
-	else
-		file=${3}.tbl
-	fi
 
-	local sql="COPY ${table} FROM '${DBDATA}/${file}' USING DELIMITERS '|';"
 	local cmd="psql -p ${DBPORT} -e -d ${SID} -1 -c "
-	if [ x${BACKGROUND} == xyes ]; then
-		echo "Loading ${table} table in the background..."
-		${cmd} "${create} ${sql} VACUUM ANALYZE ${table};" || exit 1 &
-	else
-		echo "Loading $table table..."
-		${cmd} "${create} ${sql}" || exit 1
-	fi
+
+	echo "Creating ${table} table..."
+	${cmd} "${create};" || exit 1
 }
 
 if [ -z ${DBNAME} ]; then
@@ -40,9 +30,6 @@ fi
 USE_TABLESPACES=0
 while getopts "bd:l:t" OPT; do
 	case ${OPT} in
-	b)
-		BACKGROUND=yes
-		;;
 	d)
 		DBDATA=${OPTARG}
 		;;
@@ -98,7 +85,7 @@ if [ ${USE_TABLESPACES} -eq 1 ]; then
 	${PSQL} "CREATE ${REGION_TABLESPACE} LOCATION '${TS_REGION_DIR}';"
 fi
 
-load_table supplier "
+create_table supplier "
 CREATE TABLE supplier (
 	s_suppkey  INTEGER,
 	s_name CHAR(25),
@@ -110,7 +97,7 @@ CREATE TABLE supplier (
 	${SUPPLIER_TABLESPACE};
 "
 
-load_table part "
+create_table part "
 CREATE TABLE part (
 	p_partkey INTEGER,
 	p_name VARCHAR(55),
@@ -124,7 +111,7 @@ CREATE TABLE part (
 	${PART_TABLESPACE};
 "
 
-load_table partsupp "
+create_table partsupp "
 CREATE TABLE partsupp (
 	ps_partkey INTEGER,
 	ps_suppkey INTEGER,
@@ -134,7 +121,7 @@ CREATE TABLE partsupp (
 	${PARTSUPP_TABLESPACE};
 "
 
-load_table customer "
+create_table customer "
 CREATE TABLE customer (
 	c_custkey INTEGER,
 	c_name VARCHAR(25),
@@ -147,7 +134,7 @@ CREATE TABLE customer (
 	${CUSTOMER_TABLESPACE};
 "
 
-load_table orders "
+create_table orders "
 CREATE TABLE orders (
 	o_orderkey INTEGER,
 	o_custkey INTEGER,
@@ -161,7 +148,7 @@ CREATE TABLE orders (
 	${ORDERS_TABLESPACE};
 "
 
-load_table lineitem "
+create_table lineitem "
 CREATE TABLE lineitem (
 	l_orderkey INTEGER,
 	l_partkey INTEGER,
@@ -182,7 +169,7 @@ CREATE TABLE lineitem (
 	${LINEITEM_TABLESPACE};
 "
 
-load_table nation "
+create_table nation "
 CREATE TABLE nation (
 	n_nationkey INTEGER,
 	n_name CHAR(25),
@@ -191,7 +178,7 @@ CREATE TABLE nation (
 	${NATION_TABLESPACE};
 "
 
-load_table region "
+create_table region "
 CREATE TABLE region (
 	r_regionkey INTEGER,
 	r_name CHAR(25),
@@ -199,7 +186,7 @@ CREATE TABLE region (
 	${REGION_TABLESPACE};
 "
 
-${PSQL} "
+create_table time_statistics "
 CREATE TABLE time_statistics (
 	task_name VARCHAR(40),
 	s_time TIMESTAMP,
@@ -217,7 +204,5 @@ GRANT SELECT,INSERT,UPDATE,DELETE ON lineitem TO PUBLIC;
 GRANT SELECT,INSERT,UPDATE,DELETE ON orders TO PUBLIC;
 GRANT SELECT,INSERT,UPDATE,DELETE ON time_statistics TO PUBLIC;
 " || exit 1
-
-wait
 
 exit 0

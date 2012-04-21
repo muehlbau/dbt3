@@ -7,6 +7,5 @@ CREATE TABLE `part` (
 	p_size INTEGER,
 	p_container CHAR(10),
 	p_retailprice DECIMAL(10,2),
-	p_comment VARCHAR(23),
-PRIMARY KEY (p_partkey)
+	p_comment VARCHAR(23)
 );

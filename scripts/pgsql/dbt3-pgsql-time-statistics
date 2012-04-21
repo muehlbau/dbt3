@@ -33,10 +33,7 @@ while getopts "cel:n:s" opt; do
 	esac
 done
 
-# Stand-alone PostgreSQL
-#PSQL="psql -q -p ${DBPORT} -d $SID"
-# Stado
-PSQL="psql -h localhost -U admin -q -p ${DBPORT} -d $SID"
+PSQL="psql -q -p ${DBPORT} -d $SID"
 
 if [ $cmd_clear == 1 ]; then
     SQL="DELETE FROM time_statistics"

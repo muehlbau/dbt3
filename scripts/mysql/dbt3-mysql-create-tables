@@ -12,24 +12,14 @@ DIR=`dirname $0`
 
 engine=`echo $MYSQL_ENGINE | tr 'A-Z' 'a-z' `
 
-# Load tables
-# This background stuff is honestly kinda ugly. IMO the right way to do this is to utilize make -j
-load_table() {
+# Create tables
+create_table() {
     table=${1}
-    if [ x${2} == x ]; then
-	file=${table}.tbl
-    else
-	file=${2}.tbl
-    fi
     if [ -f $DSS_QUERY/ddl/$engine/${table}.sql ] ; then 
 	cat $DSS_QUERY/ddl/$engine/${table}.sql | mysql --defaults-file=${DEFAULTS_FILE} $DBNAME || exit 1
     else
         cat $DSS_QUERY/ddl/${table}.sql | mysql --defaults-file=${DEFAULTS_FILE} $DBNAME || exit 1
     fi
-    # This disable/enable trick only works on MyISAM for the moment. 
-    mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "alter table $table disable keys;"
-    mysqlimport --defaults-file=${DEFAULTS_FILE} --fields-terminated-by='|' ${DBNAME} ${DBDATA}/${file}
-    mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "alter table $table enable keys;"
 }
 
 while getopts "bd:e:" OPT; do
@@ -47,21 +37,21 @@ while getopts "bd:e:" OPT; do
 done
 
 
-load_table supplier 
-load_table part
-load_table partsupp
-load_table customer
-load_table orders
-load_table lineitem
-load_table nation
-load_table region
+create_table supplier 
+create_table part
+create_table partsupp
+create_table customer
+create_table orders
+create_table lineitem
+create_table nation
+create_table region
 
 mysql --defaults-file=${DEFAULTS_FILE} -D ${DBNAME} -e "
 CREATE TABLE time_statistics (
 	task_name VARCHAR(40),
 	s_time TIMESTAMP default current_timestamp,
 	e_time TIMESTAMP,
-	int_time INTEGER) engine=myisam;
+	int_time INTEGER);
 " || exit 1
 
 DBUSER="dbt";

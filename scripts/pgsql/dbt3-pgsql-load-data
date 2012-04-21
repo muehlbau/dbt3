@@ -1,0 +1,69 @@
+#!/bin/sh
+
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2002-2008 Mark Wong & Open Source Development Labss, Inc.
+#
+
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+# Load tables
+# This background stuff is honestly kinda ugly. IMO the right way to do this is to utilize make -j
+load_table() {
+	table=${1}
+	file=${table}.tbl
+
+	local sql="COPY ${table} FROM '${DBDATA}/${file}' USING DELIMITERS '|';"
+	local cmd="psql -p ${DBPORT} -e -d ${SID} -1 -c "
+	if [ x${BACKGROUND} == xyes ]; then
+		echo "Loading ${table} table in the background..."
+		${cmd} "${sql}" || exit 1 &
+	else
+		echo "Loading $table table..."
+		${cmd} "${sql}" || exit 1 &
+	fi
+}
+
+if [ -z ${DBNAME} ]; then
+    echo "DBNAME not defined."
+    exit 1
+fi
+
+USE_TABLESPACES=0
+while getopts "bd:l:t" OPT; do
+	case ${OPT} in
+	b)
+		BACKGROUND=yes
+		;;
+	d)
+		DBDATA=${OPTARG}
+		;;
+	l)
+		PORT=${OPTARG}
+		;;
+	t)
+		USE_TABLESPACES=1
+		;;
+	esac
+done
+
+if [ ! "x${PORT}" = "x" ]; then
+	PORTARG="-p ${PORT}"
+fi
+PSQL="psql -p ${DBPORT} -e -d ${SID} -c"
+
+load_table supplier
+load_table part
+load_table partsupp
+load_table customer
+load_table orders
+load_table lineitem
+load_table nation
+load_table region
+
+wait
+
+exit 0

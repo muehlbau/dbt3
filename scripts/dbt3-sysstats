@@ -88,7 +88,7 @@ do
 		;;
 	--stop)
 		echo "Killing ${SAR} ${IOPP} ${IOSTAT} ${MPSTAT} ${VMSTAT}..."
-		killall -q ${SAR} ${IOPP} ${IOSTAT} ${MPSTAT} ${VMSTAT}
+		killall -q ${SAR} sadc ${IOPP} ${IOSTAT} ${MPSTAT} ${VMSTAT}
 		exit;
 		;;
 	esac
@@ -133,25 +133,25 @@ mkdir -p $OUTPUT_DIR
 echo "starting system statistics data collection"
 
 # collect all sar data in binary form
-${SAR} -o $OUTPUT_DIR/sar_raw.out $SAMPLE_LENGTH $ITERATIONS &
+${SAR} -o $OUTPUT_DIR/sar_raw.out $SAMPLE_LENGTH $ITERATIONS > ${OUTPUT_DIR}/sar.out &
 
 # collect i/o data per process
-${IOPP} -c ${SAMPLE_LENGTH} ${ITERATIONS} >> ${OUTPUT_DIR}/iopp.out &
+${IOPP} -c ${SAMPLE_LENGTH} ${ITERATIONS} > ${OUTPUT_DIR}/iopp.out &
 
 # collect i/o data per physical device
-${IOSTAT} -d $SAMPLE_LENGTH $ITERATIONS >> $OUTPUT_DIR/iostat.out &
-${IOSTAT} -d -x $SAMPLE_LENGTH $ITERATIONS >> $OUTPUT_DIR/iostatx.out &
+${IOSTAT} -d $SAMPLE_LENGTH $ITERATIONS > $OUTPUT_DIR/iostat.out &
+${IOSTAT} -d -x $SAMPLE_LENGTH $ITERATIONS > $OUTPUT_DIR/iostatx.out &
 
 # collect mpstat data
-${MPSTAT} -P ALL ${SAMPLE_LENGTH} ${ITERATIONS} >> ${OUTPUT_DIR}/mpstat.out &
+${MPSTAT} -P ALL ${SAMPLE_LENGTH} ${ITERATIONS} > ${OUTPUT_DIR}/mpstat.out &
 
 # collect vmstat data
 VMSTAT_OUTPUT=$OUTPUT_DIR/vmstat.out
 OS=`uname`
 if [ "x${OS}" = "xSunOS" ]; then
-	${VMSTAT} $SAMPLE_LENGTH $ITERATIONS >> $VMSTAT_OUTPUT &
+	${VMSTAT} $SAMPLE_LENGTH $ITERATIONS > $VMSTAT_OUTPUT &
 else
-	${VMSTAT} -n $SAMPLE_LENGTH $ITERATIONS >> $VMSTAT_OUTPUT &
+	${VMSTAT} -n $SAMPLE_LENGTH $ITERATIONS > $VMSTAT_OUTPUT &
 fi
 
 exit 0

@@ -5,7 +5,5 @@ CREATE TABLE supplier (
 	s_nationkey INTEGER,
 	s_phone CHAR(15),
 	s_acctbal DECIMAL (10,2),
-	s_comment VARCHAR(101),
-	PRIMARY KEY (s_suppkey) ,
-	index i_s_nationkey (s_nationkey)
+	s_comment VARCHAR(101)
 );

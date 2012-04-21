@@ -36,6 +36,7 @@ skip-external-locking
 #tmp_table_size=209715200
 #read_buffer_size=2M
 #read_rnd_buffer_size=2M
+#sort_buffer_size=2048M
 #
 #
 # * Fine Tuning
@@ -59,8 +60,12 @@ log-error=@MYSQL_DATADIR@/mysql_error.log
 #
 # InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
 # Read the manual for more InnoDB related options. There are many!
+#innodb_file_per_table
 #innodb_log_file_size=100M
 #innodb_buffer_pool_size=200M
+# 0:every 1 seconds, 1:fsync on commits, 2:writes on commits
+#innodb_flush_log_at_trx_commit=0
+#innodb_log_buffer_size=16M
 # * Security Features
 #
 # Read the manual, too, if you want chroot!

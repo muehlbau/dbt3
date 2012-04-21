@@ -184,8 +184,6 @@ if test "$DATABASE_TO_USE" = "mysql"; then
       [chmod +x scripts/mysql/mysql_profile])
   AC_CONFIG_FILES([scripts/mysql/q_time.sh],
       [chmod +x scripts/mysql/q_time.sh])
-  AC_CONFIG_FILES([scripts/mysql/load_test.sh],
-      [chmod +x scripts/mysql/load_test.sh])
   AC_CONFIG_FILES([scripts/mysql/power_test.sh],
       [chmod +x scripts/mysql/power_test.sh])
   AC_CONFIG_FILES([scripts/mysql/throughput_test.sh],
@@ -272,8 +270,6 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
       [chmod +x scripts/pgsql/pgsql_profile])
   AC_CONFIG_FILES([scripts/pgsql/q_time.sh],
       [chmod +x scripts/pgsql/q_time.sh])
-  AC_CONFIG_FILES([scripts/pgsql/load_test.sh],
-      [chmod +x scripts/pgsql/load_test.sh])
   AC_CONFIG_FILES([scripts/pgsql/power_test.sh],
       [chmod +x scripts/pgsql/power_test.sh])
   AC_CONFIG_FILES([scripts/pgsql/throughput_test.sh],

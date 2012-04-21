@@ -6,7 +6,5 @@ CREATE TABLE customer (
 	c_phone CHAR(15),
 	c_acctbal DECIMAL(10,2),
 	c_mktsegment CHAR(10),
-	c_comment VARCHAR(117),
-	PRIMARY KEY (c_custkey) ,
-	index i_c_nationkey (c_nationkey)
+	c_comment VARCHAR(117)
 );

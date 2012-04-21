@@ -10,12 +10,14 @@
 DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
 
+DBNAME=$SID
+
 if [ "x${DBNAME}" = "x" ]; then
     echo "DBNAME not defined."
     exit 1
 fi
 
-while getopts "l:" OPT; do
+while getopts "d:l:" OPT; do
 	case ${OPT} in
 	l)
 		PORT=${OPTARG}
@@ -29,12 +31,12 @@ fi
 PSQL="psql ${PORTARG} -e -d ${DBNAME}"
 
 # need to consider table dependencies.
-${PSQL} -e -d $SID -c "DROP TABLE supplier;"
-${PSQL} -e -d $SID -c "DROP TABLE part;"
-${PSQL} -e -d $SID -c "DROP TABLE partsupp;"
-${PSQL} -e -d $SID -c "DROP TABLE customer;"
-${PSQL} -e -d $SID -c "DROP TABLE orders;"
-${PSQL} -e -d $SID -c "DROP TABLE lineitem;"
-${PSQL} -e -d $SID -c "DROP TABLE nation;"
-${PSQL} -e -d $SID -c "DROP TABLE region;"
-${PSQL} -e -d $SID -c "DROP TABLE time_statistics;"
+${PSQL} -e -c "DROP TABLE supplier;"
+${PSQL} -e -c "DROP TABLE part;"
+${PSQL} -e -c "DROP TABLE partsupp;"
+${PSQL} -e -c "DROP TABLE customer;"
+${PSQL} -e -c "DROP TABLE orders;"
+${PSQL} -e -c "DROP TABLE lineitem;"
+${PSQL} -e -c "DROP TABLE nation;"
+${PSQL} -e -c "DROP TABLE region;"
+${PSQL} -e -c "DROP TABLE time_statistics;"

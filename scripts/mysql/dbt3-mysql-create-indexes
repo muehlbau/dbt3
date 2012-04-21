@@ -10,6 +10,33 @@
 DIR=`dirname $0`
 . ${DIR}/mysql_profile || exit 1
 
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE supplier ADD PRIMARY KEY (s_suppkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE region ADD PRIMARY KEY (r_regionkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE partsupp ADD PRIMARY KEY (ps_partkey, ps_suppkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE part ADD PRIMARY KEY (p_partkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE orders ADD PRIMARY KEY (o_orderkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE nation ADD PRIMARY KEY (n_nationkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE lineitem ADD PRIMARY KEY (l_orderkey, l_linenumber);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "ALTER TABLE customer ADD PRIMARY KEY (c_custkey);" &
+
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_s_nationkey ON supplier (s_nationkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_ps_partkey ON partsupp (ps_partkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_ps_suppkey ON partsupp (ps_suppkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_o_orderdate ON orders (o_orderdate);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_o_custkey ON orders (o_custkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_n_regionkey ON nation (n_regionkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_shipdate ON lineitem (l_shipdate);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_suppkey_partkey ON lineitem (l_partkey, l_suppkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_partkey ON lineitem (l_partkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_suppkey ON lineitem (l_suppkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_receiptdate ON lineitem (l_receiptdate);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_orderkey ON lineitem (l_orderkey);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_orderkey_quantity ON lineitem (l_orderkey, l_quantity);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_l_commitdate ON lineitem (l_commitdate);" &
+mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "CREATE INDEX i_c_nationkey ON customer (c_nationkey);" &
+
+wait
+
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table supplier"
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table part"
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table partsupp"
@@ -18,3 +45,4 @@ mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table orders"
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table lineitem"
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table nation"
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "analyze table region"
+

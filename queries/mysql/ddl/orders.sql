@@ -7,8 +7,5 @@ CREATE TABLE orders (
 	o_orderpriority CHAR(15),
 	o_clerk CHAR(15),
 	o_shippriority INTEGER,
-	o_comment VARCHAR(79),
-	PRIMARY KEY (o_orderkey) , 
-	index i_o_orderdate (o_orderdate), 
-	index i_o_custkey (o_custkey)
+	o_comment VARCHAR(79)
 );
