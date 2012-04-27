@@ -11,6 +11,8 @@
 DIR=`dirname $0`
 . ${DIR}/mysql_profile || exit 1
 
+echo -n "Starting MySQL..."
+
 if [ "x" = "x${MYDATA}" ]; then
 	echo "ERROR: MYDATA must be set"
 	exit 1
@@ -19,6 +21,10 @@ fi
 LOGFILE="dbt3.log"
 OUTDIR="."
 HOSTNAME=`hostname`
+
+if [ ! -z $DEFAULTS_FILE ]; then
+	DEFAULTS_FILE_ARG="--defaults-file=${DEFAULTS_FILE}"
+fi;
 
 while getopts "fo:p:s:" OPT; do
 	case ${OPT} in
@@ -44,5 +50,7 @@ fi
 nohup mysqld_safe ${DEFAULTS_FILE_ARG} \
 		--log-error=${OUTDIR}/${LOGFILE} > /dev/null 2>&1 &
 sleep 10
+
+echo "done."
 
 exit 0

@@ -1,0 +1,279 @@
+#!/usr/bin/perl -w
+
+use strict;
+use Getopt::Long;
+use FileHandle;
+
+sub usage()
+{
+	print "usage: graph_query_time.pl [-23z] [--if q_time.out]\n";
+	print "  options:\n";
+	print "  2  - power test data\n";
+	print "  3  - throughput test data\n";
+	print "  if - query time data file\n";
+	print "  z  - no refresh stream data\n";
+}
+
+my $infile;
+my $no_refresh;
+my $flag_power_test;
+my $flag_throughput_test;
+my $help;
+
+GetOptions(
+  '2' => \$flag_power_test,
+  '3' => \$flag_throughput_test,
+  "help" => \$help,
+  "if=s" => \$infile,
+  'z' => \$no_refresh
+);
+
+if ($help) {
+	usage();
+	exit 0;
+}
+
+my $raw_data;
+my @data;
+my $dirname = `dirname $infile`;
+chomp $dirname;
+my $avg;
+
+sub average()
+{
+  my $count = scalar(@data);
+  my $total = 0;
+
+  for (my $i = 0; $i < $count; $i++) {
+    $total += $data[ $i ];
+  }
+
+  return $total / $count;
+}
+
+if ($flag_power_test)
+{
+    open(OUT, "> $dirname/q_time_p.data") || die($!);
+
+    #
+    # Generate data file for power query times, for the first iteration only.
+    #
+    my $i;
+    for ($i=1 ; $i<=22 ; $i++)
+    {
+	my $tag = "PERF1.POWER.Q".$i;
+
+	open(IN, "$infile") || die($!);
+	while(<IN>)
+	{
+	    chomp;
+	    my @v = split(/,/);
+
+	    if ( $v[0] eq $tag )
+	    {
+		print OUT $i . " " . $v[4] . "\n";
+	    }
+	}
+	close(IN);
+    }
+
+    unless ($no_refresh) {
+	for ($i=1 ; $i<=2 ; $i++)
+	{
+	    my $tag = "PERF1.POWER.RF".$i;
+	    
+	    open(IN, "$infile") || die($!);
+	    while(<IN>)
+	    {
+		chomp;
+		my @v = split(/,/);
+		
+		if ( $v[0] eq $tag )
+		{
+		    my $j = $i + 22;
+		    print OUT $j . " " . $v[4] . "\n";
+		}
+	    }
+	    close(IN);
+	}
+    }
+    close(OUT);
+}
+
+if ($flag_throughput_test)
+{
+  #
+  # Generate data file of average throughput query times.
+  #
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q1,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 1.1 $avg > $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q2,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 2.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q3,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 3.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q4,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 4.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q5,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 5.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q6,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 6.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q7,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 7.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q8,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 8.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q9,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 9.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q10,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 10.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q11,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 11.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q12,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 12.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q13,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 13.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q14,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 14.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q15,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 15.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q16,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 16.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q17,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 17.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q18,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 18.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q19,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 19.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q20,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 20.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q21,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 21.1 $avg >> $dirname/q_time_t.data";
+
+  $raw_data = `grep THRUPUT $infile | grep 'Q22,' | awk -F ','  '{print \$5}' | xargs`;
+  @data = split ' ', $raw_data;
+  $avg = average();
+  system "echo 22.1 $avg >> $dirname/q_time_t.data";
+
+  unless ($no_refresh) {
+    $raw_data = `grep THRUPUT $infile | grep 'RF1,' | awk -F ','  '{print \$5}' | xargs`;
+    @data = split ' ', $raw_data;
+    $avg = average();
+    system "echo 23.1 $avg >> $dirname/q_time_t.data";
+
+    $raw_data = `grep THRUPUT $infile | grep 'RF2,' | awk -F ','  '{print \$5}' | xargs`;
+    @data = split ' ', $raw_data;
+    $avg = average();
+    system "echo 24.1 $avg >> $dirname/q_time_t.data";
+  }
+}
+
+my $outfile = new FileHandle;
+unless( $outfile->open( "> $dirname/q_time.input" ) ) {
+  die "cannot open $dirname/q_time.input $!";
+}
+
+my $plots = '';
+if ($flag_power_test) {
+  $plots .= "\"q_time_p.data\" using (\$1-0.15):2 title \"Power Test\" with boxes";
+}
+if ($flag_throughput_test) {
+  if ($flag_power_test) {
+    $plots .= ", ";
+  }
+  $plots .= "\"q_time_t.data\" using (\$1+0.15):2 title \"Throughput Test\" with boxes";
+}
+
+# gnuplot 4.0 syntax
+print $outfile "
+reset
+set auto x
+set auto y
+
+set samples 25
+set boxwidth 0.3 absolute
+set style fill solid 0.25 border
+
+set xlabel \"Queries\"
+set xrange [0:25]
+
+set ylabel \"Query Time in Seconds\"
+set ytics
+
+set term png nocrop
+set output \"q_time.png\"
+";
+
+# x-axis
+if ($no_refresh) {
+    print $outfile "set xtics \(\"Q1\" 1, \"Q2\" 2, \"Q3\" 3, \"Q4\" 4, \"Q5\" 5, \"Q6\" 6, \"Q7\" 7, \"Q8\" 8, \"Q9\" 9, \"Q10\" 10, \"Q11\" 11, \"Q12\" 12, \"Q13\" 13, \"Q14\" 14, \"Q15\" 15, \"Q16\" 16, \"Q17\" 17, \"Q18\" 18, \"Q19\" 19, \"Q20\" 20, \"Q21\" 21, \"Q22\" 22\)\n";
+} else {
+    print $outfile "set xtics \(\"Q1\" 1, \"Q2\" 2, \"Q3\" 3, \"Q4\" 4, \"Q5\" 5, \"Q6\" 6, \"Q7\" 7, \"Q8\" 8, \"Q9\" 9, \"Q10\" 10, \"Q11\" 11, \"Q12\" 12, \"Q13\" 13, \"Q14\" 14, \"Q15\" 15, \"Q16\" 16, \"Q17\" 17, \"Q18\" 18, \"Q19\" 19, \"Q20\" 20, \"Q21\" 21, \"Q22\" 22, \"RF1\" 23, \"RF2\" 24\)\n";
+}
+
+print $outfile "plot $plots\n";
+$outfile->close;
+
+chdir $dirname;
+system "gnuplot q_time.input";

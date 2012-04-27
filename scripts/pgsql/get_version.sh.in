@@ -1,5 +1,0 @@
-#!/bin/bash
-
-@PSQL@ --version | head -n 1 || exit 1
-
-exit 0

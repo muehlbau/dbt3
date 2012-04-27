@@ -37,17 +37,21 @@ fi
 
 if [ $cmd_clear == 1 ]; then
     SQL="DELETE FROM time_statistics"
+    echo -n "Clearing all the time statistics..."
 fi;
 
 if [ $cmd_start == 1 ]; then
     s_time=`$GTIME`
     SQL="INSERT INTO time_statistics (task_name, s_time, int_time) 
          VALUES ('$NAME', now(), $s_time)"
+    echo -n "Starting a time statistics for ${NAME}..."
 fi;
 
 if [ $cmd_end == 1 ]; then
     SQL="UPDATE time_statistics SET e_time = now() WHERE task_name = '$NAME'"
+    echo -n "Finishing the time statistics for ${NAME}..."
 fi;
 
 mysql --defaults-file=${DEFAULTS_FILE} -D $DBNAME -e "$SQL"
 
+echo "done."

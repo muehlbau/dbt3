@@ -10,6 +10,9 @@
 # Rewritten from perl to bash.
 #
 
+DIR=`dirname $0`
+source ${DIR}/dbt3_profile || exit 1
+
 FLAG_POWER_TEST=0
 FLAG_THROUGHPUT_TEST=0
 while getopts "23i:n:o:p:s:z" OPT; do
@@ -41,7 +44,7 @@ while getopts "23i:n:o:p:s:z" OPT; do
 	esac
 done
 
-SCRIPT_DIR="@TOPDIR@/scripts/@DATABASE_TO_USE@";
+SCRIPT_DIR="${DBT3_HOME}/scripts/${DATABASE}";
 
 #
 # Make sure the outfile is created.
@@ -54,7 +57,8 @@ if [ ${FLAG_POWER_TEST} -eq 1 ]; then
 fi
 
 if [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
-	THROUGHPUT=`${SCRIPT_DIR}/get-throughput -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
+#	THROUGHPUT=`${SCRIPT_DIR}/get-throughput -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
+	THROUGHPUT=`${SCRIPT_DIR}/get-throughput -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR}`
 	echo "throughput = ${THROUGHPUT}" | tee -a ${OUTFILE}
 fi
 

@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# This file is released under the terms of the Artistic License.
+# Please see the file LICENSE, included in this package, for details.
+#
+# Copyright (C) 2003-2006 Jenny Zhang & Open Source Development Labs, Inc.
+#
+# May 26, 2005
+# Mark Wong
+# Rewritten from perl to bash.
+#
+
+DIR=`dirname $0`
+source ${DIR}/dbt3_profile || exit 1
+
+PLOT_OPTS=""
+FLAG_POWER_TEST=0
+FLAG_THROUGHPUT_TEST=0
+while getopts "23i:n:o:p:s:z" OPT; do
+	case ${OPT} in
+	2)
+		FLAG_POWER_TEST=1
+		PLOT_OPTS="${PLOT_OPTS} -2"
+		;;
+	3)
+		FLAG_THROUGHPUT_TEST=1
+		PLOT_OPTS="${PLOT_OPTS} -3"
+		;;
+	i)
+		INFILE=${OPTARG}
+		;;
+	n)
+		STREAMS=${OPTARG}
+		;;
+	o)
+		OUTFILE=${OPTARG}
+		;;
+	p)
+		PERFNUM=${OPTARG}
+		;;
+	s)
+		SCALE_FACTOR=${OPTARG}
+		;;
+	z)
+		NO_REFRESH_FLAG="-z"
+		PLOT_OPTS="${PLOT_OPTS} -z"
+		;;
+	esac
+done
+
+SCRIPT_DIR="${DBT3_HOME}/scripts";
+
+#
+# Make sure the outfile is created.
+#
+cat /dev/null >  ${OUTFILE}
+
+if [ ${FLAG_POWER_TEST} -eq 1 ]; then
+	POWER=`perl ${SCRIPT_DIR}/get_power.pl -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} ${NO_REFRESH_FLAG}`
+	echo "power = ${POWER}"  | tee -a ${OUTFILE}
+fi
+
+if [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
+	THROUGHPUT=`${SCRIPT_DIR}/get-throughput -i ${INFILE} -p ${PERFNUM} -s ${SCALE_FACTOR} -n ${STREAMS}`
+	echo "throughput = ${THROUGHPUT}" | tee -a ${OUTFILE}
+fi
+
+if [ ${FLAG_POWER_TEST} -eq 1 ] && [ ${FLAG_THROUGHPUT_TEST} -eq 1 ]; then
+	COMPOSITE=`echo "scale=2; sqrt(${POWER} * ${THROUGHPUT})" | bc -l`
+	echo "composite = ${COMPOSITE}" | tee -a ${OUTFILE}
+fi
+
+# -------------------------------------
+# Plot a result chart with using gnuplot
+# -------------------------------------
+$SCRIPT_DIR/dbt3-plot-results \
+    --if ${INFILE} ${NO_REFRESH_FLAG} \
+    ${PLOT_OPTS} || exit 1
+
+exit 0

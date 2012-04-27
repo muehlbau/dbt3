@@ -14,7 +14,7 @@
 #                     complete, we only want to wait for the processes that
 #                     are executing the queries.
 
-SRCDIR=@TOPDIR@
+SRCDIR=/home/snaga/osdldbt/dbt3
 
 USE_OPROFILE=0
 
@@ -100,8 +100,8 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	clearoprof
 fi
 
-$DBSCRIPTDIR/stop_db.sh || exit 1
-$DBSCRIPTDIR/start_db.sh -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
+$DBSCRIPTDIR/dbt3-pgsql-stop-db || exit 1
+$DBSCRIPTDIR/dbt3-pgsql-start-db -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
 
 s_time=`$GTIME`
 $DBSCRIPTDIR/record_start.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
@@ -126,7 +126,7 @@ let "diff_time=$e_time-$s_time"
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
 
 # Stop the database after the test.
-$DBSCRIPTDIR/stop_db.sh || exit 1
+$DBSCRIPTDIR/dbt3-pgsql-stop-db || exit 1
 
 if [ -f /proc/profile ]; then
 	profname="Throughput_Test_$TAG"

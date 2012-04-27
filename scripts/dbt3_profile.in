@@ -9,7 +9,8 @@
 
 DIR=`dirname $0`
 
-DATABASE=@DATABASE_TO_USE@
+export DBT3_HOME="@TOPDIR@"
+export DATABASE=@DATABASE_TO_USE@
 
 export DSS_QUERY="@TOPDIR@/queries/@DATABASE_TO_USE@"
 export DSS_PATH="${HOME}/local/data"

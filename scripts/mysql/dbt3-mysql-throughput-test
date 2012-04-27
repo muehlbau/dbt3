@@ -14,7 +14,9 @@
 #                     complete, we only want to wait for the processes that
 #                     are executing the queries.
 
-SRCDIR=@TOPDIR@
+echo "Starting a throughput test..."
+
+SRCDIR=/home/snaga/osdldbt/dbt3
 
 USE_OPROFILE=0
 
@@ -99,10 +101,11 @@ if [ $USE_OPROFILE -eq 1 ]; then
 fi
 
 #$DBSCRIPTDIR/stop_db.sh  > /dev/null 2>&1
-$DBSCRIPTDIR/start_db.sh  -p "${PARAMETERS}" || exit 1
+#$DBSCRIPTDIR/dbt3-mysql-start-db -p "${PARAMETERS}" || exit 1
+$DBSCRIPTDIR/dbt3-mysql-start-db -p "${PARAMETERS}" || exit 1
 
 s_time=`$GTIME`
-$DBSCRIPTDIR/record_start.sh -n "PERF${TAG}.THRUPUT" || exit 1
+$DBSCRIPTDIR/dbt3-mysql-time-statistics -s -n "PERF${TAG}.THRUPUT" || exit 1
 
 # Start collecting system statistics. 
 $SRCDIR/scripts/dbt3-sysstats --outdir $OUTPUT_DIR --iter 1440 --sample 60 || exit 1
@@ -120,7 +123,7 @@ fi
 # Stop collecting system statistics.
 $SRCDIR/scripts/dbt3-sysstats --stop
 
-$DBSCRIPTDIR/record_end.sh -n "PERF${TAG}.THRUPUT" || exit 1
+$DBSCRIPTDIR/dbt3-mysql-time-statistics -e -n "PERF${TAG}.THRUPUT" || exit 1
 e_time=`$GTIME`
 diff_time=`expr $e_time - $s_time`
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
@@ -137,5 +140,7 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	profname="Throughput_Test_$TAG"
 	getoprof
 fi
+
+echo "Finishing the throughput test..."
 
 exit 0

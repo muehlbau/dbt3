@@ -53,28 +53,52 @@ my $value = 1;
 # Get execution time for the power queries.
 #
 for ($i = 1; $i <= 22; $i++) {
-  my $val = `grep \'PERF$perf_run_number.POWER.Q$i \' $infile | awk -F '|' '{ print \$5 }'`;
-  $val =~ s/^\s+//;
-  $val =~ s/\s+$//;
-  $value *= $val;
+    my $tag = "PERF".$perf_run_number.".POWER.Q".$i;
+
+    open(IN, "$infile") || die($!);
+    while(<IN>)
+    {
+	chomp;
+	my @v = split(/,/, $_);
+
+	if ( $v[0] eq $tag ) {
+            if ( $v[4]==0 ) {
+                $v[4] = 1;
+            }
+	    $value *= $v[4];
+	}
+    }
+    close(IN);
 }
 
 #
 # Get execution time for the power refresh functions.
 #
 unless ($no_refresh) {
-  for ($i = 1; $i <= 2; $i++) {
-    my $val = `grep \'PERF$perf_run_number.POWER.RF$i\' $infile | awk '{ print \$11 }'`;
-    #
-    # Skip in case the refresh functions finished within 1 second so we don't
-    # get a divide by 0 error later.
-    #
-    if ($val == 0) {
-      next;
+    for ($i = 1; $i <= 2; $i++) {
+	my $tag = "PERF".$perf_run_number.".POWER.RF".$i;
+
+	open(IN, "$infile") || die($!);
+	while(<IN>)
+	{
+	    chomp;
+	    my @v = split(/,/, $_);
+	    
+	    if ( $v[0] eq $tag )
+	    {
+		#
+		# Skip in case the refresh functions finished within 1 second so we don't
+		# get a divide by 0 error later.
+		#
+		if ($v[4] == 0) {
+		    next;
+		}
+
+		$value *= $v[4];
+	    }
+	}
+	close(IN);
     }
-    chomp $val;
-    $value *= $val;
-  }
 }
 
 $power = (3600 * $scale_factor) / ($value)**(1/24);

@@ -61,7 +61,8 @@ fi
 
 dbt3-mysql-start-db -p ${DEFAULTS_FILE}
 
-echo "Creating database $DBNAME..."
+echo -n "Creating database $DBNAME..."
 mysqladmin --defaults-file=${DEFAULTS_FILE} create $DBNAME || exit 1
+echo "done."
 
 exit 0

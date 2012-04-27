@@ -7,6 +7,9 @@
 #                    Open Source Development Labs, Inc.
 #
 
+DIR=`dirname $0`
+source ${DIR}/dbt3_profile || exit 1
+
 usage()
 {
 	echo "usage: run_workload.sh [-123eghouz] [-c comment] [-d data dir]"
@@ -35,13 +38,13 @@ usage()
 	echo " z - do not run refresh streams"
 }
 
-SRCDIR=@TOPDIR@
-DATABASE=@DATABASE_TO_USE@
+SRCDIR=/home/snaga/osdldbt/dbt3
 SCRIPTDIR=$SRCDIR/scripts
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
+export PATH=$PATH:$DBSCRIPTDIR
 
-DIR=`dirname $0`
-source ${DIR}/dbt3_profile || exit 1
+killall db_stats.sh
+$SRCDIR/scripts/dbt3-sysstats --stop
 
 SEED=0
 REDIR_LOG=0
@@ -172,10 +175,11 @@ echo "Using seed: `cat $SEED_FILE`"
 #
 # Load Test
 #
+#			-z ${DBPORT} \
 if [ ${RUN_LOAD_TEST} -eq 1 ]; then
+	echo "Starting a load test..."
 	$DBSCRIPTDIR/dbt3-${DATABASE}-load-test \
 			-o $OUTPUT_DIR/load \
-			-z ${DBPORT} \
 			-p "${LOAD_PARAMETERS}" \
 			${OPROFILE_FLAG} \
 			-f $SCALE_FACTOR \
@@ -188,8 +192,10 @@ else
 	# be cleared out.  Otherwise the data collection will be
 	# incomprehensible with duplicate data.
 	#
-	${DBSCRIPTDIR}/start_db.sh -p "-c port=${DBPORT}"
-	${DBSCRIPTDIR}/clear-time-statistics.sh ${DBPORT} || exit 1
+#	${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db -p "-c port=${DBPORT}"
+	${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db
+	#${DBSCRIPTDIR}/dbt3-${DATABASE}-time-statistics -c -l ${DBPORT} || exit 1
+	${DBSCRIPTDIR}/dbt3-${DATABASE}-time-statistics -c || exit 1
 fi
 
 i=1
@@ -199,13 +205,13 @@ do
 	# Start time of a Power and Throughput test.
 	#
 	s_time=`$GTIME`
-	${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} -n "PERF${i}" || exit 1
+	${DBSCRIPTDIR}/dbt3-${DATABASE}-time-statistics -s -l ${DBPORT} -n "PERF${i}" || exit 1
 
 	if [ ${RUN_POWER_TEST} -eq 1 ]; then
 		#
 		# Power Test
 		#
-		${DBSCRIPTDIR}/power_test.sh \
+		${DBSCRIPTDIR}/dbt3-${DATABASE}-power-test \
 				-f ${SCALE_FACTOR} \
 				-o ${OUTPUT_DIR}/power${i} \
 				-p "${POWER_PARAMETERS}" ${TEST_ARGS} \
@@ -221,8 +227,8 @@ do
 	#
 	# Throughput Test
 	#
-		${DBSCRIPTDIR}/throughput_test.sh \
-				-l ${DBPORT} \
+#				-l ${DBPORT} \
+		${DBSCRIPTDIR}/dbt3-${DATABASE}-throughput-test \
 				-n ${STREAMS} \
 				-f ${SCALE_FACTOR} \
 				-o ${OUTPUT_DIR}/throughput${i} \
@@ -239,12 +245,12 @@ do
 	# The database should be shut down after the last test, so start it back
 	# up so we can update and retrieve test information in the database.
 	#
-	${DBSCRIPTDIR}/start_db.sh -p "-c port=${DBPORT}"
+	${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db -p "-c port=${DBPORT}"
 
 	#
 	# End time of a Power and Throughput test.
 	#
-	$DBSCRIPTDIR/record_end.sh -l ${DBPORT} -n "PERF${i}" || exit 1
+	$DBSCRIPTDIR/dbt3-${DATABASE}-time-statistics -e -l ${DBPORT} -n "PERF${i}" || exit 1
 	e_time=`$GTIME`
 	diff_time=`expr $e_time - $s_time`
 	echo "Elapsed time for performance test ${i} : $diff_time seconds"
@@ -255,38 +261,46 @@ do
 	i=`expr $i + 1`
 done
 
+# -------------------------------------------
+# Post-processing
+# -------------------------------------------
 # Get system details.
-$SCRIPTDIR/get_config.sh $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$POWER_PARAMETERS" "$THROUGHPUT_PARAMETERS" $OUTPUT_DIR || exit 1
+echo -n "Getting system configuration..."
+$SCRIPTDIR/dbt3-get-config $SCALE_FACTOR $STREAMS "$LOAD_PARAMETERS" "$POWER_PARAMETERS" "$THROUGHPUT_PARAMETERS" $OUTPUT_DIR || exit 1
+echo "done."
 
 # Get query times.
-${DBSCRIPTDIR}/q_time.sh -l ${DBPORT} > ${OUTPUT_DIR}/q_time.out || exit 1
+echo -n "Getting query times..."
+${DBSCRIPTDIR}/dbt3-${DATABASE}-get-query-time > ${OUTPUT_DIR}/q_time.out || exit 1
+echo "done."
 
+echo -n "Generating a report..."
 #
 # Calculate composite score.      
 #
 if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
-	$SRCDIR/scripts/get_composite.sh \
-			-i ${OUTPUT_DIR}/q_time.out \
-			-p 1 \
-			-s ${SCALE_FACTOR} \
-			-n ${STREAMS} \
-			-o ${OUTPUT_DIR}/calc_composite.out \
-			${NO_REFRESH_FLAG} \
-			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
-	${DBSCRIPTDIR}/graph_query_time.pl \
-			--if $OUTPUT_DIR/q_time.out ${NO_REFRESH_FLAG} \
-			${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
+    $SRCDIR/scripts/dbt3-post-process \
+	-i ${OUTPUT_DIR}/q_time.out \
+	-p 1 \
+	-s ${SCALE_FACTOR} \
+	-n ${STREAMS} \
+	-o ${OUTPUT_DIR}/calc_composite.out \
+	${NO_REFRESH_FLAG} \
+	${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
 fi
-$SRCDIR/scripts/gen_html.sh $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
+$SRCDIR/scripts/dbt3-gen-report $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
+echo "done."
 
 #
 # Stop the database at the end of the test.
 #
-$DBSCRIPTDIR/stop_db.sh
+$DBSCRIPTDIR/dbt3-${DATABASE}-stop-db
 
 RUN_NUMBER=`expr $RUN_NUMBER + 1`
 echo $RUN_NUMBER > run_number
 
 echo "Results are in $OUTPUT_DIR"
+
+killall db_stats.sh
 
 exit 0

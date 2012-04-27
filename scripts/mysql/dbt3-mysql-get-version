@@ -1,0 +1,8 @@
+#!/bin/bash
+
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
+mysql --defaults-file=${DEFAULTS_FILE} -s -e "show global variables like 'version'" | awk '{print $2}' || exit 1
+
+exit 0
