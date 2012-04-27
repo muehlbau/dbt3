@@ -7,7 +7,10 @@
 #
 # 15 July 2004: Reworked by Mark Wong
 
-SRCDIR=/home/snaga/osdldbt/dbt3
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+SRCDIR=${DBT3_HOME}
 
 clearprof () {
 	sudo /usr/sbin/readprofile -m /boot/System.map-`uname -r` -r

@@ -38,7 +38,7 @@ usage()
 	echo " z - do not run refresh streams"
 }
 
-SRCDIR=/home/snaga/osdldbt/dbt3
+SRCDIR=${DBT3_HOME}
 SCRIPTDIR=$SRCDIR/scripts
 DBSCRIPTDIR=$SRCDIR/scripts/$DATABASE
 export PATH=$PATH:$DBSCRIPTDIR

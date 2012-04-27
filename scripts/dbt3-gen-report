@@ -25,7 +25,7 @@ SF=`grep scale_factor ${RESULT_PATH}/config.txt | awk '{print $2}'`
 STREAMS=`grep num_stream ${RESULT_PATH}/config.txt | awk '{print $2}'`
 
 if [ -d "${RESULT_PATH}/load" ]; then
-	LOAD=`grep LOAD ${RESULT_PATH}/q_time.out | awk '{ print $11 }'`
+	LOAD=`grep LOAD ${RESULT_PATH}/q_time.out | awk -F, '{ print $5 }'`
 	# Round to 2 decimal places, convert to hours.
 	LOAD=`echo "scale=2; ${LOAD} / 3600" | bc -l`
 else

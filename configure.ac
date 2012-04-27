@@ -62,6 +62,8 @@ AC_ARG_WITH(postgresql,
 	[ AC_HELP_STRING([ --with-postgresql=DIR], [])],
 	[ PGSQL_PATH=$withval DATABASE_TO_USE="pgsql" DATABASE_DEF="PGSQL=1"],
 	[])
+AC_SUBST(PGSQL_PATH)
+
 AC_ARG_WITH(mysql,
 	[ AC_HELP_STRING([ --with-mysql=DIR], [Default.])],
 	[ MYSQL_PATH=$withval DATABASE_TO_USE="mysql" DATABASE_DEF="MYSQL=1"],
@@ -168,8 +170,6 @@ if test "$DATABASE_TO_USE" = "mysql"; then
   AC_CONFIG_FILES([scripts/mysql/lockfile.sh])
   AC_CONFIG_FILES([scripts/mysql/get_query_plan.sh],
       [chmod +x scripts/mysql/get_query_plan.sh])
-  AC_CONFIG_FILES([scripts/mysql/get_version.sh],
-      [chmod +x scripts/mysql/get_version.sh])
   AC_CONFIG_FILES([scripts/mysql/run_power_query.sh],
       [chmod +x scripts/mysql/run_power_query.sh])
   AC_CONFIG_FILES([scripts/mysql/run_rf1.sh],
@@ -182,12 +182,6 @@ if test "$DATABASE_TO_USE" = "mysql"; then
       [chmod +x scripts/mysql/db_stats.sh])
   AC_CONFIG_FILES([scripts/mysql/mysql_profile],
       [chmod +x scripts/mysql/mysql_profile])
-  AC_CONFIG_FILES([scripts/mysql/q_time.sh],
-      [chmod +x scripts/mysql/q_time.sh])
-  AC_CONFIG_FILES([scripts/mysql/power_test.sh],
-      [chmod +x scripts/mysql/power_test.sh])
-  AC_CONFIG_FILES([scripts/mysql/throughput_test.sh],
-      [chmod +x scripts/mysql/throughput_test.sh])
   AC_CONFIG_FILES([scripts/mysql/throughput_stream_wrapper.sh],
       [chmod +x scripts/mysql/throughput_stream_wrapper.sh])
 
@@ -254,8 +248,6 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
 
   AC_CONFIG_FILES([scripts/pgsql/get_query_plan.sh],
       [chmod +x scripts/pgsql/get_query_plan.sh])
-  AC_CONFIG_FILES([scripts/pgsql/get_version.sh],
-      [chmod +x scripts/pgsql/get_version.sh])
   AC_CONFIG_FILES([scripts/pgsql/run_power_query.sh],
       [chmod +x scripts/pgsql/run_power_query.sh])
   AC_CONFIG_FILES([scripts/pgsql/run_rf1.sh],
@@ -268,12 +260,6 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
       [chmod +x scripts/pgsql/db_stats.sh])
   AC_CONFIG_FILES([scripts/pgsql/pgsql_profile],
       [chmod +x scripts/pgsql/pgsql_profile])
-  AC_CONFIG_FILES([scripts/pgsql/q_time.sh],
-      [chmod +x scripts/pgsql/q_time.sh])
-  AC_CONFIG_FILES([scripts/pgsql/power_test.sh],
-      [chmod +x scripts/pgsql/power_test.sh])
-  AC_CONFIG_FILES([scripts/pgsql/throughput_test.sh],
-      [chmod +x scripts/pgsql/throughput_test.sh])
   AC_CONFIG_FILES([scripts/pgsql/throughput_stream_wrapper.sh],
       [chmod +x scripts/pgsql/throughput_stream_wrapper.sh])
 elif test "$DATABASE_TO_USE" = "sapdb"; then
@@ -340,11 +326,6 @@ fi
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([doc/Makefile])
 AC_CONFIG_FILES([scripts/dbt3_profile])
-AC_CONFIG_FILES([scripts/get_composite.sh], [chmod +x scripts/get_composite.sh])
-AC_CONFIG_FILES([scripts/get_config.sh], [chmod +x scripts/get_config.sh])
-AC_CONFIG_FILES([scripts/gen_data.sh], [chmod +x scripts/gen_data.sh])
-AC_CONFIG_FILES([scripts/gen_html.sh], [chmod +x scripts/gen_html.sh])
-AC_CONFIG_FILES([scripts/run_workload.sh], [chmod +x scripts/run_workload.sh])
 AC_CONFIG_FILES([src/Makefile])
 AC_CONFIG_FILES([src/dbgen/Makefile])
 

@@ -30,5 +30,5 @@ done
 
 
 mysql --defaults-file=${DEFAULTS_FILE} --skip-column-names -D $SID -e "${SQL}" $ARGS \
-  | grep PERF | sed -e 's/\t/,/g;'
+  | grep -e PERF -e LOAD | sed -e 's/\t/,/g;'
 

@@ -14,7 +14,11 @@
 #                     complete, we only want to wait for the processes that
 #                     are executing the queries.
 
-SRCDIR=/home/snaga/osdldbt/dbt3
+
+DIR=`dirname $0`
+. ${DIR}/pgsql_profile || exit 1
+
+SRCDIR=${DBT3_HOME}
 
 USE_OPROFILE=0
 

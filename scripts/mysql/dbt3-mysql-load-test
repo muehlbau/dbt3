@@ -11,7 +11,7 @@
 DIR=`dirname $0`
 . ${DIR}/mysql_profile || exit 1
 
-SRCDIR=/home/snaga/osdldbt/dbt3
+SRCDIR=${DBT3_HOME}
 
 DBSCRIPTDIR=$SRCDIR/scripts/mysql
 

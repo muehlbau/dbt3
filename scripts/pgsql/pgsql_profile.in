@@ -8,8 +8,10 @@
 #
 
 export DBT3_DIR=${HOME}/local/dbt3
+export PGHOME=@PGSQL_PATH@
 
 export SID=dbt3
+export DBNAME=${SID}
 export PGDATA=${DBT3_DIR}/pgdata
 export DBPORT=5432
 
@@ -18,4 +20,7 @@ export DEFAULT_POWER_PARAMETERS=""
 export DEFAULT_THROUGHPUT_PARAMETERS=""
 
 # Directory with tablespace mount points, if using tablespaces.
-TSDIR=${DBT3_DIR}
+export TSDIR=${DBT3_DIR}
+
+export PATH=${PATH}:${PGHOME}/bin
+

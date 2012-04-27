@@ -14,9 +14,12 @@
 #                     complete, we only want to wait for the processes that
 #                     are executing the queries.
 
+DIR=`dirname $0`
+. ${DIR}/mysql_profile || exit 1
+
 echo "Starting a throughput test..."
 
-SRCDIR=/home/snaga/osdldbt/dbt3
+SRCDIR=${DBT3_HOME}
 
 USE_OPROFILE=0
 
