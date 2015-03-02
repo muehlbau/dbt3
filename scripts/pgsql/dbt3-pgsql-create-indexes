@@ -145,46 +145,6 @@ if [ ${USE_TABLESPACES} -eq 1 ];then
 fi
 
 ${PSQL} "
-ALTER TABLE supplier
-ADD CONSTRAINT pk_supplier PRIMARY KEY (s_suppkey) ${TS_PK_SUPPLIER};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE part
-ADD CONSTRAINT pk_part PRIMARY KEY (p_partkey) ${TS_PK_PART};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE partsupp
-ADD CONSTRAINT pk_partsupp PRIMARY KEY (ps_partkey, ps_suppkey) ${TS_PK_PARTSUPP};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE customer
-ADD CONSTRAINT pk_customer PRIMARY KEY (c_custkey) ${TS_PK_CUSTOMER};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE orders
-ADD CONSTRAINT pk_orders PRIMARY KEY (o_orderkey) ${TS_PK_ORDERS};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE lineitem
-ADD CONSTRAINT pk_lineitem PRIMARY KEY (l_orderkey, l_linenumber) ${TS_PK_LINEITEM};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE nation
-ADD CONSTRAINT pk_nation PRIMARY KEY (n_nationkey) ${TS_PK_NATION};
-" || exit 1 &
-
-${PSQL} "
-ALTER TABLE region
-ADD CONSTRAINT pk_region PRIMARY KEY (r_regionkey) ${TS_PK_REGION};
-" || exit 1 &
-
-${PSQL} "
 CREATE INDEX i_l_shipdate
 ON lineitem (l_shipdate) ${TS_I_L_SHIPDATE};
 " || exit 1  &
