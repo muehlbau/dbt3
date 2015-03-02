@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -lt 2 ]; then
         echo "Usage: ./run_dbt3.sh <scale_factor> <num_stream> [seed]"

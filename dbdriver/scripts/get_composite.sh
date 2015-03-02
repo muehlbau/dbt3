@@ -7,7 +7,7 @@
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
 #
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 3 ]; then
         echo "Usage: ./get_composite.sh <perf_run_number> <scale_factor> <num_of_stream>"

@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 if [ $# -ne 3 ]; then
         echo "Usage: ./run_throughput_query.sh <scale_factor> <perf_run_num> <stream_num>"
         exit

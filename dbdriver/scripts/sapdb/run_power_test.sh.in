@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 2 ]; then
         echo "Usage: ./run_power_test.sh <scale_factor> <perf_run_number>"

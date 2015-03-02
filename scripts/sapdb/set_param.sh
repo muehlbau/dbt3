@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 1 ]; then
 	echo "Usage: ./set_param.sh <0/1>"

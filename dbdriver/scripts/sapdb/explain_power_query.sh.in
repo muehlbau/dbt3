@@ -8,7 +8,7 @@
 #
 # History: June-25-2003 Created by Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 if [ $# -lt 2 ]; then
         echo "Usage: $0 <scale_factor> <output_dir>"
         exit

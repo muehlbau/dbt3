@@ -8,7 +8,7 @@
 # Author: Jenny Zhang
 # March 2003
 
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -lt 3 ]; then
         echo "usage: $0.sh <scale_factor> <number of stream> <output_dir>"

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 4 ]; then
 	echo "usage: db_stats.sh <database_name> <output_dir> <iterations> <sleep>"

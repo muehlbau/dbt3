@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 3 ]; then
         echo "Usage: ./run_refresh_stream.sh <scale_factor> <stream_num> <perf_run_number>" 

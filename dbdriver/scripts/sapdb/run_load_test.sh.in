@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -lt 1 ]; then
         echo "Usage: ./run_load_test.sh <scale_factor>"

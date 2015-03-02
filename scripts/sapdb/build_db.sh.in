@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #this script is used to build the database
 # ./build_db.sh -g <scale_factor> will generate data and build the database
 # ./build_db.sh will load the database from previously generated data files

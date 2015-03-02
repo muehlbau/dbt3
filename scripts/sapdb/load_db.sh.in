@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 date
 repmcli -u $DBUSER,$DBUSER -d $SID -b @TOPDIR@/scripts/sapdb/supplier.sql
 date

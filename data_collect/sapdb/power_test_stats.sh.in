@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # power_test_stats.sh: run power test and collect database and system statistics
 #

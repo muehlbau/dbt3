@@ -7,7 +7,7 @@
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
 #
-#!/bin/sh
+#!/bin/bash
 #convert string time to number of seconds
 #if DATE_TIME_FORMAT is set to internal, timediff() returns a value in 
 # hhhhmmss. This is strange, but I have to convert it to seconds

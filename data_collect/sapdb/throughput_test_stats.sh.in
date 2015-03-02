@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # throughput_test_stats.sh: run throuput test and collect database and system 
 # statistics

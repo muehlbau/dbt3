@@ -8,7 +8,7 @@
 #
 # History: June-16-2003 Created by Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 if [ $# -lt 3 ]; then
         echo "Usage: ./run_single_query.sh <scale_factor> <query_name> <output_dir>"
         exit

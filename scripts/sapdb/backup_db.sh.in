@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #note: if DATA_CACHE is too big, it should be reduced before backup
 #otherwise we get I/O error

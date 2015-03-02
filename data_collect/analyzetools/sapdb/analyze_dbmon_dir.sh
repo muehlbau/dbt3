@@ -8,7 +8,7 @@
 # Author: Jenny Zhang
 # March 2003
 
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 2 ]; then
         echo "Usage: ./analyze_dbmon_dir.sh <output_dir> <interval>"

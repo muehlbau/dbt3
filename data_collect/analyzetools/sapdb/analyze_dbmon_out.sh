@@ -8,7 +8,7 @@
 # Author: Jenny Zhang
 # March 2003
 
-#/bin/sh
+#/bin/bash
 
 #This script goes to the result direcotry, find the number of files having
 #the file name [name*], calculate diff, and operations/sec

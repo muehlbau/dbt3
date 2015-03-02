@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 # June-26-2003 use @TOPDIR@ instead of DBT3_INSTALL_PATH by Jenny Zhang
-#!/bin/sh
+#!/bin/bash
 if [ $# -ne 3 ]; then
         echo "Usage: ./run_single_query.sh <scale_factor> <query_name> <output_dir>"
         exit

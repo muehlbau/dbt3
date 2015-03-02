@@ -8,7 +8,7 @@
 # Author: Jenny Zhang
 # March 2003
 
-#!/bin/sh
+#!/bin/bash
 #!/usr/bin/perl -w
 
 use strict;

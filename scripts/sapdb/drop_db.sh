@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 dbmcli -s -d $SID -u dbm,dbm db_stop
 dbmcli -s -d $SID -u dbm,dbm db_offline

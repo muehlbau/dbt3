@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # query_stats.sh: run specified query and collect database and system statistics
 #

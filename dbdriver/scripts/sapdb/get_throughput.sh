@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 3 ]; then
         echo "Usage: ./$0 <perf_run_number> <scale_factor> <num_stream>"

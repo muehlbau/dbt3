@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "define backup medium"
 _o=`cat <<EOF | dbmcli -d $SID -u dbm,dbm 2>&1

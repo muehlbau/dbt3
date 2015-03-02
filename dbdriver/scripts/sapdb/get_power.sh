@@ -7,7 +7,7 @@
 # Copyright (C) 2003 Open Source Development Lab, Inc.
 #
 # Author: Jenny Zhang
-#!/bin/sh
+#!/bin/bash
 
 if [ $# -ne 2 ]; then
         echo "Usage: ./get_power.sh <perf_run_number> <scale_factor>"

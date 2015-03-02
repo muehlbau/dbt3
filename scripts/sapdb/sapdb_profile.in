@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # set_run_env.sh.in: set dbt3 run environment variables for SAPDB
 #
 # This file is released under the terms of the Artistic License.  Please see

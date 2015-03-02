@@ -8,7 +8,7 @@
 #
 # Author: Jenny Zhang
 #
-#!/bin/sh
+#!/bin/bash
 
 GTIME="@TOPDIR@/dbdriver/utils/gtime"
 curr_set_file_rf1="@TOPDIR@/run/curr_set_num_rf1"

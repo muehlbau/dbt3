@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 #if [ $# -ne 2 ]; then
 #        echo "Usage: ./plot_runs.sh <output_dir> <interval>"
