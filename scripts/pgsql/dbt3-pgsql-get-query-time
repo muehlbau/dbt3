@@ -30,4 +30,4 @@ while getopts "hl:o:" opt; do
 done
 
 
-psql -A -F, -t -p ${DBPORT} -d ${SID} -q -c "${SQL}" ${ARGS}
+psql -h ${HOSTNAME} -A -F, -t -p ${DBPORT} -d ${SID} -q -c "${SQL}" ${ARGS}

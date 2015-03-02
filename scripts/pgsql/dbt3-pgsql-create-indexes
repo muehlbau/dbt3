@@ -31,7 +31,7 @@ if [ -z ${DBNAME} ]; then
 	exit 1
 fi
 
-PSQL="psql -p ${DBPORT} -e -d $SID -c"
+PSQL="psql -h ${HOSTNAME} -p ${DBPORT} -e -d $SID -c"
 
 if [ ${USE_TABLESPACES} -eq 1 ];then
 	TS_PK_SUPPLIER_DIR="${TSDIR}/pk_supplier/ts"

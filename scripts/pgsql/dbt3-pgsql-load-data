@@ -17,7 +17,7 @@ load_table() {
 	file=${table}.tbl
 
 	local sql="COPY ${table} FROM '${DBDATA}/${file}' USING DELIMITERS '|';"
-	local cmd="psql -p ${DBPORT} -e -d ${SID} -1 -c "
+	local cmd="psql -h ${HOSTNAME} -p ${DBPORT} -e -d ${SID} -1 -c "
 	if [ x${BACKGROUND} == xyes ]; then
 		echo "Loading ${table} table in the background..."
 		${cmd} "${sql}" || exit 1 &
@@ -53,7 +53,7 @@ done
 if [ ! "x${PORT}" = "x" ]; then
 	PORTARG="-p ${PORT}"
 fi
-PSQL="psql -p ${DBPORT} -e -d ${SID} -c"
+PSQL="psql -h ${HOSTNAME} -p ${DBPORT} -e -d ${SID} -c"
 
 load_table supplier
 load_table part

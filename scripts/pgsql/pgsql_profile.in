@@ -11,6 +11,7 @@ export DBT3_DIR=${HOME}/local/dbt3
 export PGHOME=@PGSQL_PATH@
 
 export SID=dbt3
+export HOSTNAME=/var/run/postgresql
 export DBNAME=${SID}
 export PGDATA=${DBT3_DIR}/pgdata
 export DBPORT=5432
