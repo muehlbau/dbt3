@@ -44,6 +44,6 @@ ${PARSE_QUERY} $query_file $tmp_query_file E
 # Run the queries and save the output.
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
-@PSQL@ -p ${DBPORT} $SID -f $tmp_query_file -a >> $output_file 2>&1 || exit 1
+@PSQL@ -h ${HOSTNAME} -p ${DBPORT} $SID -f $tmp_query_file -a >> $output_file 2>&1 || exit 1
 
 exit 0

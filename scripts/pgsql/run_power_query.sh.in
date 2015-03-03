@@ -21,7 +21,7 @@ RUNDIR=$5
 SEED_FILE=$6
 DBPORT=$7
 
-PSQL="@PSQL@ -p ${DBPORT} -d $SID"
+PSQL="@PSQL@ -h ${HOSTNAME} -p ${DBPORT} -d $SID"
 
 query_file="$RUNDIR/power_query"
 tmp_query_file="$RUNDIR/tmp_query.sql"

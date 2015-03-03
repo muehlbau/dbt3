@@ -18,7 +18,7 @@ scale_factor=$1
 RUNDIR=$2
 DBPORT=$3
 
-PSQL="@PSQL@ -p ${DBPORT} -d ${SID}"
+PSQL="@PSQL@ -h ${HOSTNAME} -p ${DBPORT} -d ${SID}"
 
 curr_set_file_rf1="$RUNDIR/curr_set_num_rf1"
 lock_file_rf1="$RUNDIR/rf1.lock"

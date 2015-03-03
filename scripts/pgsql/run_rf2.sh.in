@@ -12,7 +12,7 @@ SRCDIR=@TOPDIR@
 RUNDIR=$1
 DBPORT=$2
 
-PSQL="@PSQL@ -p ${DBPORT} -d ${SID}"
+PSQL="@PSQL@ -h ${HOSTNAME} -p ${DBPORT} -d ${SID}"
 
 curr_set_file_rf1="$RUNDIR/curr_set_num_rf1"
 curr_set_file_rf2="$RUNDIR/curr_set_num_rf2"

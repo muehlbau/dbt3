@@ -74,7 +74,7 @@ ${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
 		-n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
 # You can't use -a and have the query redirected to a file with -o, so use -a
 # and redirect.
-@PSQL@ -p ${DBPORT} -d ${SID} -f ${tmp_query_file} \
+@PSQL@ -h ${HOSTNAME} -p ${DBPORT} -d ${SID} -f ${tmp_query_file} \
 		-a >> ${OUTPUT_DIR}/results/thruput_qs${stream_num}.result 2>&1 || exit 1
 ${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
 		-n "PERF${perf_run_num}.THRUPUT.QS${stream_num}.ALL" || exit 1
