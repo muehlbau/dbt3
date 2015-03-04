@@ -3,20 +3,19 @@
 -- Functional Query Definition
 -- Approved February 1998
 :b
-create view revenue:s (supplier_no, total_revenue) as
-	select
-		l_suppkey,
-		sum(l_extendedprice * (1 - l_discount))
-	from
-		lineitem
-	where
-		l_shipdate >= ':1'
-		and l_shipdate < date':1' + interval '90 days'
-	group by
-		l_suppkey;
-
 :x
 :o
+with revenue:s (supplier_no, total_revenue) as (
+        select
+                l_suppkey,
+                sum(l_extendedprice * (1 - l_discount))
+        from
+                lineitem
+        where
+                l_shipdate >= ':1'
+                and l_shipdate < date':1' + interval '90' day
+        group by
+                l_suppkey)
 select
 	s_suppkey,
 	s_name,
