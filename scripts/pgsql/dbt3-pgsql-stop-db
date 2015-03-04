@@ -24,7 +24,7 @@ if [ -f "${PGDATA}/postmaster.pid" ]; then
 	# becasue large amount of shared buffers and
 	# long checkpoint timeout take longer time to
 	# complete a checkpoint and shutdown.
-	pg_ctl -D ${PGDATA} -t 600 stop ${1}
+	# pg_ctl -D ${PGDATA} -t 600 stop ${1}
 
 	sleep 1
 fi
