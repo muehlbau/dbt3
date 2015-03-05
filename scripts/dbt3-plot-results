@@ -261,7 +261,7 @@ set xrange [0:25]
 set ylabel \"Query Time in Seconds\"
 set ytics
 
-set term png nocrop
+set term png nocrop size 800,600 font arial 10
 set output \"q_time.png\"
 ";
 
