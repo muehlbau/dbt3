@@ -51,7 +51,7 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 	# Start the refresh stream.  The throughput tests runs a streams
 	# consecutively per throughput streams, also consecutively.
 	stream_num=1
-	while [ $stream_num -le $num_stream ]
+	while [ $stream_num -le $[$num_stream+1] ]
 	do
 		${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
 				-n "PERF${TAG}.THRUPUT.RFST${stream_num}"

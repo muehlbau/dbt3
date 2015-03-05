@@ -48,27 +48,28 @@ fi
 echo $set_num > $curr_set_file_rf2
 rm -f $lock_file_rf2
 
-echo "`date`: Stream ${set_num} : Starting Refresh Stream 2..."
-s_time=`$GTIME`
-
 # generate load .sql
 echo "COPY tmp_orderkey$set_num FROM '/tmp/delete.$set_num' USING DELIMITERS '|';" >> tmp_orderkey$set_num.sql
 
-${PSQL} -c "create table tmp_orderkey$set_num (orderkey numeric(10));"
+echo "`date`: Stream ${set_num} : Starting Refresh Stream 2..."
+s_time=`$GTIME`
 
-${PSQL} -f tmp_orderkey$set_num.sql
+${PSQL} -c "create table tmp_orderkey$set_num (orderkey numeric(10));" || exit 1
 
-${PSQL} -c "delete from lineitem where l_orderkey=tmp_orderkey$set_num.orderkey;"
+${PSQL} -f tmp_orderkey$set_num.sql || exit 1
 
-${PSQL} -c "delete from orders where o_orderkey=tmp_orderkey$set_num.orderkey;"
+${PSQL} -c "delete from lineitem using tmp_orderkey$set_num where l_orderkey=tmp_orderkey$set_num.orderkey;" || exit 1
+
+${PSQL} -c "delete from orders using tmp_orderkey$set_num where o_orderkey=tmp_orderkey$set_num.orderkey;" || exit 1
 
 # clean up
-${PSQL} -c "drop table tmp_orderkey$set_num;"
-rm -f tmp_orderkey$set_num.sql
+${PSQL} -c "drop table tmp_orderkey$set_num;" || exit 1
 
 e_time=`$GTIME`
 echo "`date`: Stream ${set_num} : Refresh Stream 2 completed."
 let "diff_time=$e_time-$s_time"
 echo "Stream ${set_num} : Elapsed time for Refresh Stream 2 : $diff_time seconds"
+
+rm -f tmp_orderkey$set_num.sql
 
 exit 0
