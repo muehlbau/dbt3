@@ -25,3 +25,6 @@ export TSDIR=${DBT3_DIR}
 
 export PATH=${PATH}:${PGHOME}/bin
 
+# Use secondary indexes
+export USE_SECONDARY_INDEXES=1
+
