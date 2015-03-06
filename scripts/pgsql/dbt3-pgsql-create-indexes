@@ -219,9 +219,9 @@ then
 	CREATE INDEX i_l_commitdate
 	ON lineitem (l_commitdate) ${TS_I_L_COMMITDATE};
 	" || exit 1 &
-fi
 
-wait ${!}
+	wait
+fi
 
 echo "Updating optimizer statistics..."
 
