@@ -59,7 +59,7 @@ echo "Database statistics taken at $SAMPLE_LENGTH second intervals, $ITERATIONS 
 # ${PSQL} -c "SHOW ALL"  > $OUTPUT_DIR/param.out
 
 # record indexes
-# ${PSQL} -c "SELECT * FROM pg_stat_user_indexes;" -o $DBOUTPUT_DIR/indexes.out
+${PSQL} -c "SELECT * FROM pg_stat_user_indexes;" -o $DBOUTPUT_DIR/indexes.out
 
 # Clear files if they already exist.
 echo "" > ${OUTPUT_DIR}/ipcs.out
@@ -77,12 +77,12 @@ while [ 1 ]; do
 	# ${PSQL} -c "${LOCK_STATS}" >> ${DBOUTPUT_DIR}/lockstats.out
 
 	# table info
-	# ${PSQL} -t -c "${TABLE_INFO}" >> ${DBOUTPUT_DIR}/table_info.out
-	# ${PSQL} -t -c "${INDEX_INFO}" >> ${DBOUTPUT_DIR}/index_info.out
+	${PSQL} -t -c "${TABLE_INFO}" >> ${DBOUTPUT_DIR}/table_info.out
+	${PSQL} -t -c "${INDEX_INFO}" >> ${DBOUTPUT_DIR}/index_info.out
 
 	# scans 
-	# ${PSQL} -t -c "${TABLE_SCAN}" >> ${DBOUTPUT_DIR}/table_scan.out
-	# ${PSQL} -t -c "${INDEX_SCAN}" >> ${DBOUTPUT_DIR}/index_scan.out
+	${PSQL} -t -c "${TABLE_SCAN}" >> ${DBOUTPUT_DIR}/table_scan.out
+	${PSQL} -t -c "${INDEX_SCAN}" >> ${DBOUTPUT_DIR}/index_scan.out
 
 	sleep ${SAMPLE_LENGTH}
 done
