@@ -9,6 +9,8 @@
 
 SRCDIR=@TOPDIR@
 
+PSQL="@PSQL@ -h ${HOSTNAME} -p ${DBPORT} -e -d ${SID}"
+
 EXPLAIN_ANALYZE=0
 NO_REFRESH=0
 while getopts "ef:l:n:o:s:t:z" opt; do
@@ -53,6 +55,63 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 	stream_num=1
 	while [ $stream_num -le $[$num_stream+1] ]
 	do
+		# Refresh Stream 1
+		SYNCFILEDIR=$RUNDIR/../../sync
+		mkdir -p $SYNCFILEDIR
+
+		curr_set_file_rf1="$SYNCFILEDIR/curr_set_num_rf1"
+		lock_file_rf1="$SYNCFILEDIR/rf1.lock"
+		min_set_file="$SYNCFILEDIR/min_set_num"
+		max_set_file="$SYNCFILEDIR/max_set_num"
+	
+		# if curr_set_file does not exist, we generate 12 update sets
+		# create a semaphore file so that only one process can access
+		# $curr_set_file_rf1 
+		lockfile -s 0 $lock_file_rf1
+		if [ ! -f $curr_set_file_rf1 ];
+		then
+			echo "generating update set 1 - 12"
+			$DBGEN -s $SCALE_FACTOR -U 12
+			set_iter=1
+			while [ $set_iter -le 12 ]
+			do
+				${PSQL} -c "drop table tmp_orderkey$set_iter;"
+				${PSQL} -c "create table tmp_orderkey$set_iter (orderkey numeric(10));" || exit 1
+				set_iter=$[$set_iter+1]
+			done
+			echo "1" > ${min_set_file}
+			echo "12" > ${max_set_file}
+			echo "0" > ${curr_set_file_rf1}
+		fi
+		rm -f $lock_file_rf1
+
+		lockfile -s 0 $lock_file_rf1
+		set_num=`cat $curr_set_file_rf1`
+		min_set=`cat $min_set_file`
+		max_set=`cat $max_set_file`
+
+		let "set_num=$set_num+1"
+		echo $set_num>$curr_set_file_rf1
+
+		# if the current set number is larger than max_set, we need to generate new set
+		if [ $set_num -gt $max_set ]
+		then
+			let "min_set=$min_set+12"
+			let "max_set=$max_set+12"
+			echo "Stream ${set_num} : Generating update set $min_set - $max_set..."
+			$DBGEN -s $SCALE_FACTOR -U $max_set
+			set_iter=$min_set
+			while [ $set_iter -le $max_set ]
+			do
+				${PSQL} -c "drop table tmp_orderkey$set_iter;"
+				${PSQL} -c "create table tmp_orderkey$set_iter (orderkey numeric(10));" || exit 1
+				set_iter=$[$set_iter+1]
+			done
+			echo "$min_set" > ${min_set_file}
+			echo "$max_set" > ${max_set_file}
+		fi
+		rm -f $lock_file_rf1
+
 		${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
 				-n "PERF${TAG}.THRUPUT.RFST${stream_num}"
 
@@ -60,8 +119,8 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 		s_time_rf1=`$GTIME`
 		${DBSCRIPTDIR}/record_start.sh -l ${DBPORT} \
 				-n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
-		${DBSCRIPTDIR}/run_rf1.sh ${scale_factor} ${RUNDIR} \
-				${DBPORT}  > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1 || exit 1
+		${DBSCRIPTDIR}/run_rf1.sh ${set_num} ${HOSTNAME} ${DBPORT} ${SID} \
+				 > $OUTPUT_DIR/results/thruput.perf${TAG}.stream${stream_num}.rf1.result 2>&1 || exit 1
 		${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
 				-n "PERF${TAG}.THRUPUT.RFST${stream_num}.RF1"
 		e_time_rf1=`$GTIME`

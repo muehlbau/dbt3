@@ -57,8 +57,6 @@ TMP_ORDERKEY="COPY tmp_orderkey$set_num FROM '/tmp/delete.$set_num' USING DELIMI
 echo "`date`: Stream ${set_num} : Starting Refresh Stream 2..."
 s_time=`$GTIME`
 
-${PSQL} -c "create table tmp_orderkey$set_num (orderkey numeric(10));" || exit 1
-
 ${PSQL} -c "${TMP_ORDERKEY}" || exit 1
 
 ${PSQL} -c "delete from lineitem using tmp_orderkey$set_num where l_orderkey=tmp_orderkey$set_num.orderkey;" || exit 1
@@ -66,7 +64,7 @@ ${PSQL} -c "delete from lineitem using tmp_orderkey$set_num where l_orderkey=tmp
 ${PSQL} -c "delete from orders using tmp_orderkey$set_num where o_orderkey=tmp_orderkey$set_num.orderkey;" || exit 1
 
 # clean up
-${PSQL} -c "drop table tmp_orderkey$set_num;" || exit 1
+${PSQL} -c "delete from tmp_orderkey$set_num where 1=1;" || exit 1
 
 e_time=`$GTIME`
 echo "`date`: Stream ${set_num} : Refresh Stream 2 completed."

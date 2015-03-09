@@ -12,6 +12,8 @@ DIR=`dirname $0`
 
 SRCDIR=${DBT3_HOME}
 
+PSQL="@PSQL@ -h ${HOSTNAME} -p ${DBPORT} -e -d ${SID}"
+
 clearprof () {
 	sudo /usr/sbin/readprofile -m /boot/System.map-`uname -r` -r
 }
@@ -131,12 +133,68 @@ $DBSCRIPTDIR/record_start.sh -l ${DBPORT} -n "PERF${TAG}.POWER" || exit 1
 
 if [ ${NO_REFRESH} -eq 0 ]; then
 	# Refresh Stream 1
+	SYNCFILEDIR=$RUNDIR/../../sync
+	mkdir -p $SYNCFILEDIR
+
+	curr_set_file_rf1="$SYNCFILEDIR/curr_set_num_rf1"
+	lock_file_rf1="$SYNCFILEDIR/rf1.lock"
+	min_set_file="$SYNCFILEDIR/min_set_num"
+	max_set_file="$SYNCFILEDIR/max_set_num"
+	
+	# if curr_set_file does not exist, we generate 12 update sets
+	# create a semaphore file so that only one process can access
+	# $curr_set_file_rf1 
+	lockfile -s 0 $lock_file_rf1
+	if [ ! -f $curr_set_file_rf1 ];
+	then
+		echo "generating update set 1 - 12"
+		$DBGEN -s $SCALE_FACTOR -U 12 &> /dev/null
+		set_iter=1
+		while [ $set_iter -le 12 ]
+		do
+			${PSQL} -c "drop table tmp_orderkey$set_iter;" &> /dev/null
+			${PSQL} -c "create table tmp_orderkey$set_iter (orderkey numeric(10));" &> /dev/null || exit 1
+			set_iter=$[$set_iter+1]
+		done
+		echo "1" > ${min_set_file}
+		echo "12" > ${max_set_file}
+		echo "0" > ${curr_set_file_rf1}
+	fi
+	rm -f $lock_file_rf1
+
+	lockfile -s 0 $lock_file_rf1
+	set_num=`cat $curr_set_file_rf1`
+	min_set=`cat $min_set_file`
+	max_set=`cat $max_set_file`
+
+	let "set_num=$set_num+1"
+	echo $set_num>$curr_set_file_rf1
+
+	# if the current set number is larger than max_set, we need to generate new set
+	if [ $set_num -gt $max_set ]
+	then
+		let "min_set=$min_set+12"
+		let "max_set=$max_set+12"
+		echo "Stream ${set_num} : Generating update set $min_set - $max_set..."
+		$DBGEN -s $SCALE_FACTOR -U $max_set &> /dev/null
+		set_iter=$min_set
+		while [ $set_iter -le $max_set ]
+		do
+			${PSQL} -c "drop table tmp_orderkey$set_iter;" &> /dev/null
+			${PSQL} -c "create table tmp_orderkey$set_iter (orderkey numeric(10));" &> /dev/null || exit 1
+			set_iter=$[$set_iter+1]
+		done
+		echo "$min_set" > ${min_set_file}
+		echo "$max_set" > ${max_set_file}
+	fi
+	rm -f $lock_file_rf1
+
 	echo "`date`: Power Test : Starting Refresh Stream 1" 
 	s_time=`$GTIME`
 	$DBSCRIPTDIR/record_start.sh -l ${DBPORT} \
 			-n "PERF${TAG}.POWER.RF1" || exit 1
-	${DBSCRIPTDIR}/run_rf1.sh ${SCALE_FACTOR} ${RUNDIR} \
-			${DBPORT} > ${OUTPUT_DIR}/results/power.perf${TAG}.rf1.result 2>&1 || exit 1
+	${DBSCRIPTDIR}/run_rf1.sh ${set_num} ${HOSTNAME} ${DBPORT} ${SID} \
+			> ${OUTPUT_DIR}/results/power.perf${TAG}.rf1.result 2>&1 || exit 1
 	${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} \
 			-n "PERF${TAG}.POWER.RF1" || exit 1
 	e_time=`$GTIME`

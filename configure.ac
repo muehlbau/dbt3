@@ -262,6 +262,8 @@ elif test "$DATABASE_TO_USE" = "pgsql"; then
       [chmod +x scripts/pgsql/pgsql_profile])
   AC_CONFIG_FILES([scripts/pgsql/throughput_stream_wrapper.sh],
       [chmod +x scripts/pgsql/throughput_stream_wrapper.sh])
+  AC_CONFIG_FILES([scripts/pgsql/dbt3-pgsql-power-test],
+      [chmod +x scripts/pgsql/dbt3-pgsql-power-test])
 elif test "$DATABASE_TO_USE" = "sapdb"; then
   AC_DEFINE(SAPDB, 1)
 
