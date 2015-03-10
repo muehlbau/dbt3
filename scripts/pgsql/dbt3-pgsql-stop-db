@@ -15,16 +15,24 @@ if [ -z ${PGDATA} ]; then
 	exit 1
 fi
 
+if [ ${USE_HYPER} -eq 1 ]; then
+	PG_CTL=hyper_ctl
+	PIDFILE=${PGDATA}/hyperd.pid
+else
+	PG_CTL=pg_ctl
+	PIDFILE=${PGDATA}/postmaster.pid
+fi
+
 # We only need to stop the database if it's running.
-if [ -f "${PGDATA}/postmaster.pid" ]; then
-#	killall ${PG_AUTOVACUUM} > /dev/null 2>&1
+if [ -f "${PIDFILE}" ]; then
+	killall ${PG_AUTOVACUUM} > /dev/null 2>&1
 	sleep 1
 
 	# Wait 10 minutes until the stop timeout exceeds,
 	# becasue large amount of shared buffers and
 	# long checkpoint timeout take longer time to
 	# complete a checkpoint and shutdown.
-	# pg_ctl -D ${PGDATA} -t 600 stop ${1}
+	${PG_CTL} -D ${PGDATA} -t 600 stop ${1}
 
 	sleep 1
 fi

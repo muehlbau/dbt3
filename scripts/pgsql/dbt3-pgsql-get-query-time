@@ -29,5 +29,4 @@ while getopts "hl:o:" opt; do
 	esac
 done
 
-
 psql -h ${HOSTNAME} -A -F, -t -p ${DBPORT} -d ${SID} -q -c "${SQL}" ${ARGS}

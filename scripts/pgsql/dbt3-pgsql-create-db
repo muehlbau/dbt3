@@ -28,6 +28,12 @@ if [ -z ${DBNAME} ]; then
     exit 1
 fi
 
+if [ ${USE_HYPER} -eq 1 ]; then
+	INITDB=hyper_initdb
+else
+	INITDB=initdb
+fi
+
 XLOGPATH=""
 OUTPUT_DIR="."
 while getopts "l:o:p:x:" OPT; do
@@ -56,7 +62,8 @@ if [ -d ${PGDATA} ]; then
 else
 	# initialize database cluster
 	echo "initializing database cluster..."
-	initdb -D ${PGDATA} --locale=C || exit 1
+        mkdir -p ${PGDATA}
+	${INITDB} -D ${PGDATA} --locale=C || exit 1
 
 	# Use alternative XLOG directory.
 	if [ ! "x${XLOGPATH}" = "x" ]; then
@@ -80,7 +87,6 @@ if [ ! "x${PORT}" = "x" ]; then
     PORTOPT="-p ${PORT}"
 fi
 
-createdb ${PORTOPT} ${DBNAME} || exit 1
-#createlang ${PORTOPT} plpgsql ${DBNAME}
+createdb -h ${HOSTNAME} ${PORTOPT} ${DBNAME} || exit 1
 
 exit 0

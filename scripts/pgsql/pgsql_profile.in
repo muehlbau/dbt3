@@ -28,3 +28,6 @@ export PATH=${PATH}:${PGHOME}/bin
 # Use secondary indexes
 export USE_SECONDARY_INDEXES=1
 
+# Use HyPer
+export USE_HYPER=1
+
