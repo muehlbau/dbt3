@@ -4,7 +4,6 @@
 
 1) Install PostgreSQL 9.4: sudo apt-get install postgresql-9.4
 2) Export /usr/lib/postgresql/9.4/bin in your PATH (e.g., export PATH=$PATH:/usr/lib/postgresql/9.4/bin)
-3) Grant the dbt-3 user rw access to /var/run/postgresql
 
 # Steps
 
@@ -13,8 +12,8 @@
 3) make
 4) Generate TPC-H data (argument is scale factor)
    scripts/gen_data.sh 1
-5) Stop postgres server (dbt-3 starts/stops the server on demand)
-   sudo service postgresql stop
-6) Run dbt-3
+5) Run dbt-3
    scripts/dbt3-run-workload
+
+# For steps with HyPer, please consult the README.md
 
