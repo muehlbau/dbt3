@@ -48,7 +48,11 @@ sub average()
     $total += $data[ $i ];
   }
 
-  return $total / $count;
+  if ($count) {
+    return $total / $count;
+  } else {
+    return 0;
+  }
 }
 
 if ($flag_power_test)
