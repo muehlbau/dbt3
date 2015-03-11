@@ -38,13 +38,15 @@ make
 ```sh
 USE_HYPER=1
 ```
-If you  want to benchmark PostgreSQL, leave USE_HYPER at 0
+If you  want to benchmark PostgreSQL, leave USE_HYPER at 0. Clear the PG_DATA directory if you switch between PostgreSQL and HyPer.
 * Generate TPC-H data (argument is scale factor), e.g., for scale factor 1:
 ```sh
 scripts/gen_data.sh 1
 ```
-* Run benchmark
-scripts/dbt3-run-workload
+* Run benchmark (-f is the scale factor argument), e.g., for scale factor 1:
+```sh
+scripts/dbt3-run-workload -f 1
+```
 
 ### Troubleshooting
 
