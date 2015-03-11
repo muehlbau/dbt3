@@ -25,9 +25,11 @@ export TSDIR=${DBT3_DIR}
 
 export PATH=${PATH}:${PGHOME}/bin
 
-# Use secondary indexes (for HyPer, secondary indexes can be disabled)
-export USE_SECONDARY_INDEXES=1
-
 # Use HyPer
 export USE_HYPER=0
+
+# Use secondary indexes
+# For HyPer, secondary indexes are disabled by default and can be enabled by
+# explicitly setting USE_SECONDARY_INDEXES to 1
+export USE_SECONDARY_INDEXES=$[1-${USE_HYPER}]
 
