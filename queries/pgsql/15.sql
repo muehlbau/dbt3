@@ -13,7 +13,7 @@ with revenue:s (supplier_no, total_revenue) as (
                 lineitem
         where
                 l_shipdate >= ':1'
-                and l_shipdate < date':1' + interval '90' day
+                and l_shipdate < date':1' + interval '90 days'
         group by
                 l_suppkey)
 select
