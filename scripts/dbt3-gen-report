@@ -130,7 +130,7 @@ gen_results()
 
 	${SRCDIR}/scripts/vmplot.sh -i ${SUBDIR}/vmstat.out -o ${SUBDIR}/plots \
 			-x "Minutes" > /dev/null 2>&1
-	${DBDIR}/analyze_stats.pl --dir `pwd`/${SUBDIR}/db
+	${DBDIR}/analyze_stats.pl --dir `pwd`/${SUBDIR}/db 2&> /dev/null
 }
 
 echo "<html>"
