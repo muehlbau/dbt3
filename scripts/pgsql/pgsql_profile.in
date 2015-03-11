@@ -11,10 +11,10 @@ export DBT3_DIR=${HOME}/local/dbt3
 export PGHOME=@PGSQL_PATH@
 
 export SID=dbt3
-export HOSTNAME=/var/run/postgresql
 export DBNAME=${SID}
 export PGDATA=${DBT3_DIR}/pgdata
-export DBPORT=5432
+export HOSTNAME=${PGDATA}
+export DBPORT=7483
 
 export DEFAULT_LOAD_PARAMETERS=""
 export DEFAULT_POWER_PARAMETERS=""
@@ -25,9 +25,9 @@ export TSDIR=${DBT3_DIR}
 
 export PATH=${PATH}:${PGHOME}/bin
 
-# Use secondary indexes
+# Use secondary indexes (for HyPer, secondary indexes can be disabled)
 export USE_SECONDARY_INDEXES=1
 
 # Use HyPer
-export USE_HYPER=1
+export USE_HYPER=0
 

@@ -50,14 +50,14 @@ fi
 
 sleep 1
 
-if [ "x${PGPORT}" != "x" ]; then
-	PARAMETERS="${PARAMETERS} -p ${PGPORT}"
+if [ "x${DBPORT}" != "x" ]; then
+	PARAMETERS="${PARAMETERS} -p ${DBPORT}"
 fi
 
 if [ "x${PARAMETERS}" = "x" ]; then
         ${PG_CTL} -D ${PGDATA} -l ${OUTDIR}/${LOGFILE} start
 else
-	${PG_CTL} -D ${PGDATA} -o "${PARAMETERS}" -l ${OUTDIR}/${LOGFILE} start
+	${PG_CTL} -D ${PGDATA} -o "${PARAMETERS} -c unix_socket_directories=\"${PGDATA}\"" -l ${OUTDIR}/${LOGFILE} start
 fi
 
 sleep 10
