@@ -283,6 +283,8 @@ fi
 $SRCDIR/scripts/dbt3-gen-report $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
 echo "done."
 
+killall db_stats.sh
+
 #
 # Stop the database at the end of the test.
 #
@@ -293,6 +295,5 @@ echo $RUN_NUMBER > run_number
 
 echo "Results are in $OUTPUT_DIR"
 
-killall db_stats.sh
 
 exit 0
