@@ -53,8 +53,6 @@ while getopts "l:o:p:x:" OPT; do
 	esac
 done
 
-dbt3-pgsql-stop-db
-
 # Create database
 echo "Creating database..."
 if [ -d ${PGDATA} ]; then
@@ -72,16 +70,17 @@ else
 	    mv ${PGDATA}/pg_xlog ${XLOGPATH}/pg_xlog || exit 1;
 	    ln -s ${XLOGPATH}/pg_xlog ${PGDATA}/pg_xlog || exit 1;
 	fi
+	
+	# Starting the database after initdb
+	dbt3-pgsql-start-db ${PARAMOPT} || exit 1
+
+	# Give the database a few seconds to get started.
+	sleep 4
 fi
 
 if [ ! "x${PARAMETERS}" = "x" ]; then
     PARAMOPT="-p ${PARAMETERS}"
 fi
-
-dbt3-pgsql-start-db ${PARAMOPT} || exit 1
-
-# Give the database a few seconds to get started.
-sleep 4
 
 if [ ! "x${PORT}" = "x" ]; then
     PORTOPT="-p ${PORT}"

@@ -3,6 +3,6 @@
 DIR=`dirname $0`
 . ${DIR}/pgsql_profile || exit 1
 
-psql -h ${HOSTNAME} -p ${DBPORT} -c "select version()" | head -n 3 | tail -n 1 || exit 1
+psql -h ${HOSTNAME} -p ${DBPORT} -d ${SID} -c "select version()" | head -n 3 | tail -n 1 || exit 1
 
 exit 0

@@ -33,7 +33,7 @@ while getopts "cel:n:s" opt; do
 	esac
 done
 
-PSQL="psql -h ${HOSTNAME} -q -p ${DBPORT} -d $SID"
+PSQL="psql -h ${HOSTNAME} -q -p ${DBPORT} -d ${SID}"
 
 if [ $cmd_clear == 1 ]; then
     SQL="DELETE FROM time_statistics"

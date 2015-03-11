@@ -104,9 +104,6 @@ if [ $USE_OPROFILE -eq 1 ]; then
 	clearoprof
 fi
 
-$DBSCRIPTDIR/dbt3-pgsql-stop-db || exit 1
-$DBSCRIPTDIR/dbt3-pgsql-start-db -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
-
 s_time=`$GTIME`
 $DBSCRIPTDIR/record_start.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
 
@@ -128,9 +125,6 @@ ${DBSCRIPTDIR}/record_end.sh -l ${DBPORT} -n "PERF${TAG}.THRUPUT" || exit 1
 e_time=`$GTIME`
 let "diff_time=$e_time-$s_time"
 echo "Stream ${TAG} : Elapsed time for Throughput Test : $diff_time seconds"
-
-# Stop the database after the test.
-$DBSCRIPTDIR/dbt3-pgsql-stop-db || exit 1
 
 if [ -f /proc/profile ]; then
 	profname="Throughput_Test_$TAG"

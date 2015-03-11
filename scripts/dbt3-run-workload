@@ -157,8 +157,6 @@ fi
 OUTPUT_DIR=$SRCDIR/scripts/output/$RUN_NUMBER
 mkdir -p $OUTPUT_DIR
 
-
-
 if [ "x${COMMENT}" != "x" ]; then
 	echo ${COMMENT} > ${OUTPUT_DIR}/comment.txt
 fi
@@ -173,9 +171,13 @@ fi
 echo "Using seed: `cat $SEED_FILE`"
 
 #
+# Start the database
+#
+${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db
+
+#
 # Load Test
 #
-#			-z ${DBPORT} \
 if [ ${RUN_LOAD_TEST} -eq 1 ]; then
 	echo "Starting a load test..."
 	$DBSCRIPTDIR/dbt3-${DATABASE}-load-test \
@@ -192,9 +194,6 @@ else
 	# be cleared out.  Otherwise the data collection will be
 	# incomprehensible with duplicate data.
 	#
-#	${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db -p "-c port=${DBPORT}"
-	${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db
-	#${DBSCRIPTDIR}/dbt3-${DATABASE}-time-statistics -c -l ${DBPORT} || exit 1
 	${DBSCRIPTDIR}/dbt3-${DATABASE}-time-statistics -c || exit 1
 fi
 
@@ -227,7 +226,6 @@ do
 	#
 	# Throughput Test
 	#
-#				-l ${DBPORT} \
 		${DBSCRIPTDIR}/dbt3-${DATABASE}-throughput-test \
 				-n ${STREAMS} \
 				-f ${SCALE_FACTOR} \
@@ -240,12 +238,6 @@ do
 			exit 1  
 		fi
 	fi
-
-	#
-	# The database should be shut down after the last test, so start it back
-	# up so we can update and retrieve test information in the database.
-	#
-	${DBSCRIPTDIR}/dbt3-${DATABASE}-start-db -p "-c port=${DBPORT}"
 
 	#
 	# End time of a Power and Throughput test.
@@ -286,7 +278,7 @@ if [ ${RUN_POWER_TEST} -eq 1 ] || [ ${RUN_THROUGHPUT_TEST} -eq 1 ]; then
 	-n ${STREAMS} \
 	-o ${OUTPUT_DIR}/calc_composite.out \
 	${NO_REFRESH_FLAG} \
-	${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} || exit 1
+	${FLAG_POWER_TEST} ${FLAG_THROUGHPUT_TEST} 2&> /dev/null || exit 1
 fi
 $SRCDIR/scripts/dbt3-gen-report $OUTPUT_DIR > $OUTPUT_DIR/index.html || exit 1
 echo "done."
