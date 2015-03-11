@@ -109,6 +109,7 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 			echo "$max_set" > ${max_set_file}
 		fi
 
+		# make sure that temp tables exist even if update data is not generated
 		${PSQL} -c "select count(*) from tmp_orderkey$set_num;" &> /dev/null || \
 			${PSQL} -c "create table tmp_orderkey$set_num (orderkey numeric(10));" &> /dev/null || exit 1
 		rm -f $lock_file_rf1

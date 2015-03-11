@@ -160,9 +160,7 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 		echo "12" > ${max_set_file}
 		echo "0" > ${curr_set_file_rf1}
 	fi
-	rm -f $lock_file_rf1
-
-	lockfile -s 0 $lock_file_rf1
+	
 	set_num=`cat $curr_set_file_rf1`
 	min_set=`cat $min_set_file`
 	max_set=`cat $max_set_file`
@@ -187,6 +185,10 @@ if [ ${NO_REFRESH} -eq 0 ]; then
 		echo "$min_set" > ${min_set_file}
 		echo "$max_set" > ${max_set_file}
 	fi
+	
+	# make sure that temp tables exist even if update data is not generated
+	${PSQL} -c "select count(*) from tmp_orderkey$set_num;" &> /dev/null || \
+		${PSQL} -c "create table tmp_orderkey$set_num (orderkey numeric(10));" &> /dev/null || exit 1
 	rm -f $lock_file_rf1
 
 	echo "`date`: Power Test : Starting Refresh Stream 1" 
