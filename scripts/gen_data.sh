@@ -13,13 +13,13 @@ SF=$1
 
 rm -f $DSS_PATH/customer.tbl $DSS_PATH/lineitem.tbl $DSS_PATH/nation.tbl $DSS_PATH/orders.tbl $DSS_PATH/part.tbl $DSS_PATH/partsupp.tbl $DSS_PATH/region.tbl $DSS_PATH/supplier.tbl
 
-$DBGEN -s $SF -T c &
-$DBGEN -s $SF -T L &
-$DBGEN -s $SF -T n &
-$DBGEN -s $SF -T O &
-$DBGEN -s $SF -T P &
-$DBGEN -s $SF -T r &
-$DBGEN -s $SF -T s &
-$DBGEN -s $SF -T S &
+$DBGEN -f -s $SF -T c &
+$DBGEN -f -s $SF -T L &
+$DBGEN -f -s $SF -T n &
+$DBGEN -f -s $SF -T O &
+$DBGEN -f -s $SF -T P &
+$DBGEN -f -s $SF -T r &
+$DBGEN -f -s $SF -T s &
+$DBGEN -f -s $SF -T S &
 
 wait
