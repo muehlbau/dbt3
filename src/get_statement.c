@@ -103,5 +103,5 @@ void ltrim(char *str)
 
 	start_pos=str;
 	while (*start_pos == ' ' || *start_pos == '\t') start_pos++;
-	strcpy(str, start_pos);
+	memmove(str,start_pos,strlen(start_pos)+1);
 }
