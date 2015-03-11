@@ -109,9 +109,6 @@ done
 # Modify query file so that the commands are in one line.
 ${PARSE_QUERY} $query_file $tmp_query_file E
 
-$DBSCRIPTDIR/dbt3-pgsql-stop-db || exit 1
-$DBSCRIPTDIR/dbt3-pgsql-start-db -o ${OUTPUT_DIR} -p "${PARAMETERS}" || exit 1
-
 # Start collecting system statistics.
 $SRCDIR/scripts/dbt3-sysstats --outdir $OUTPUT_DIR --iter 1440 --sample 60 || exit 1
 
@@ -231,8 +228,6 @@ echo "Elapsed time for Power Test : $diff_time seconds"
 
 # Stop collecting system statistics.
 $SRCDIR/scripts/dbt3-sysstats --stop
-
-$DBSCRIPTDIR/dbt3-pgsql-stop-db || exit 1
 
 if [ -f /proc/profile ]; then
 	profname="Power_Test_$TAG"
