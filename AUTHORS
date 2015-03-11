@@ -1,5 +1,6 @@
 Jenny Zhang <jenny@osdl.org>
 Mark Wong <markw@osdl.org>
 Monty Taylor <mtaylor@mysql.com> - MySQL port
+Tobias Muehlbauer <muehlbau@in.tum.de> - fixed refresh streams, added support for Ubuntu 14.04+, added support for HyPer
 
 and many other contributors.
